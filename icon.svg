@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- 深色高级渐变背景 -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0.7" y2="1">
+      <stop offset="0%" stop-color="#2a1a10"/>
+      <stop offset="50%" stop-color="#3d2817"/>
+      <stop offset="100%" stop-color="#1e1208"/>
+    </linearGradient>
+    <!-- 金色渐变 -->
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f0d08a"/>
+      <stop offset="40%" stop-color="#e8c074"/>
+      <stop offset="70%" stop-color="#c9962f"/>
+      <stop offset="100%" stop-color="#b8861f"/>
+    </linearGradient>
+    <!-- 拨片渐变（亮金→深金） -->
+    <linearGradient id="pickGrad" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0%" stop-color="#f7e3a8"/>
+      <stop offset="45%" stop-color="#e8c074"/>
+      <stop offset="100%" stop-color="#b8861f"/>
+    </linearGradient>
+    <!-- 光泽遮罩 -->
+    <radialGradient id="glow" cx="0.35" cy="0.25" r="0.6">
+      <stop offset="0%" stop-color="#d4a544" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#d4a544" stop-opacity="0"/>
+    </radialGradient>
+    <!-- 裁剪圆角 -->
+    <clipPath id="clip">
+      <rect x="0" y="0" width="512" height="512" rx="112" ry="112"/>
+    </clipPath>
+  </defs>
+  
+  <g clip-path="url(#clip)">
+    <!-- 深色背景 -->
+    <rect x="0" y="0" width="512" height="512" fill="url(#bgGrad)"/>
+    
+    <!-- 顶部光泽 -->
+    <rect x="0" y="0" width="512" height="512" fill="url(#glow)"/>
+    
+    <!-- 装饰性线条 (表盘纹) -->
+    <g opacity="0.06" stroke="#e8c074" stroke-width="1" fill="none">
+      <line x1="60" y1="0" x2="60" y2="512"/>
+      <line x1="452" y1="0" x2="452" y2="512"/>
+      <line x1="0" y1="80" x2="512" y2="80"/>
+      <line x1="0" y1="432" x2="512" y2="432"/>
+    </g>
+    
+    <!-- 金色大拨片 (泪滴形, 放大并居中) -->
+    <g transform="matrix(1.18 0 0 1.18 -46.08 -93.28)">
+      <!-- 拨片主体 -->
+      <path d="M256 452 C214 386, 148 330, 140 246 C132 168, 182 140, 256 140 C330 140, 380 168, 372 246 C364 330, 298 386, 256 452 Z"
+            fill="url(#pickGrad)" stroke="#8a5f14" stroke-width="4"/>
+      <!-- 拨片顶部光泽 -->
+      <ellipse cx="200" cy="202" rx="58" ry="34" fill="#ffffff" opacity="0.18" transform="rotate(-18 200 202)"/>
+      <!-- 中央圆孔 -->
+      <circle cx="256" cy="278" r="34" fill="#241610"/>
+      <circle cx="256" cy="278" r="34" fill="none" stroke="url(#goldGrad)" stroke-width="4.5" opacity="0.95"/>
+    </g>
+  </g>
+  
+  <!-- 外边框金线 -->
+  <rect x="2" y="2" width="508" height="508" rx="110" ry="110" fill="none" stroke="url(#goldGrad)" stroke-width="2" opacity="0.4"/>
+</svg>
