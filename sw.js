@@ -3,7 +3,7 @@
  * 缓存策略：network-first（优先网络，离线 fallback 缓存）
  * 缓存版本：与下方 CACHE_NAME 一致（v112 起注释随版本同步更新）
  */
-var CACHE_NAME = 'guitar-workspace-v115';
+var CACHE_NAME = 'guitar-workspace-v119';
 var ASSETS_TO_CACHE = [
   './',
   './index.html',

@@ -60,7 +60,7 @@
 <link rel="manifest" href="manifest.webmanifest?v=5">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=5">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png?v=5">
-<!-- v115：iOS 启动屏（添加到主屏幕后冷启动显示：深色底 + 居中头像图标） -->
+<!-- v117：iOS 启动屏（添加到主屏幕后冷启动显示：深色底 + 居中头像图标） -->
 <link rel="apple-touch-startup-image" href="splash-1290x2796.png" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
 <link rel="apple-touch-startup-image" href="splash-1179x2556.png" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
 <link rel="apple-touch-startup-image" href="splash-1170x2532.png" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)">
@@ -452,6 +452,12 @@
   .modal, .modal-card, .detail-sheet, .acc-body, .acc-inner {
     max-width: 100%; min-width: 0;
   }
+  /* v119：页面本身禁止横向滚动；仅保留明确需要横向浏览的课时预警标签带。 */
+  body, .wrap, .view, header, .panel, .stu-list, .week-list, .day-row,
+  .modal-mask, .modal, .modal-card, .detail-sheet, .acc, .acc-body, .acc-inner {
+    overflow-x: hidden;
+  }
+  .low-hours .lh-tags { overflow-x: auto; }
   /* 长名字 / 长串字符强制换行，避免把页面撑宽 */
   .stu-name, .pool-name, .ds-name, .det-mb-name, .rc-name, .pool-sch-name {
     overflow-wrap: anywhere; word-break: break-word;
@@ -1231,7 +1237,7 @@
     -webkit-backdrop-filter: var(--glass-blur);
     border: 1px solid var(--glass-border);
     width: 100%; max-width: 540px;
-    border-radius: 12px 12px 0 0; max-height: 92vh; max-height: 92dvh; overflow-y: auto;
+    border-radius: 12px 12px 0 0; max-height: 92vh; max-height: 92dvh; overflow-x: hidden; overflow-y: auto;
     overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
     padding: 8px 18px calc(22px + env(safe-area-inset-bottom));
     animation: sheetUp .22s ease;
@@ -1392,7 +1398,7 @@
   .rc-btn.rc-leave.on { background: #b08968; border-color: #b08968; color: #fff; }
   .ds-log { display: flex; flex-direction: column; gap: 8px; }
   /* 课时流水 */
-  .hl-list { display: flex; flex-direction: column; gap: 4px; max-height: 240px; overflow-y: auto; }
+  .hl-list { display: flex; flex-direction: column; gap: 4px; max-height: 240px; overflow-x: hidden; overflow-y: auto; }
   .hl-row {
     display: flex; align-items: center; gap: 8px; font-size: 12px;
     padding: 6px 9px; border-radius: 12px; background: rgba(247,241,232,0.45);
@@ -1431,7 +1437,7 @@
   .ds-ops { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
   .ds-ops button { flex: 1; min-width: 90px; }
   /* 课时明细列表 */
-  .ds-detail { display: flex; flex-direction: column; gap: 5px; max-height: 260px; overflow-y: auto; }
+  .ds-detail { display: flex; flex-direction: column; gap: 5px; max-height: 260px; overflow-x: hidden; overflow-y: auto; }
   .det-item {
     display: flex; align-items: center; gap: 8px;
     font-size: 13px; padding: 7px 11px; border-radius: 12px;
@@ -1806,7 +1812,7 @@
     width: 100%; max-width: 480px;
     border-radius: 12px 12px 0 0; padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
     max-height: 88vh; max-height: 88dvh;
-    overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+    overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
   }
   @media (min-width: 600px) { .modal { border-radius: 12px; } }
   .modal h3 { font-size: 15px; margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
@@ -1821,7 +1827,7 @@
     border-radius: 12px 12px 0 0;
     padding: 18px 18px calc(18px + env(safe-area-inset-bottom));
     max-height: 88vh; max-height: 88dvh;
-    overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+    overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
   }
   @media (min-width: 600px) { .modal-card { border-radius: 12px; } }
   .modal-card .modal-title {
@@ -1879,7 +1885,7 @@
     flex: 1; min-height: 38px; border: none; background: transparent;
     font-size: 16px; color: var(--text); outline: none; font-family: inherit;
   }
-  .stu-picker-list { overflow-y: auto; flex: 1; padding: 4px; }
+  .stu-picker-list { overflow-x: hidden; overflow-y: auto; flex: 1; padding: 4px; }
   .stu-picker-item {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
     padding: 12px 10px; border-radius: 12px; cursor: pointer;
@@ -1904,13 +1910,13 @@
   .add-sched-members { display: flex; flex-wrap: wrap; gap: 6px; }
   .add-sched-mem { display: inline-flex; align-items: center; gap: 5px; background: var(--orange-light); color: var(--wood-dark); border-radius: 12px; padding: 4px 9px 4px 10px; font-size: 12px; font-weight: 600; }
   .add-sched-mem .asm-x { cursor: pointer; color: var(--orange-deep); font-weight: 800; padding: 0 2px; }
-  .add-sched-pool { margin-top: 8px; border: 1px solid var(--soft-border); border-radius: 12px; max-height: 180px; overflow-y: auto; }
+  .add-sched-pool { margin-top: 8px; border: 1px solid var(--soft-border); border-radius: 12px; max-height: 180px; overflow-x: hidden; overflow-y: auto; }
   .add-sched-pool-item { display: flex; align-items: center; gap: 8px; padding: 9px 10px; font-size: 13px; border-bottom: 1px dashed var(--soft-border); cursor: pointer; }
   .add-sched-pool-item:last-child { border-bottom: none; }
   .add-sched-pool-item:hover { background: var(--orange-light); }
 
   /* ===== 课表管理列表 ===== */
-  .sched-manage-list { max-height: 52vh; overflow-y: auto; }
+  .sched-manage-list { max-height: 52vh; overflow-x: hidden; overflow-y: auto; }
   .sm-group-title {
     font-size: 12px; font-weight: 700; color: var(--text-light);
     padding: 8px 2px 4px; letter-spacing: .3px;
@@ -2096,7 +2102,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v115</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v119</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -2437,7 +2443,7 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9c6644" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
       回收站 <span style="font-size:12px;color:var(--text-light);font-weight:400">（保留 7 天）</span>
     </h3>
-    <div id="recycleList" style="max-height:60vh;overflow:auto;margin-top:6px"></div>
+    <div id="recycleList" style="max-height:60vh;overflow-x:hidden;overflow-y:auto;margin-top:6px"></div>
     <div class="modal-ops">
       <button class="m-cancel" onclick="closeModal('recycleModal')">关闭</button>
     </div>
@@ -2615,8 +2621,14 @@
     <div class="form-item" id="addSchedGroupWrap" style="display:none">
       <label id="addSchedGroupLabel">小组成员</label>
       <div id="addSchedMembers" class="add-sched-members"></div>
-      <button type="button" class="btn-ghost" style="width:100%;min-height:40px;margin-top:8px;font-size: 12px" onclick="toggleAddSchedPool()">＋ 从学员管理添加成员</button>
-      <div id="addSchedPool" class="add-sched-pool" style="display:none"></div>
+      <button type="button" class="btn-ghost" style="width:100%;min-height:40px;margin-top:8px;font-size: 12px" onclick="toggleAddSchedPool()">＋ 添加成员（从学员池选择）</button>
+      <div id="addSchedPool" class="add-sched-pool" style="display:none">
+        <div class="stu-picker-search" style="margin-bottom:6px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="addSchedPoolSearch" placeholder="搜索姓名 / 联系方式" oninput="renderAddSchedPool()" onclick="event.stopPropagation()">
+        </div>
+        <div id="addSchedPoolList"></div>
+      </div>
     </div>
     <div class="form-item">
       <label>课程类型</label>
@@ -2867,7 +2879,7 @@
       <input type="text" id="poolSearch" placeholder="搜索姓名 / 电话" oninput="renderPoolList()" style="width:100%;min-height:40px;padding:8px 12px;border:1px solid #ddd0bd;border-radius:12px;font-size: 16px;font-family:inherit;margin-bottom:8px"><!-- v112: 13px→16px 防 iOS 聚焦缩放 -->
     </div>
     <div class="set-tip" style="margin:0 0 8px">每位学员一份档案，跨小组共享课时与身份。点学员可编辑资料 🎂</div>
-    <div id="poolList" style="max-height:46vh;overflow-y:auto"></div>
+    <div id="poolList" style="max-height:46vh;overflow-x:hidden;overflow-y:auto"></div>
     <div id="poolEditor" style="display:none"></div>
     <div class="pool-batch-bar" id="poolBatchBar" style="display:none"></div>
     <div class="modal-ops" id="poolOps">
@@ -8369,7 +8381,7 @@ function updateAddSchedGroup() {
           return '<span class="add-sched-mem">' + escapeHtml(m.name || '?') +
             '<span class="asm-x" onclick="removeAddSchedMember(' + i + ')" title="移除">×</span></span>';
         }).join('')
-      : '<span style="color:var(--text-light);font-size: 12px">还没添加成员，点下面按钮从学员管理挑人</span>';
+      : '<span style="color:var(--text-light);font-size: 12px">还没添加成员，点下面按钮挑人（单人课学员选中后会自动并入学员管理）</span>';
   }
   renderAddSchedPool();
 }
@@ -8384,32 +8396,86 @@ function toggleAddSchedPool() {
   p.style.display = hidden ? '' : 'none';
   if (hidden) renderAddSchedPool();
 }
+/* v118：小组成员可从完整学员池选择——包括单人课学员、已在其他小组的学员和未入组学员；
+   仅排除当前小组工作区已选成员，避免重复添加。单人学员保存时再绑定 person。 */
 function renderAddSchedPool() {
-  var p = document.getElementById('addSchedPool');
+  var p = document.getElementById('addSchedPoolList');
   if (!p) return;
-  var used = {};
-  addSchedMembers.forEach(function (m) { if (m.personId) used[m.personId] = 1; });
-  var persons = (state.persons || []).filter(function (x) { return !used[x.id]; });
-  if (!persons.length) {
-    p.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-light);font-size: 12px">学员管理里没有可添加的成员了</div>';
+  var usedP = {}, usedS = {};
+  addSchedMembers.forEach(function (m) { if (m.personId) usedP[m.personId] = 1; if (m.studentId) usedS[m.studentId] = 1; });
+  var kwEl = document.getElementById('addSchedPoolSearch');
+  var kw = ((kwEl && kwEl.value) || '').trim().toLowerCase();
+  var entries = poolEntries().filter(function (e) {
+    /* 完整学员池均可跨组添加；这里只排除当前工作区已选成员。 */
+    if (e.kind === 'person' && usedP[e.obj.id]) return false;
+    if (e.kind === 'student' && usedS[e.obj.id]) return false;
+    if (kw && e.name.toLowerCase().indexOf(kw) < 0 && (e.contact || '').toLowerCase().indexOf(kw) < 0) return false;
+    return true;
+  });
+  if (!entries.length) {
+    p.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-light);font-size: 12px">' + (kw ? '没找到匹配的学员' : '学员池里没有可添加的成员了') + '</div>';
     return;
   }
-  p.innerHTML = persons.map(function (x) {
-    var h = (x.hoursRemaining == null || x.hoursRemaining === '') ? '未设课时' : ('剩 ' + x.hoursRemaining + ' 节');
-    return '<div class="add-sched-pool-item" onclick="addAddSchedMember(\'' + x.id + '\')">' +
-      '<span style="flex:1;min-width:0">' + escapeHtml(x.name || '(未命名)') + '</span>' +
-      '<span style="color:var(--text-light);font-size: 12px">' + escapeHtml(h) + '</span></div>';
+  p.innerHTML = entries.map(function (e) {
+    var h = e.hours == null ? '未设课时' : ('剩 ' + e.hours + ' 节');
+    var tag = e.kind === 'student'
+      ? '<span style="color:var(--orange-deep);font-size: 12px;flex-shrink:0">单人课</span>'
+      : '<span style="color:var(--text-light);font-size: 12px;flex-shrink:0">' + escapeHtml(h) + '</span>';
+    return '<div class="add-sched-pool-item" onclick="addAddSchedMember(\'' + e.key + '\')">' +
+      '<span style="flex:1;min-width:0">' + escapeHtml(e.name || '(未命名)') + '</span>' + tag + '</div>';
   }).join('');
 }
-function addAddSchedMember(personId) {
-  var p = getPerson(personId);
-  if (!p) return;
-  if (addSchedMembers.some(function (m) { return m.personId === personId; })) return;
-  addSchedMembers.push({
-    id: uid(), personId: p.id, name: p.name || '', contact: p.contact || '',
-    hours: (p.hoursRemaining == null || p.hoursRemaining === '') ? null : p.hoursRemaining, avatar: p.avatar || ''
-  });
+function addAddSchedMember(key) {
+  /* 兼容旧版调用：历史测试/旧页面可能直接传 personId（如 pa），新界面传 p:pa 或 s:solo1 */
+  var lookupKey = (String(key).indexOf(':') >= 0) ? String(key) : ('p:' + String(key));
+  var entries = poolEntries().filter(function (e) { return e.key === lookupKey; });
+  if (!entries.length) return;
+  var e = entries[0];
+  if (e.kind === 'student') {
+    /* 单人课学员先暂存 studentId，等真正保存小组课时再迁移建档；取消弹窗不留痕 */
+    if (addSchedMembers.some(function (m) { return m.studentId === e.obj.id || (m.personId && e.obj.personId === m.personId); })) { showToast('该学员已在成员里'); return; }
+    addSchedMembers.push({
+      id: uid(), studentId: e.obj.id, personId: '', name: e.obj.name || '',
+      contact: e.obj.contact || '', hours: (e.obj.hoursRemaining == null || e.obj.hoursRemaining === '') ? null : e.obj.hoursRemaining,
+      avatar: e.obj.avatar || ''
+    });
+    showToast('已选择「' + (e.obj.name || '') + '」，保存小组课时会自动并入学员管理');
+  } else {
+    var pp = e.obj;
+    if (addSchedMembers.some(function (m) { return m.personId === pp.id; })) return;
+    addSchedMembers.push({
+      id: uid(), personId: pp.id, name: pp.name || '', contact: pp.contact || '',
+      hours: (pp.hoursRemaining == null || pp.hoursRemaining === '') ? null : pp.hoursRemaining,
+      avatar: pp.avatar || ''
+    });
+  }
   updateAddSchedGroup();
+}
+/* 把单人课学员档案迁移为学员管理 person：课时/联系方式/头像/生日并入 person，
+   学员档案改由 person 代表（s.personId 绑定）。同名 person 已存在时直接复用绑定。 */
+function ensurePersonForStudent(s) {
+  if (!s) return null;
+  if (s.personId && getPerson(s.personId)) return getPerson(s.personId);
+  var i, p = null;
+  if (s.name) {
+    for (i = 0; i < (state.persons || []).length; i++) {
+      var cand = state.persons[i];
+      if (cand.name !== s.name) continue;
+      if (cand.contact && s.contact && cand.contact !== s.contact) continue; /* 同名不同人，不绑 */
+      p = cand; break;
+    }
+  }
+  if (!p) {
+    p = { id: uid(), name: s.name || '', contact: s.contact || '', createdAt: Date.now() };
+    state.persons.push(p);
+  }
+  if (s.hoursRemaining != null && s.hoursRemaining !== '' && (p.hoursRemaining == null || p.hoursRemaining === '')) {
+    p.hoursRemaining = s.hoursRemaining; /* 课时并档：person 成为唯一课时账本 */
+  }
+  if (!p.avatar && s.avatar) p.avatar = s.avatar;
+  if (!p.birthday && s.birthday) p.birthday = s.birthday;
+  s.personId = p.id;
+  return p;
 }
 function onAddSchedSearchKey(e) {
   if (typeof ev_isComposing === 'function' && ev_isComposing(e)) return;
@@ -8520,7 +8586,11 @@ function openAddScheduleModal(studentId) {
   var gEl = document.getElementById('addSchedGroupName');
   if (gEl) gEl.value = '';
   var poolEl = document.getElementById('addSchedPool');
-  if (poolEl) poolEl.style.display = 'none';
+  if (poolEl) {
+    poolEl.style.display = 'none';
+    var poolSearch = document.getElementById('addSchedPoolSearch');
+    if (poolSearch) poolSearch.value = '';
+  }
   setAddSchedType('temp');
   updateAddSchedTrigger();
   updateAddSchedInfo();
@@ -8528,6 +8598,23 @@ function openAddScheduleModal(studentId) {
   closeAddSchedPicker();
   var m = document.getElementById('addScheduleModal');
   if (m) m.classList.add('show');
+}
+/* 将成员工作区里的单人课条目在最终保存前转换为 person 成员，取消弹窗不会触发迁移 */
+function materializeAddSchedMembers() {
+  var out = [];
+  for (var i = 0; i < addSchedMembers.length; i++) {
+    var m = addSchedMembers[i] || {};
+    var p = m.personId ? getPerson(m.personId) : null;
+    if (!p && m.studentId) p = ensurePersonForStudent(getStudent(m.studentId));
+    if (!p) return null;
+    out.push({
+      id: m.id || uid(), personId: p.id, name: p.name || m.name || '',
+      contact: p.contact || m.contact || '',
+      hours: (p.hoursRemaining == null || p.hoursRemaining === '') ? null : p.hoursRemaining,
+      avatar: p.avatar || m.avatar || ''
+    });
+  }
+  return out;
 }
 function saveAddSchedule() {
   var newGroup = addSchedNewGroup;
@@ -8543,6 +8630,9 @@ function saveAddSchedule() {
     var gName = ((gEl && gEl.value) || '').trim();
     if (!gName) { showToast('请填写小组课名称'); return; }
     if (!addSchedMembers.length) { showToast('请从学员管理至少添加 1 位成员'); return; }
+    var materialized = materializeAddSchedMembers();
+    if (!materialized) { showToast('成员资料已失效，请重新选择'); return; }
+    addSchedMembers = materialized;
     stu = {
       id: uid(), name: gName, contact: '', note: '', mode: 'flex',
       hoursRemaining: null, locationId: '', avatar: '',
@@ -8558,6 +8648,9 @@ function saveAddSchedule() {
   if (!stu) { showToast('学员不存在'); return; }
   /* 已有小组：把编辑后的成员名单写回（小组按成员计课时，整组课时为空） */
   if (!newGroup && c && c.group) {
+    var updatedMembers = materializeAddSchedMembers();
+    if (!updatedMembers) { showToast('成员资料已失效，请重新选择'); return; }
+    addSchedMembers = updatedMembers;
     stu.members = addSchedMembers.slice();
     if (stu.members.length) stu.hoursRemaining = null;
   }
