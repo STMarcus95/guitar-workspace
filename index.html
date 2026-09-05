@@ -114,6 +114,8 @@
     --soft: rgba(255,255,255,0.45);
     --soft-border: rgba(255,255,255,0.55);
     --theme-color: #2a1a10;
+    /* 小组课叠加头像的分隔环颜色：跟随卡片底色，避免叠加的小圆糊在一起 */
+    --stack-ring: #fdf6ec;
   }
   /* ===== 主题：午夜黑金（深色） ===== */
   body[data-theme="midnight"] {
@@ -155,6 +157,7 @@
     --soft: rgba(60,50,42,0.55);
     --soft-border: rgba(120,100,70,0.35);
     --theme-color: #161210;
+    --stack-ring: #2a241f;
   }
   /* 午夜主题：把暖白课程卡/日期行底换成深色 */
   body[data-theme="midnight"] .day-row.today { background: rgba(70,56,40,0.62); }
@@ -791,6 +794,38 @@
     cursor: pointer; transition: transform .12s;
   }
   .avatar:active { transform: scale(.92); }
+  /* 小组课叠加头像：容器沿用 .avatar 的尺寸（各上下文已覆写 28~66px），内部按比例叠放多个成员小圆。
+     cell 尺寸与间距由 JS 按人数写入 --av-cell / --av-gap，保证 2~4 人正好铺满容器、不溢出。 */
+  .avatar.av-stack {
+    /* 不设 overflow:hidden——否则圆形容器的边缘会把叠在最外侧的小圆上下切掉一块；
+       cell 总宽正好 100%、高度居中，本来就不会溢出，让它们自然呈现成"一簇" */
+    background: transparent;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+  }
+  .avatar.av-stack .av-cell {
+    box-sizing: border-box;
+    width: var(--av-cell, 62%);
+    height: var(--av-cell, 62%);
+    border-radius: 50%;
+    border: 1.5px solid var(--stack-ring);
+    background-color: var(--wood);
+    background-size: cover;
+    background-position: center 30%;
+    background-repeat: no-repeat;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.42em;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .avatar.av-stack .av-cell + .av-cell { margin-left: var(--av-gap, -24%); }
+  .avatar.av-stack .av-cell.av-more { background-color: var(--wood-dark); font-size: 0.38em; }
   /* 头像放大查看弹窗 */
   #avatarZoomModal { align-items: center; touch-action: none; overscroll-behavior: contain; }
   #avatarZoomModal .modal { padding: 0; background: transparent; box-shadow: none; max-width: 90vw; width: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; }
@@ -1317,6 +1352,39 @@
     display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; color: #4a7fb5;
     background: #e8f0f9; border-radius: 99px; padding: 1px 6px; vertical-align: middle; line-height: 1.4;
   }
+  /* 本次临时参与者（试听/蹭课）：绿色 chip 与正式成员区分开，一眼看出"这次多出来的人" */
+  /* 本次临时参与者：绿色 = 无档案不扣课时；橙色 = 有档案会扣课时 */
+  .extra-chip {
+    display: inline-flex; align-items: center; max-width: 100%;
+    font-size: 11px; font-weight: 600; color: var(--green);
+    background: var(--green-light); border-radius: 99px; padding: 1px 7px; vertical-align: middle; line-height: 1.5;
+  }
+  .extra-chip.ex-linked { color: var(--orange-deep); background: var(--orange-light); border: 1px solid var(--orange-border); }
+  /* 「本次临时」小标签：和蓝色的「N人组」区分开，一眼看出这不是编制内的人 */
+  .extra-label { font-size: 11px; color: var(--text-light); }
+  .extra-chip .ex-minus { opacity: .75; margin-right: 1px; }
+  .extra-chip .ex-kh { font-size: 10px; opacity: .8; margin-left: 3px; }
+  .btn-extra-add {
+    display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+    min-height: 20px; padding: 0 7px; margin-left: 5px;
+    font-size: 11px; font-weight: 600; font-family: inherit;
+    color: var(--wood-dark); background: var(--orange-light);
+    border: 1px solid var(--orange-border); border-radius: 8px;
+    cursor: pointer; vertical-align: middle; transition: transform .12s;
+  }
+  .btn-extra-add:active { transform: scale(.92); }
+  /* 弹窗里每位临时参与者的状态标记 */
+  .ex-tag {
+    display: inline-flex; align-items: center; font-size: 10px; font-weight: 600;
+    color: var(--text-light); background: var(--bg); border: 1px solid var(--soft-border);
+    border-radius: 99px; padding: 0 5px; margin-left: 5px; line-height: 1.6; cursor: default;
+  }
+  .ex-tag-on { color: var(--orange-deep); background: var(--orange-light); border-color: var(--orange-border); }
+  .add-sched-mem .asm-link {
+    cursor: pointer; font-size: 11px; color: var(--wood-dark); padding: 0 4px; margin-left: 3px;
+    border-left: 1px solid var(--soft-border);
+  }
+  .add-sched-mem.asm-linked { border-color: var(--orange-border); background: #fffaf3; }
   .mem-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; width: 100%; margin-top: 6px; padding-top: 8px; border-top: 1px dashed #e8ddca; }
   .mem-chip {
     display: inline-block; font-size: 12px; font-weight: 600; color: var(--wood-dark);
@@ -1379,6 +1447,11 @@
   .rc-row .avatar { width: 38px; height: 38px; font-size: 13px; flex-shrink: 0; object-fit: cover; }
   .rc-name { display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--wood-dark); font-size: 13px; flex: 1; min-width: 0; }
   .ds-member-row .avatar { width: 38px; height: 38px; font-size: 13px; flex-shrink: 0; object-fit: cover; }
+  .rc-sec {
+    font-size: 12px; font-weight: 600; color: var(--text-light);
+    margin: 10px 0 6px; padding-bottom: 4px; border-bottom: 1px solid var(--soft-border);
+  }
+  .rc-sec:first-child { margin-top: 0; }
   .rc-row {
     display: flex; align-items: center; gap: 10px;
     background: rgba(247,241,232,0.5);
@@ -1798,8 +1871,14 @@
     transition: background-color .3s ease, border-color .3s ease, box-shadow .2s ease;
   }
 
-  /* 确认弹窗永远在最上层（高于档案抽屉等业务弹窗） */
+  /* 弹窗层级：同为 .modal-mask（默认 100）时，必须显式抬高"叠在别的弹窗之上"的那些，
+     否则会被下层弹窗整个盖住——表现为点了按钮却"什么都没弹出来"。
+     由高到低：确认框 300 > 头像裁剪 250 > 头像放大 200 > 添加学员 150 > 普通弹窗 100 */
   #confirmModal { z-index: 300; }
+  /* 头像裁剪：会从「添加学员」(150) 或「头像放大」(200) 之上打开，必须高于两者 */
+  #cropModal { z-index: 250; }
+  /* 头像放大：可从「添加学员」弹窗里的头像预览点开，需高于 stuModal */
+  #avatarZoomModal { z-index: 200; }
   /* 添加/编辑学员弹窗：需盖在「学员管理」弹窗之上（两者同为 modal-mask，DOM 靠后者会压住前者） */
   #stuModal { z-index: 150; }
   @media (min-width: 600px) { .modal-mask { align-items: center; padding: 20px; } }
@@ -2102,7 +2181,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v119</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v121</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -2528,7 +2607,7 @@
     <div class="form-item">
       <label>小组成员</label>
       <div id="memberEditor"></div>
-      <div class="set-tip" style="margin-top:4px">小组成员统一在「<b>添加课表</b>」里添加/移除：选这个小组后即可增删成员。同一学员参加多个小组时课时自动共享。</div>
+      <div class="set-tip" style="margin-top:4px">添加成员后即成为<b>小组课</b>，课时按成员各自计算；同一学员参加多个小组时课时自动共享。改动在点「保存」后才写入。</div>
     </div>
     <div class="form-item">
       <label>备注（进度 / 教材）</label>
@@ -2670,10 +2749,10 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e0762e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
       课表管理 <span id="schedManageCount" style="font-weight:400;font-size:12px;color:var(--text-light)"></span>
     </h3>
-    <div class="set-tip" style="margin:0 0 10px">统一添加、修改、删除课表。临时课按某一天排，固定课每周自动重复。</div>
+    <div class="set-tip" style="margin:0 0 10px">统一添加、修改、删除课表。临时课按某一天排，固定课每周自动重复。小组课点<b>编辑</b>还能直接增删小组成员。</div>
     <button class="btn-add" style="width:100%;justify-content:center;min-height:44px;margin-bottom:10px" onclick="addSchedFromManage=true;closeModal('schedManageModal');openAddScheduleModal()">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      ＋ 添加课表
+      添加课表
     </button>
     <div id="schedManageList" class="sched-manage-list"></div>
     <div class="modal-ops">
@@ -2690,6 +2769,11 @@
       编辑课表
     </h3>
     <div class="form-item"><label>学员</label><div id="seStuInfo" class="rs-info"></div></div>
+    <div class="form-item" id="seMemberWrap" style="display:none">
+      <label id="seMemberLabel">小组成员</label>
+      <div id="seMemberEditor"></div>
+      <div class="set-tip" style="margin:4px 0 0">成员属于<b>这个小组本身</b>，增删会影响该小组的全部课表（不只这一条）；课时按成员各自计算。改动点「保存」后生效。</div>
+    </div>
     <div class="form-row">
       <div class="form-item" id="seDateWrap"><label>日期 *</label><input type="date" id="seDate"></div>
       <div class="form-item" id="seDayWrap" style="display:none"><label>星期 *</label><select id="seDay"></select></div>
@@ -2735,6 +2819,44 @@
     <div class="modal-ops">
       <button class="m-cancel" onclick="closeModal('reschedModal')">取消</button>
       <button class="m-ok" onclick="saveResched()">保存调课</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 本次临时加人（试听/蹭课，不建档、不扣课时） ===== -->
+<div class="modal-mask" id="extraModal">
+  <div class="modal" style="max-width:420px">
+    <h3>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e0762e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+      本次临时加人
+    </h3>
+    <div class="set-tip" style="margin:0 0 10px">只影响<b>这一次课</b>：不会进小组编制，也不改课表。<b>学员管理里有同名档案</b>的会自动关联，这节课扣他 1 节课时；没有档案的就是纯临时（试听 / 蹭课），不扣课时。</div>
+    <div class="form-item">
+      <label>课程</label>
+      <div id="extraClassInfo" class="rs-info"></div>
+    </div>
+    <div class="form-item">
+      <label>临时参与者姓名</label>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="extraNameInput" placeholder="如：小红" maxlength="12" onkeydown="onExtraNameKey(event)">
+        <button type="button" class="btn-ghost" style="flex-shrink:0;min-height:40px;padding:0 14px" onclick="addExtraName()">添加</button>
+      </div>
+      <button type="button" class="btn-ghost" style="width:100%;min-height:36px;margin-top:8px;font-size:12px" onclick="toggleExtraPool()">从学员管理选择（有档案的会扣课时）</button>
+      <div id="extraPool" class="add-sched-pool" style="display:none;margin-top:8px">
+        <div class="stu-picker-search" style="margin-bottom:6px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/></svg>
+          <input type="text" id="extraPoolSearch" placeholder="搜索姓名 / 联系方式" oninput="renderExtraPool()">
+        </div>
+        <div id="extraPoolList" class="stu-picker-list" style="max-height:180px"></div>
+      </div>
+    </div>
+    <div class="form-item">
+      <label>已添加（<span id="extraCount">0</span> 人 · <span id="extraLinkedCount">0</span> 位扣课时）</label>
+      <div id="extraList" class="add-sched-members"></div>
+    </div>
+    <div class="modal-ops">
+      <button class="m-cancel" onclick="closeModal('extraModal')">取消</button>
+      <button class="m-ok" onclick="saveExtraAttendees()">保存</button>
     </div>
   </div>
 </div>
@@ -2833,7 +2955,7 @@
     </h3>
     <input type="hidden" id="rcType"><input type="hidden" id="rcFlexId">
     <input type="hidden" id="rcStudentId"><input type="hidden" id="rcTime"><input type="hidden" id="rcDate">
-    <p style="font-size: 12px;color:var(--text-light);margin-bottom:10px">点一下切换：<b style="color:var(--green)">出勤</b>扣1节课时，<b style="color:#b08968">请假</b>不扣课时</p>
+    <p style="font-size: 12px;color:var(--text-light);margin-bottom:10px"><b>固定成员</b>点一下切换：<b style="color:var(--green)">出勤</b>扣1节课时，<b style="color:#b08968">请假</b>不扣课时。<b>本次临时参与者</b>不在编制内、默认出勤，学员管理里有档案的同样扣1节。</p>
     <div id="rollcallList"></div>
     <div class="modal-ops">
       <button class="m-cancel" onclick="closeModal('rollcallModal')">取消</button>
@@ -3162,6 +3284,9 @@ function defaultState() {
     fixedDone: {},
     leaveLog: {},
     memberLeaveLog: {},
+    /* 本次临时参与者（试听/蹭课）：只对「某一天、某一节课」生效，不建档、不扣课时。
+       key 由 extraKey() 生成：固定课 = `日期|学员id|时间`，临时课 = `日期|tp|排课id` */
+    extraAttendees: {},
     reschedules: [],
     locations: JSON.parse(JSON.stringify(REAL_SCHEDULE.locations)),
     settings: { teacherName: '', reminderTemplate: DEFAULT_TEMPLATE, renewTemplate: DEFAULT_RENEW_TEMPLATE, expandedLocs: [], theme: 'classic', brandName: '', brandAvatar: '', todayCollapsed: false, tomorrowCollapsed: false, weekCollapsed: false, backupHintDismissedAt: 0, backupHintDismissedCount: 0, lowHoursCollapsed: false }
@@ -3190,6 +3315,13 @@ function cleanupExpiredData() {
   if (state.memberLeaveLog) {
     Object.keys(state.memberLeaveLog).forEach(function (date) {
       if (date && date < cutoffStr) { delete state.memberLeaveLog[date]; changed = true; }
+    });
+  }
+  /* 本次临时参与者：key 形如「日期|…」，按前缀日期清理 */
+  if (state.extraAttendees) {
+    Object.keys(state.extraAttendees).forEach(function (k) {
+      var d = String(k).split('|')[0];
+      if (d && d < cutoffStr) { delete state.extraAttendees[k]; changed = true; }
     });
   }
   /* reschedules：fromDate/toDate 比截止天数更早且 toDate<今天 则清理 */
@@ -3253,6 +3385,7 @@ function loadData() {
         state.fixedDone = d.fixedDone || {};
         state.leaveLog = d.leaveLog || {};
         state.memberLeaveLog = d.memberLeaveLog || {};
+        state.extraAttendees = d.extraAttendees || {};
         state.recycleBin = Array.isArray(d.recycleBin) ? d.recycleBin : [];
         state.persons = Array.isArray(d.persons) ? d.persons : [];
         state.reschedules = Array.isArray(d.reschedules) ? d.reschedules : [];
@@ -3517,6 +3650,7 @@ function applyStateSnapshot(d) {
   state.fixedDone = d.fixedDone || {};
   state.leaveLog = d.leaveLog || {};
   state.memberLeaveLog = d.memberLeaveLog || {};
+  state.extraAttendees = d.extraAttendees || {};
   state.reschedules = Array.isArray(d.reschedules) ? d.reschedules : [];
   state.locations = Array.isArray(d.locations) && d.locations.length ? d.locations : def.locations;
   state.settings = d.settings || def.settings;
@@ -3877,35 +4011,66 @@ function avatarHtml(stu, extraCls) {
   /* 推断对象身份，用于"点开放大+修改" */
   var aid = '', ptype = '';
   if (stu && stu.id) {
-    if (stu.personId) { aid = stu.personId; ptype = 'person'; } /* 小组成员：背后 person */
+    if (Array.isArray(stu.members) && stu.members.length) { aid = stu.id; ptype = 'student'; } /* 小组课：整组，头像由成员自动拼合 */
+    else if (stu.personId) { aid = stu.personId; ptype = 'person'; } /* 小组成员：背后 person */
     else if (stu.mode === 'fixed' || stu.mode === 'flexible') { aid = stu.id; ptype = 'student'; }
     else if (stu.createdAt) { aid = stu.id; ptype = 'person'; } /* 学员管理 person */
     else { aid = stu.id; ptype = 'student'; } /* 默认按学员处理 */
   }
   var dataAttr = aid ? (' data-aid="' + escapeHtml(aid) + '" data-ptype="' + ptype + '"') : '';
-  /* 小组课：用第一位成员的头像/首字母代替组合宫格。
-     在小尺寸下组合宫格（128px 压缩到 40-46px）脸糊成点、比例难看，
-     改成单张成员大脸，与个人卡片视觉一致、比例自然。*/
+  /* 小组课：叠加显示多位成员（微信式叠叠乐），点开看组合大图。
+     之前是拿 128px 组合宫格压到 40px，脸糊成点；改成每位成员保留一个完整小圆，
+     小尺寸下也能认出是谁，且一眼看出"这是多人课"。 */
   var members = membersOf(stu);
   if (members && members.length) {
-    var first = members[0] || { name: stu ? stu.name : '?' };
-    if (first.avatar) {
-      return '<img class="avatar' + (extraCls || '') + '" src="' + first.avatar + '" alt=""' + dataAttr + ' onclick="event.stopPropagation();openAvatarZoom(this)">';
-    }
-    var fn = first.name || (stu ? stu.name : '?');
-    var hash = 0;
-    for (var i = 0; i < fn.length; i++) hash = (hash * 31 + fn.charCodeAt(i)) & 0xffff;
-    var color = AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
-    return '<span class="avatar' + (extraCls || '') + '" style="background:' + color + '"' + dataAttr + ' onclick="event.stopPropagation();openAvatarZoom(this)">' + escapeHtml(fn.charAt(0)) + '</span>';
+    return groupAvatarHtml(stu, members, extraCls, dataAttr);
   }
   if (stu && stu.avatar) {
     return '<img class="avatar' + (extraCls || '') + '" src="' + stu.avatar + '" alt=""' + dataAttr + ' onclick="event.stopPropagation();openAvatarZoom(this)">';
   }
   var name = stu ? stu.name : '?';
+  return '<span class="avatar' + (extraCls || '') + '" style="background:' + avatarColorOf(name) + '"' + dataAttr + ' onclick="event.stopPropagation();openAvatarZoom(this)">' + escapeHtml(name.charAt(0)) + '</span>';
+}
+/* 姓名 → 稳定配色（同一个人永远同一个颜色） */
+function avatarColorOf(name) {
+  var s = name || '?';
   var hash = 0;
-  for (var i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) & 0xffff;
-  var color = AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
-  return '<span class="avatar' + (extraCls || '') + '" style="background:' + color + '"' + dataAttr + ' onclick="event.stopPropagation();openAvatarZoom(this)">' + escapeHtml(name.charAt(0)) + '</span>';
+  for (var i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) & 0xffff;
+  return AVATAR_PALETTE[hash % AVATAR_PALETTE.length];
+}
+/* 单个成员的小圆（叠加头像的组成单元） */
+function memberCellHtml(m) {
+  var nm = m.name || '?';
+  var style = m.avatar
+    ? 'background-image:url("' + m.avatar + '")'
+    : 'background-color:' + avatarColorOf(nm);
+  return '<span class="av-cell" style="' + style + '">' + (m.avatar ? '' : escapeHtml(nm.charAt(0))) + '</span>';
+}
+/* 单成员小组课：退化成该成员的普通头像 */
+function memberAvatarHtml(m, stu, extraCls, dataAttr) {
+  if (m.avatar) {
+    return '<img class="avatar' + (extraCls || '') + '" src="' + m.avatar + '" alt=""' + dataAttr + ' onclick="event.stopPropagation();openAvatarZoom(this)">';
+  }
+  var fn = m.name || (stu ? stu.name : '?');
+  return '<span class="avatar' + (extraCls || '') + '" style="background:' + avatarColorOf(fn) + '"' + dataAttr + ' onclick="event.stopPropagation();openAvatarZoom(this)">' + escapeHtml(fn.charAt(0)) + '</span>';
+}
+/* 小组课叠加头像：最多 3 个圆（2 人各一个；≥3 人显示前 2 个 + 「+N」）。
+   尺寸与间距按圆的总数算，保证总宽正好铺满容器：w·[1+(t-1)(1-k)] = 100%，k 为重叠比例。 */
+function groupAvatarHtml(stu, members, extraCls, dataAttr) {
+  var n = members.length;
+  if (n === 1) return memberAvatarHtml(members[0], stu, extraCls, dataAttr);
+  var show = n >= 3 ? 2 : n;          /* 展示真实头像的圆个数 */
+  var more = n - show;                /* 折叠成 +N 的人数 */
+  var total = show + (more > 0 ? 1 : 0);
+  var K = 0.38;                       /* 相邻圆的重叠比例 */
+  var w = 100 / (1 + (total - 1) * (1 - K));
+  var gap = -w * K;
+  var cells = '';
+  for (var i = 0; i < show; i++) cells += memberCellHtml(members[i]);
+  if (more > 0) cells += '<span class="av-cell av-more">+' + more + '</span>';
+  return '<span class="avatar av-stack' + (extraCls || '') + '" data-gstack="1"' +
+    ' style="--av-cell:' + w.toFixed(2) + '%;--av-gap:' + gap.toFixed(2) + '%"' +
+    dataAttr + ' onclick="event.stopPropagation();openAvatarZoom(this)">' + cells + '</span>';
 }
 /* 生成多人课群聊式头像（类似微信）：按成员头像拼成宫格 */
 function composeGroupAvatar(stu, size, cb) {
@@ -4159,6 +4324,146 @@ function cancelResched(id) {
     saveData(); renderAll(); showToast('已撤销调课');
   });
 }
+/* ===== 本次临时加人（只对这一天这一节课生效，不进小组编制） =====
+   存的是 [{n:姓名, p:personId}]。p 非空表示"学员管理里有档案"，这节课要扣他 1 节课时并记流水；
+   p 为空表示纯临时（试听/蹭课），不建档也不扣课时。
+   参数够定位"哪一天哪一节"即可，不需要完整的课对象。改动先落在 extraNames 工作区，保存才写回。 */
+var extraCtx = null;  /* { type, id, studentId, time, dateStr } */
+var extraNames = [];  /* 工作区：[{n, p}] */
+function openExtraAttendees(type, id, studentId, time, dateStr) {
+  extraCtx = { type: type, id: id || '', studentId: studentId || '', time: time || '', dateStr: dateStr };
+  extraNames = getExtraAttendees(extraCtx, dateStr).slice();
+  var info = document.getElementById('extraClassInfo');
+  if (info) {
+    var stu = getStudent(studentId);
+    info.innerHTML = '<div><b>' + escapeHtml(stu ? stu.name : '(未命名)') + '</b>' +
+      '<div style="color:var(--text-light);font-size:12px;margin-top:4px">' +
+      escapeHtml(fmtDateCN(dateStr)) + ' ' + escapeHtml(time) + '</div></div>';
+  }
+  var inp = document.getElementById('extraNameInput');
+  if (inp) inp.value = '';
+  renderExtraList();
+  document.getElementById('extraModal').classList.add('show');
+  setTimeout(function () { if (inp) inp.focus(); }, 0);
+}
+function renderExtraList() {
+  var box = document.getElementById('extraList');
+  var cnt = document.getElementById('extraCount');
+  var lcnt = document.getElementById('extraLinkedCount');
+  var linked = 0;
+  extraNames.forEach(function (x) { if (x.p) linked++; });
+  if (cnt) cnt.textContent = extraNames.length;
+  if (lcnt) lcnt.textContent = linked;
+  if (!box) return;
+  box.innerHTML = extraNames.length
+    ? extraNames.map(function (it, i) {
+        var p = extraPersonOf(it);
+        var hTxt = (p && p.hoursRemaining != null && p.hoursRemaining !== '') ? '（剩' + p.hoursRemaining + '节）' : '';
+        var tag = p
+          ? '<span class="ex-tag ex-tag-on" title="学员管理里有「' + escapeHtml(p.name) + '」的档案，这节课扣 1 节课时">扣1节</span>'
+          : '<span class="ex-tag" title="学员管理里没有同名档案，不建档、不扣课时">不扣</span>';
+        return '<span class="add-sched-mem' + (p ? ' asm-linked' : '') + '">' + escapeHtml(it.n) + hTxt + tag +
+          '<span class="asm-link" onclick="toggleExtraLink(' + i + ')" title="切换这节课是否扣他课时">' + (p ? '改不扣' : '关联') + '</span>' +
+          '<span class="asm-x" onclick="removeExtraName(' + i + ')" title="移除">×</span></span>';
+      }).join('')
+    : '<span style="color:var(--text-light);font-size:12px">还没有添加。填名字点「添加」——学员管理里有同名档案会自动关联并扣课时。</span>';
+}
+/* 同名判定：工作区里已有同名（不论是否关联档案）就不许再加 */
+function extraHasName(name) {
+  var k = String(name || '').trim();
+  return extraNames.some(function (x) { return x.n === k; });
+}
+function addExtraName() {
+  var inp = document.getElementById('extraNameInput');
+  var v = ((inp && inp.value) || '').trim();
+  if (!v) { showToast('请先填名字'); return; }
+  if (extraHasName(v)) { showToast('这位已经加过了'); return; }
+  /* 学员管理里有同名档案 → 自动关联，这节课要扣他课时 */
+  var p = findPersonByName(v);
+  extraNames.push({ n: v, p: p ? p.id : '' });
+  if (inp) { inp.value = ''; inp.focus(); }
+  renderExtraList();
+  if (p) showToast('已关联学员管理里「' + p.name + '」的档案，这节课会扣 1 节课时');
+}
+function removeExtraName(i) { extraNames.splice(i, 1); renderExtraList(); }
+/* 切换某位的扣课时状态：关联档案（扣） ⇄ 纯临时（不扣）。没有同名档案时无法关联。 */
+function toggleExtraLink(i) {
+  var it = extraNames[i];
+  if (!it) return;
+  if (it.p) {
+    it.p = '';
+    showToast('「' + it.n + '」已改为纯临时，本次不扣课时');
+  } else {
+    var p = findPersonByName(it.n);
+    if (!p) { showToast('学员管理里没有「' + it.n + '」的档案，可用下方「从学员管理选择」挑一位'); return; }
+    it.p = p.id;
+    showToast('已关联「' + p.name + '」的档案，这节课会扣 1 节课时');
+  }
+  renderExtraList();
+}
+function onExtraNameKey(e) {
+  if (typeof ev_isComposing === 'function' && ev_isComposing(e)) return;
+  if (e.key === 'Enter') { e.preventDefault(); addExtraName(); }
+}
+function toggleExtraPool() {
+  var box = document.getElementById('extraPool');
+  if (!box) return;
+  var open = box.style.display === 'none';
+  box.style.display = open ? '' : 'none';
+  if (open) {
+    var s = document.getElementById('extraPoolSearch');
+    if (s) { s.value = ''; s.focus(); }
+    renderExtraPool();
+  }
+}
+function renderExtraPool() {
+  var box = document.getElementById('extraPoolList');
+  if (!box) return;
+  var kw = ((document.getElementById('extraPoolSearch') || {}).value || '').trim().toLowerCase();
+  var entries = poolEntries().filter(function (e) {
+    return !kw || e.name.toLowerCase().indexOf(kw) >= 0 || String(e.contact || '').toLowerCase().indexOf(kw) >= 0;
+  });
+  if (!entries.length) {
+    box.innerHTML = '<div class="pool-empty">' + (kw ? '没找到匹配的学员' : '学员管理还是空的') + '</div>';
+    return;
+  }
+  box.innerHTML = entries.map(function (e) {
+    /* 有档案的人才能记课时；单人课学员会在真正选中时按学员管理的资料建档 */
+    var pid = e.kind === 'person' ? e.obj.id : (e.obj.personId || '');
+    var already = pid && extraNames.some(function (x) { return x.p === pid; });
+    var hTxt = (e.hours == null || e.hours === '') ? '未记课时' : '剩' + e.hours + '节';
+    return '<div class="stu-picker-row' + (already ? ' picked' : '') + '" onclick="pickExtraFromPool(\'' + e.key + '\')">' +
+      avatarHtml(e.obj) +
+      '<div class="stu-picker-name">' + escapeHtml(e.name) + (already ? ' <span style="color:var(--green);font-size:11px">已添加</span>' : '') + '</div>' +
+      '<div class="stu-picker-sub">' + escapeHtml(e.contact || '') + ' · ' + hTxt + '</div>' +
+      '</div>';
+  }).join('');
+}
+/* 从学员管理挑一位：一定带档案，所以一定扣课时 */
+function pickExtraFromPool(key) {
+  var e = null;
+  poolEntries().forEach(function (x) { if (x.key === key) e = x; });
+  if (!e) return;
+  var p = null;
+  if (e.kind === 'person') p = e.obj;
+  else if (e.obj.personId) p = getPerson(e.obj.personId);
+  else p = ensurePersonForStudent(e.obj); /* 单人课学员：按学员管理的资料建档，才能记课时 */
+  if (!p) { showToast('这位还没有档案，请先用上面的输入框按名字添加'); return; }
+  if (extraNames.some(function (x) { return x.p === p.id; })) { showToast('这位已经在列表里了'); return; }
+  extraNames.push({ n: p.name, p: p.id });
+  renderExtraList();
+  var box = document.getElementById('extraPool');
+  if (box) box.style.display = 'none';
+}
+function saveExtraAttendees() {
+  if (!extraCtx) { closeModal('extraModal'); return; }
+  setExtraAttendees(extraCtx, extraCtx.dateStr, extraNames);
+  saveData(); closeModal('extraModal'); renderAll();
+  var linked = extraNames.filter(function (x) { return !!x.p; }).length;
+  if (!extraNames.length) { showToast('已清空本次的临时参与者'); return; }
+  showToast('已加入 ' + extraNames.length + ' 位（仅本次）' +
+    (linked ? '，其中 ' + linked + ' 位有档案、签到时会扣课时' : '，均无档案、不扣课时'));
+}
 /* ===== 请假 ===== */
 function isFixedLeave(dateStr, studentId, time) {
   var arr = state.leaveLog[dateStr] || [];
@@ -4266,6 +4571,86 @@ function getMember(stu, memberId) {
   var ms = membersOf(stu);
   for (var i = 0; i < ms.length; i++) if (ms[i].id === memberId) return ms[i];
   return null;
+}
+/* ===== 本次临时参与者 =====
+   试听/蹭课这类"只来这一次"的人：不建档（不在学员管理里）、不扣课时、不影响课表结构。
+   挂在「某一天 + 某一节课」上，而不是学员档案上——这正是它和小组成员的区别。 */
+/* 临时参与者扣课流水的固定备注：撤销时靠它反查，改了会导致旧流水退不掉 */
+var EXTRA_CONSUME_NOTE = '本次临时参与扣课';
+function extraKey(c, dateStr) {
+  if (!c || !dateStr) return '';
+  if (c.type === 'flexible') return dateStr + '|tp|' + (c.id || '');
+  return dateStr + '|' + (c.studentId || '') + '|' + (c.time || '');
+}
+/* 归一化一条临时参与者；兼容 v120 早期只存姓名的纯字符串格式。非法/空名返回 null。 */
+function normExtraItem(x) {
+  if (x == null) return null;
+  if (typeof x === 'string') {
+    var s = x.trim();
+    return s ? { n: s, p: '' } : null;
+  }
+  if (typeof x === 'object') {
+    var n = String(x.n != null ? x.n : (x.name || '')).trim();
+    if (!n) return null;
+    var pid = String((x.p != null ? x.p : (x.personId || '')) || '');
+    /* 档案被删了就退回纯临时，避免留一个指向空处的 id */
+    if (pid && !getPerson(pid)) pid = '';
+    return { n: n, p: pid };
+  }
+  return null;
+}
+function getExtraAttendees(c, dateStr) {
+  if (!c || !dateStr || !state.extraAttendees) return [];
+  var v = state.extraAttendees[extraKey(c, dateStr)];
+  if (!Array.isArray(v)) return [];
+  var out = [];
+  v.forEach(function (x) { var it = normExtraItem(x); if (it) out.push(it); });
+  return out;
+}
+function setExtraAttendees(c, dateStr, list) {
+  if (!c || !dateStr) return;
+  if (!state.extraAttendees) state.extraAttendees = {};
+  var out = [];
+  (list || []).forEach(function (x) { var it = normExtraItem(x); if (it) out.push(it); });
+  state.extraAttendees[extraKey(c, dateStr)] = out;
+}
+/* 按姓名在学员管理里找档案（精确匹配，去空格）。找不到返回 null。 */
+function findPersonByName(name) {
+  var k = String(name || '').trim();
+  if (!k || !Array.isArray(state.persons)) return null;
+  for (var i = 0; i < state.persons.length; i++) {
+    if (String(state.persons[i].name || '').trim() === k) return state.persons[i];
+  }
+  return null;
+}
+/* 这条临时参与者对应的档案（没关联则返回 null） */
+function extraPersonOf(item) {
+  return (item && item.p) ? getPerson(item.p) : null;
+}
+/* 扣 1 节课时 + 记流水。只有"关联了档案"的人才会真的扣；返回被扣的 person 或 null */
+function deductExtraAttendee(item, dateStr, time) {
+  var p = extraPersonOf(item);
+  if (!p) return null;
+  if (p.hoursRemaining != null && p.hoursRemaining !== '' && p.hoursRemaining > 0) p.hoursRemaining--;
+  logHours({
+    personId: p.id, name: p.name, type: 'consume', delta: -1,
+    after: p.hoursRemaining, note: EXTRA_CONSUME_NOTE, date: dateStr, time: time || ''
+  });
+  return p;
+}
+/* 退还：只有当天真扣过（存在对应 consume 流水）才退，避免没扣也白退 */
+function refundExtraAttendees(list, dateStr, time) {
+  (list || []).forEach(function (it) {
+    var p = extraPersonOf(it);
+    if (!p) return;
+    if (findConsumeLogIndex({ personId: p.id, date: dateStr, time: time, note: EXTRA_CONSUME_NOTE }) < 0) return;
+    if (p.hoursRemaining != null && p.hoursRemaining !== '') p.hoursRemaining++;
+    removeConsumeLog({ personId: p.id, date: dateStr, time: time, note: EXTRA_CONSUME_NOTE });
+    logHours({
+      personId: p.id, name: p.name, type: 'adjust', delta: +1,
+      after: p.hoursRemaining, note: '撤销完成（退还课时·本次临时参与）', date: dateStr, time: time || ''
+    });
+  });
 }
 /* 全局去重人头数：同一 personId 在多个小组只算一次 */
 function totalHeadCount() {
@@ -4572,6 +4957,20 @@ function renderTopArea() {
           '<button class="btn-copy btn-wood" title="' + finishTitle + '" onclick="finishClass(\'' + c.type + '\',\'' + (c.id || '') + '\',\'' + c.studentId + '\',\'' + c.time + '\')">签到</button></div>';
       }
       var memChip = (grp && !leave) ? ' <span class="grp-chip">' + membersOf(stu).length + '人组</span>' : '';
+      /* 本次临时加人（试听/蹭课）：只挂在这一天这一节课上，不建档、不扣课时 */
+      var exList = getExtraAttendees(c, todayStr);
+      var exChip = exList.length
+        ? '<span class="extra-label">本次临时</span>' + exList.map(function (it) {
+            var p = extraPersonOf(it);
+            return '<span class="extra-chip' + (p ? ' ex-linked' : '') + '" title="' +
+              (p ? '学员管理有档案，这节课扣 1 节课时' : '临时参与，不建档、不扣课时') + '">' +
+              '<span class="ex-minus">+</span>' + escapeHtml(it.n) +
+              (p ? '<span class="ex-kh">扣1</span>' : '') + '</span>';
+          }).join('')
+        : '';
+      /* 已完成的课也留着入口：临时参与者不扣课时、不改结构，补录无害（课上完才想起来很常见） */
+      var exBtn = leave ? '' :
+        '<button class="btn-extra-add" title="本次临时加人（不建档、不扣课时）" onclick="openExtraAttendees(\'' + c.type + '\',\'' + (c.id || '') + '\',\'' + c.studentId + '\',\'' + c.time + '\',\'' + todayStr + '\')">+人</button>';
       var tLoc = getLocation(c.locationId);
       var tStyle = (tLoc && !done && !leave)
         ? ' style="background:linear-gradient(135deg,' + hexToRgba(tLoc.color, 0.20) + ',' + hexToRgba(tLoc.color, 0.07) + ');border-left:4px solid ' + tLoc.color + '"'
@@ -4579,7 +4978,7 @@ function renderTopArea() {
       tHtml += '<div class="r-item' + (done ? ' done-r' : '') + (leave ? ' leave-r' : '') + '"' + tStyle + '>' +
         '<div class="r-avatar">' + avatarHtml(stu) + '</div>' +
         '<div class="r-info">' +
-          '<div class="r-name">' + escapeHtml(c.name) + memChip + (leave ? ' <span class="badge-leave">已请假</span>' : '') + '</div>' +
+          '<div class="r-name">' + escapeHtml(c.name) + memChip + exChip + (leave ? ' <span class="badge-leave">已请假</span>' : '') + exBtn + '</div>' +
           '<div class="r-meta"><span class="r-time">' + c.time + '</span>' + cdHtml + locHtml(c.locationId) + (c.reschedIn ? ' <span class="rs-note">↪ 原' + (c.reschedIn.fromDate === todayStr ? c.reschedIn.fromTime : fmtDateCN(c.reschedIn.fromDate) + ' ' + c.reschedIn.fromTime) + '</span>' : '') + '</div>' +
         '</div>' +
         '<div class="r-actions">' + opBtn + '</div>' +
@@ -4644,6 +5043,19 @@ function renderTopArea() {
         }).join('');
         memRow = '<div class="mem-row" style="grid-column:1/-1"><span style="font-size: 12px;color:var(--text-light);flex-shrink:0">成员请假（点击切换）：</span>' + chips + '</div>';
       }
+      /* 本次临时加人（试听/蹭课）：只挂在这一天这一节课上，不建档、不扣课时 */
+      var mExList = getExtraAttendees(c, tomorrowStr);
+      var mExChip = mExList.length
+        ? '<span class="extra-label">本次临时</span>' + mExList.map(function (it) {
+            var p = extraPersonOf(it);
+            return '<span class="extra-chip' + (p ? ' ex-linked' : '') + '" title="' +
+              (p ? '学员管理有档案，这节课扣 1 节课时' : '临时参与，不建档、不扣课时') + '">' +
+              '<span class="ex-minus">+</span>' + escapeHtml(it.n) +
+              (p ? '<span class="ex-kh">扣1</span>' : '') + '</span>';
+          }).join('')
+        : '';
+      var mExBtn = leave ? '' :
+        '<button class="btn-extra-add" title="本次临时加人（不建档、不扣课时）" onclick="openExtraAttendees(\'' + c.type + '\',\'' + (c.id || '') + '\',\'' + c.studentId + '\',\'' + c.time + '\',\'' + tomorrowStr + '\')">+人</button>';
       var mLoc = getLocation(c.locationId);
       var mStyle = ' style="flex-wrap:wrap';
       if (mLoc && !leave) mStyle += ';background:' + hexToRgba(mLoc.color, 0.14) + ';border-left:3px solid ' + mLoc.color;
@@ -4651,7 +5063,7 @@ function renderTopArea() {
       mHtml += '<div class="r-item' + (reminded && !leave ? ' done-r' : '') + (leave ? ' leave-r' : '') + '"' + mStyle + '>' +
         '<div class="r-avatar">' + avatarHtml(stu) + '</div>' +
         '<div class="r-info">' +
-          '<div class="r-name">' + escapeHtml(c.name) + ' ' + (c.type === 'fixed' ? '<span style="font-size: 12px;color:var(--wood);font-weight:600">固定</span>' : '<span style="font-size: 12px;color:var(--orange-deep);font-weight:600">约课</span>') + (grp ? memChip : (stu && !leave ? ' ' + hoursBadge(stu) : '')) + (leave ? ' <span class="badge-leave">已请假</span>' : '') + '</div>' +
+          '<div class="r-name">' + escapeHtml(c.name) + ' ' + (c.type === 'fixed' ? '<span style="font-size: 12px;color:var(--wood);font-weight:600">固定</span>' : '<span style="font-size: 12px;color:var(--orange-deep);font-weight:600">约课</span>') + (grp ? memChip : (stu && !leave ? ' ' + hoursBadge(stu) : '')) + (leave ? ' <span class="badge-leave">已请假</span>' : '') + mExChip + mExBtn + '</div>' +
           '<div class="r-meta">明天 ' + weekdayOf(tomorrowStr) + ' <span class="r-time">' + c.time + '</span>' + locHtml(c.locationId) + (c.reschedIn ? ' <span class="rs-note">↪ 原' + fmtDateCN(c.reschedIn.fromDate) + ' ' + c.reschedIn.fromTime + '</span>' : '') + (leave ? '' : reminded ? '已提醒' : (grp && lvCnt === membersOf(stu).length ? '全员请假' : '待提醒')) + '</div>' +
         '</div>' +
         '<div class="r-actions">' + right + '</div>' +
@@ -4930,7 +5342,16 @@ var zoomAid = '', zoomPtype = '';
 function openAvatarZoom(el) {
   if (!el) return;
   var box = document.getElementById('avatarZoomBox');
-  if (el.tagName === 'IMG') {
+  if (el.getAttribute && el.getAttribute('data-gstack') === '1') {
+    /* 小组课叠加头像：实时按当前成员拼一张大图，成员增减/换头像后点开都是最新的 */
+    var g = getStudent(el.getAttribute('data-aid') || '');
+    box.innerHTML = '<span class="z-letter" style="background:var(--wood)">👥</span>';
+    if (g) {
+      composeGroupAvatar(g, 512, function (dataUrl) {
+        if (dataUrl) box.innerHTML = '<img src="' + dataUrl + '" alt="" draggable="false">';
+      });
+    }
+  } else if (el.tagName === 'IMG') {
     box.innerHTML = '<img src="' + el.src + '" alt="" draggable="false">';
   } else {
     var ch = (el.textContent || '?').trim().charAt(0) || '?';
@@ -5978,25 +6399,116 @@ function locOptionsHtml(selectedId, allowEmpty, emptyLabel) {
   });
   return html;
 }
-/* 小组成员编辑器 */
-var editorMembers = []; /* 编辑中的成员列表（含头像、personId） */
-/* 小组成员：只读展示。成员的添加/移除统一在「添加课表」里做，
-   这里不再提供可编辑行，避免两处都能改导致数据不一致。 */
-function renderMemberEditor(list) {
-  editorMembers = list;
-  var box = document.getElementById('memberEditor');
-  if (!box) { updateGroupFields(); return; }
-  if (!list.length) {
-    box.innerHTML = '<div class="set-tip" style="margin:0">当前为单人课。要改成小组课，请到「<b>添加课表</b>」里新建小组课并添加成员。</div>';
-  } else {
-    box.innerHTML =
-      '<div class="add-sched-members">' + list.map(function (m) {
+/* ===== 小组成员编辑器（可复用组件）=====
+   「编辑学员」和「编辑课表」两个弹窗共用：boxId 区分容器，onChange 是成员数变化后的回调。
+   改动只落在工作区 editorMembers，宿主弹窗点「保存」时才写回数据，取消不留痕。 */
+var editorMembers = []; /* 编辑中的成员列表（含头像、personId，单人课学员暂用 studentId） */
+var editorMemberBoxId = 'memberEditor';
+var editorMemberOnChange = null;  /* 编辑学员里用来切换「学生姓名/小组课名称」文案 */
+var editorMemberPoolOpen = {};  /* 按 boxId 记录学员选择面板的展开状态，两个弹窗互不干扰 */
+/* 内部元素 id 按容器派生，避免两个弹窗里的实例互相串台 */
+function meIds() {
+  return { pool: editorMemberBoxId + '_pool', search: editorMemberBoxId + '_search', list: editorMemberBoxId + '_list' };
+}
+function renderMemberEditor(list, boxId, onChange, emptyTip) {
+  editorMembers = list || [];
+  if (boxId) editorMemberBoxId = boxId;
+  editorMemberOnChange = (onChange === undefined) ? null : onChange;
+  var box = document.getElementById(editorMemberBoxId);
+  if (!box) return;
+  var ids = meIds();
+  var chips = editorMembers.length
+    ? '<div class="add-sched-members">' + editorMembers.map(function (m, i) {
         var linked = m.personId && personGroups(m.personId).length > 1;
-        return '<span class="add-sched-mem">' + escapeHtml(m.name || '?') + (linked ? ' 🔗' : '') + '</span>';
-      }).join('') + '</div>' +
-      '<div class="set-tip" style="margin:6px 0 0">共 ' + list.length + ' 位成员。需要增删成员，请到「<b>添加课表</b>」里选这个小组后操作。</div>';
+        return '<span class="add-sched-mem">' + escapeHtml(m.name || '?') + (linked ? ' 🔗' : '') +
+          '<span class="asm-x" onclick="removeEditorMember(' + i + ')" title="移除">×</span></span>';
+      }).join('') + '</div>'
+    : '<div style="color:var(--text-light);font-size:12px">' +
+      (emptyTip || '还没有成员。点「添加成员」挑人即可组成小组课。') + '</div>';
+  box.innerHTML =
+    chips +
+    '<div style="margin-top:8px">' +
+      '<button type="button" class="btn-ghost" onclick="toggleEditorMemberPool()">添加成员</button>' +
+    '</div>' +
+    '<div id="' + ids.pool + '" style="display:' + (editorMemberPoolOpen[editorMemberBoxId] ? '' : 'none') + '">' +
+      '<input type="text" id="' + ids.search + '" placeholder="搜索姓名 / 电话" oninput="renderEditorMemberPool()" ' +
+        'style="width:100%;min-height:40px;padding:8px 12px;border:1px solid #ddd0bd;border-radius:12px;font-size:16px;font-family:inherit;margin:8px 0 0">' +
+      '<div id="' + ids.list + '" class="add-sched-pool"></div>' +
+    '</div>';
+  if (editorMemberPoolOpen[editorMemberBoxId]) renderEditorMemberPool();
+  if (editorMemberOnChange) editorMemberOnChange(editorMembers.length);
+}
+/* 移除编辑中的成员（仅改工作区，保存时才写回） */
+function removeEditorMember(i) {
+  editorMembers.splice(i, 1);
+  renderMemberEditor(editorMembers);
+}
+function toggleEditorMemberPool() {
+  var open = !editorMemberPoolOpen[editorMemberBoxId];
+  editorMemberPoolOpen[editorMemberBoxId] = open;
+  var p = document.getElementById(meIds().pool);
+  if (p) p.style.display = open ? '' : 'none';
+  if (open) {
+    var s = document.getElementById(meIds().search);
+    if (s) { s.value = ''; s.focus(); }
+    renderEditorMemberPool();
   }
-  updateGroupFields();
+}
+/* 可添加成员：完整学员池，排除当前已在组里的 */
+function renderEditorMemberPool() {
+  var p = document.getElementById(meIds().list);
+  if (!p) return;
+  var usedP = {}, usedS = {};
+  editorMembers.forEach(function (m) { if (m.personId) usedP[m.personId] = 1; if (m.studentId) usedS[m.studentId] = 1; });
+  var kwEl = document.getElementById(meIds().search);
+  var kw = ((kwEl && kwEl.value) || '').trim().toLowerCase();
+  var entries = poolEntries().filter(function (e) {
+    if (e.kind === 'person' && usedP[e.obj.id]) return false;
+    if (e.kind === 'student' && usedS[e.obj.id]) return false;
+    if (kw && e.name.toLowerCase().indexOf(kw) < 0 && (e.contact || '').toLowerCase().indexOf(kw) < 0) return false;
+    return true;
+  });
+  if (!entries.length) {
+    p.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-light);font-size:12px">' +
+      (kw ? '没找到匹配的学员' : '学员池里没有可添加的成员了') + '</div>';
+    return;
+  }
+  p.innerHTML = entries.map(function (e) {
+    var h = e.hours == null ? '未设课时' : ('剩 ' + e.hours + ' 节');
+    var tag = e.kind === 'student'
+      ? '<span style="color:var(--orange-deep);font-size:12px;flex-shrink:0">单人课</span>'
+      : '<span style="color:var(--text-light);font-size:12px;flex-shrink:0">' + escapeHtml(h) + '</span>';
+    return '<div class="add-sched-pool-item" onclick="addEditorMember(\'' + e.key + '\')">' +
+      '<span style="flex:1;min-width:0">' + escapeHtml(e.name || '(未命名)') + '</span>' + tag + '</div>';
+  }).join('');
+}
+function addEditorMember(key) {
+  var lookupKey = (String(key).indexOf(':') >= 0) ? String(key) : ('p:' + String(key));
+  var entries = poolEntries().filter(function (e) { return e.key === lookupKey; });
+  if (!entries.length) return;
+  var e = entries[0];
+  if (e.kind === 'student') {
+    /* 单人课学员先暂存 studentId，保存时才迁到学员管理建档，取消不留痕 */
+    if (editorMembers.some(function (m) { return m.studentId === e.obj.id || (m.personId && e.obj.personId === m.personId); })) {
+      showToast('该学员已在成员里'); return;
+    }
+    editorMembers.push({
+      id: uid(), studentId: e.obj.id, personId: '', name: e.obj.name || '',
+      contact: e.obj.contact || '',
+      hours: (e.obj.hoursRemaining == null || e.obj.hoursRemaining === '') ? null : e.obj.hoursRemaining,
+      avatar: e.obj.avatar || ''
+    });
+    showToast('已选择「' + (e.obj.name || '') + '」，保存后并入学员管理');
+  } else {
+    var pp = e.obj;
+    if (editorMembers.some(function (m) { return m.personId === pp.id; })) return;
+    editorMembers.push({
+      id: uid(), personId: pp.id, name: pp.name || '', contact: pp.contact || '',
+      hours: (pp.hoursRemaining == null || pp.hoursRemaining === '') ? null : pp.hoursRemaining,
+      avatar: pp.avatar || ''
+    });
+  }
+  renderMemberEditor(editorMembers);
 }
 /* 小组课：有成员时把「学生姓名」改为「小组课名称」并隐藏整组剩余课时（按成员计） */
 function updateGroupFields() {
@@ -6008,6 +6520,19 @@ function updateGroupFields() {
   if (lbl) lbl.textContent = isGroup ? '小组课名称 *' : '学生姓名 *';
   if (inp) inp.placeholder = isGroup ? '如：可茹小组 / 周二小课' : '如：小明 / 王小红';
   if (hr) hr.style.display = isGroup ? 'none' : '';
+}
+/* 把编辑器工作区落成可写回的 members 数组：单人课学员在这里迁到学员管理建档。
+   「编辑学员」和「编辑课表」两处保存都调它，保证行为一致（取消则不落库）。 */
+function collectEditorMembers() {
+  var out = [];
+  (editorMembers || []).forEach(function (m) {
+    if (m.personId) { out.push({ id: m.id || uid(), personId: m.personId }); return; }
+    var stu = m.studentId ? getStudent(m.studentId) : null;
+    if (!stu) return;
+    var p = ensurePersonForStudent(stu);
+    if (p) out.push({ id: m.id || uid(), personId: p.id });
+  });
+  return out;
 }
 /* 输入法组合状态判定：选候选词时的回车不当作确认，供各搜索框复用 */
 function ev_isComposing(ev) {
@@ -6608,7 +7133,9 @@ function openStudentModal(id) {
     document.getElementById('stuHourGroup').value = hourGroupOf(s);
     selLoc = s.locationId || '';
     pendingAvatar = s.avatar || '';
-    renderMemberEditor(membersOf(s).map(function (m) { return { id: m.id, personId: m.personId, name: m.name, contact: m.contact || '', hours: m.hours, avatar: m.avatar || '' }; }));
+    renderMemberEditor(membersOf(s).map(function (m) { return { id: m.id, personId: m.personId, name: m.name, contact: m.contact || '', hours: m.hours, avatar: m.avatar || '' }; }),
+      'memberEditor', updateGroupFields,
+      '当前为<b>单人课</b>。点「添加成员」挑人即可升级为小组课（课时按成员各自计算）。');
   } else {
     document.getElementById('stuModalTitle').textContent = '添加学生';
     document.getElementById('stuName').value = '';
@@ -6618,7 +7145,8 @@ function openStudentModal(id) {
     document.getElementById('stuHourGroup').value = '';
     setMode('fixed');
     pendingAvatar = '';
-    renderMemberEditor([]);
+    renderMemberEditor([], 'memberEditor', updateGroupFields,
+      '当前为<b>单人课</b>。点「添加成员」挑人即可升级为小组课（课时按成员各自计算）。');
     renderSlotEditor([]);
   }
   document.getElementById('stuLocation').innerHTML = locOptionsHtml(selLoc, true, '不设置');
@@ -6657,10 +7185,9 @@ function saveStudent() {
     data.fixedSlots = [];
   }
   data.hourGroupId = document.getElementById('stuHourGroup').value.trim();
-  /* 小组成员统一在「添加课表」里增删。这里不读成员编辑器，直接保留原有成员，
-     否则编辑小组后保存会把成员清空（成员编辑器已改为只读展示）。 */
-  var prevStu = id ? getStudent(id) : null;
-  data.members = (prevStu && Array.isArray(prevStu.members)) ? prevStu.members : [];
+  /* 小组成员从编辑器写回：点「保存」才生效，取消不留痕。
+     新增的单人课学员在 collectEditorMembers 里迁到学员管理建档，课时/头像一并并入。 */
+  data.members = collectEditorMembers();
   if (data.members.length) data.hoursRemaining = null; /* 小组按成员计课时 */
   function finalizeSave() {
     syncHourGroup(data.hourGroupId);
@@ -8296,8 +8823,10 @@ function renderAddSchedList() {
            (c.contact || '').toLowerCase().indexOf(text) >= 0;
   });
   if (!items.length) { list.innerHTML = '<div class="stu-picker-empty">未找到匹配的学员</div>'; return; }
-  /* 顶部固定「新建小组课」入口：从学员管理挑成员直接组队并排课（搜索时隐藏，避免干扰） */
-  var newGrpHtml = text ? '' :
+  /* 顶部「新建小组课」入口：只在还没选定对象时出现（引导用），搜索时也隐藏避免干扰。
+     一旦选定了学员/小组就必须隐藏——此时下方已有「＋ 添加成员」，两个 + 号并存
+     会让人分不清到底是"建一个新组"还是"往当前组里加人"。 */
+  var newGrpHtml = (text || addSchedSelKey) ? '' :
     '<div class="stu-picker-item' + (addSchedSelKey === ADD_SCHED_NEW_GROUP ? ' selected' : '') + '" data-key="' + ADD_SCHED_NEW_GROUP + '" onclick="selectAddSched(\'' + ADD_SCHED_NEW_GROUP + '\')">' +
       '<div class="stu-picker-main">' +
         '<div class="stu-picker-name" style="color:var(--orange-deep)">＋ 新建小组课</div>' +
@@ -8763,7 +9292,7 @@ function renderSchedManage() {
   var all = scheduleEntries();
   if (cnt) cnt.textContent = '（共 ' + all.length + ' 条）';
   if (!all.length) {
-    box.innerHTML = '<div class="set-tip" style="margin:0;text-align:center;padding:18px 0">还没有排课，点上面「＋ 添加课表」开始</div>';
+    box.innerHTML = '<div class="set-tip" style="margin:0;text-align:center;padding:18px 0">还没有排课，点上面「添加课表」开始</div>';
     return;
   }
   var temps = all.filter(function (e) { return e.kind === 'temp'; }).sort(function (a, b) {
@@ -8822,6 +9351,24 @@ function openSchedEdit(key) {
       '<div style="color:var(--text-light);font-size:12px;margin-top:4px">' +
       (e.kind === 'fixed' ? '固定课 · 每周' + escapeHtml(WEEKDAYS[e.day]) : '临时课 · ' + escapeHtml(fmtDateCN(e.date))) +
       '</div></div>';
+  }
+  /* 小组成员：单人课和小组课都能在这里增删成员（成员属于小组本身，影响该组全部课表）。
+     单人课添加了新成员就自动升级为小组课——当前学员本人一并并入成员。 */
+  var mw = document.getElementById('seMemberWrap');
+  var memStu = e.studentId ? getStudent(e.studentId) : null;
+  if (mw) {
+    mw.style.display = memStu ? '' : 'none';
+    var mlbl = document.getElementById('seMemberLabel');
+    if (mlbl) mlbl.textContent = e.group ? '小组成员' : '小组成员（加人后升级为小组课）';
+    var selfName = memStu ? (memStu.name || '当前学员') : '当前学员';
+    var mTip = e.group
+      ? '这个小组还没有成员，点「添加成员」把学员加进来。'
+      : '当前是<b>单人课</b>（' + escapeHtml(selfName) + '）。点「添加成员」加入新学员后会自动升级为小组课，' +
+        escapeHtml(selfName) + '会并入成员、课时一并带到学员管理。';
+    /* 单人课也要走一遍渲染（传空列表），否则 editorMembers 会残留上次编辑小组时的成员 */
+    renderMemberEditor(e.group ? membersOf(memStu).map(function (m) {
+      return { id: m.id, personId: m.personId, name: m.name, contact: m.contact || '', hours: m.hours, avatar: m.avatar || '' };
+    }) : [], 'seMemberEditor', null, mTip);
   }
   var dWrap = document.getElementById('seDateWrap');
   var dayWrap = document.getElementById('seDayWrap');
@@ -8915,8 +9462,40 @@ function saveSchedEdit() {
     cls.locationId = locId;
     cls.note = note;
   }
-  saveData(); closeModal('schedEditModal'); renderSchedManage(); renderAll();
-  showToast('课表已更新');
+  var schedEditUpgraded = false; /* 本次保存是否把单人课升级成了小组课 */
+  function finalizeSchedEdit() {
+    saveData(); closeModal('schedEditModal'); renderSchedManage(); renderAll();
+    if (schedEditUpgraded) {
+      var ms = getStudent(e.studentId);
+      showToast('已升级为小组课（' + (ms ? membersOf(ms).length : 0) + ' 人），可到「编辑学员」里改组名');
+    } else {
+      showToast('课表已更新');
+    }
+  }
+  /* 成员编辑器写回（成员属于小组本身，固定课/临时课都要处理）。
+     单人课一旦加了成员就升级为小组课：学员本人补进成员首位，课时由 ensurePersonForStudent 带到学员管理。 */
+  var memStu = e.studentId ? getStudent(e.studentId) : null;
+  if (memStu) {
+    var newMembers = collectEditorMembers();
+    if (!e.group && newMembers.length) {
+      var selfP = ensurePersonForStudent(memStu);
+      if (selfP && !newMembers.some(function (m) { return m.personId === selfP.id; })) {
+        newMembers.unshift({ id: uid(), personId: selfP.id });
+      }
+      schedEditUpgraded = true;
+    }
+    memStu.members = newMembers;
+    if (newMembers.length) memStu.hoursRemaining = null; /* 小组按成员计课时 */
+    if (newMembers.length > 1) {
+      /* 成员变了，组合头像要重出；生成是异步的，等它回来再落库 */
+      composeGroupAvatar(memStu, 128, function (dataUrl) {
+        if (dataUrl) memStu.avatar = dataUrl;
+        finalizeSchedEdit();
+      });
+      return;
+    }
+  }
+  finalizeSchedEdit();
 }
 /* 点击弹窗外部收起学员下拉 */
 document.addEventListener('click', function (e) {
@@ -8949,6 +9528,11 @@ function finishClass(type, flexId, studentId, time) {
       msg += '，已登记为扣课（' + stu.name + ' 尚未设置剩余课时，请尽快续费）';
     }
   }
+  /* 本次临时参与者：学员管理里有档案的，这节课同样扣 1 节课时并记流水 */
+  var exList = getExtraAttendees({ type: type, id: flexId, studentId: studentId, time: time }, todayStr);
+  var exHit = [];
+  exList.forEach(function (it) { if (deductExtraAttendee(it, todayStr, time)) exHit.push(it.n); });
+  if (exHit.length) msg += '；本次临时参与「' + exHit.join('、') + '」各扣 1 节课时';
   saveData(); renderAll();
   /* v113：toast 带「撤销」按钮——点错了可以立刻反悔（不弹确认框，直接回退） */
   showToast(msg, { label: '撤销', fn: function () { undoFinishCore(type, flexId, studentId, time, todayStr); showToast('已撤销完成，课时已退还'); } });
@@ -8983,6 +9567,8 @@ function undoFinishCore(type, flexId, studentId, time, dateStr) {
   }
   /* 删除单人课 finishClass 那条 consume 流水（未设课时时也删除占位的 delta=-1流水） */
   removeConsumeLog({ studentId: stu.id, date: dStr, time: time, note: '完成课程扣课' });
+  /* 退还本次临时参与者的课时（有档案且真的扣过的才退） */
+  refundExtraAttendees(getExtraAttendees({ type: type, id: flexId, studentId: studentId, time: time }, dStr), dStr, time);
   /* 撤销当天点名的成员扣课（小组课） */
   if (isGroup(stu)) {
     var memberLeaveMap = state.memberLeaveLog[dStr] || [];
@@ -9054,6 +9640,8 @@ function finishClassQuiet(c, todayStr) {
       logHours({ studentId: stu.id, name: stu.name, type: 'consume', delta: -1, after: null, note: '完成课程扣课', time: c.time });
     }
   }
+  /* 本次临时参与者（自动完成也要扣，否则课上了但课时没记） */
+  getExtraAttendees(c, todayStr).forEach(function (it) { deductExtraAttendee(it, todayStr, c.time); });
 }
 /* 退还课时到学员或课时共享组（与 deductHours 镜像） */
 function addBackHours(stu, n) {
@@ -9087,8 +9675,10 @@ function openRollcall(type, flexId, studentId, time, dateStr) {
 function renderRollcallList() {
   var stu = getStudent(document.getElementById('rcStudentId').value);
   if (!stu) return;
-  var html = '';
-  membersOf(stu).forEach(function (m) {
+  var mems = membersOf(stu);
+  /* 固定成员：编制内的人，按出勤/请假切换 */
+  var html = '<div class="rc-sec">固定成员 ' + mems.length + ' 人</div>';
+  mems.forEach(function (m) {
     var isLv = rcState[m.id] === 'leave';
     var hTxt = (m.hours != null && m.hours !== '') ? '剩' + m.hours + '节' : '未记课时';
     html += '<div class="rc-row">' +
@@ -9099,6 +9689,23 @@ function renderRollcallList() {
       '<button type="button" class="rc-btn rc-leave' + (isLv ? ' on' : '') + '" onclick="rcSet(\'' + m.id + '\',\'leave\')">请假</button>' +
       '</div></div>';
   });
+  /* 本次临时参与者：不在编制内，默认出勤，有档案的扣 1 节课时 */
+  var exList = getExtraAttendees(
+    { type: document.getElementById('rcType').value, id: document.getElementById('rcFlexId').value, studentId: document.getElementById('rcStudentId').value, time: document.getElementById('rcTime').value },
+    document.getElementById('rcDate').value
+  );
+  if (exList.length) {
+    html += '<div class="rc-sec">本次临时参与者 ' + exList.length + ' 人（默认出勤，有档案的扣 1 节）</div>';
+    exList.forEach(function (it) {
+      var p = extraPersonOf(it);
+      var hTxt = p ? ((p.hoursRemaining == null || p.hoursRemaining === '') ? '未记课时' : '扣后剩' + Math.max(0, p.hoursRemaining - 1) + '节') : '不扣课时';
+      html += '<div class="rc-row">' +
+        '<span class="rc-name">' + escapeHtml(it.n) + '</span>' +
+        '<span class="rc-hours">' + hTxt + '</span>' +
+        '<span class="rc-state">' + (p ? '扣1节' : '临时') + '</span>' +
+        '</div>';
+    });
+  }
   document.getElementById('rollcallList').innerHTML = html;
 }
 function rcSet(memberId, val) {
@@ -9131,6 +9738,10 @@ function doRollcall() {
       toggleMemberLeaveQuiet(dateStr, studentId, m.id, false);
     }
   });
+  /* 本次临时参与者：不进编制、不在点名列表里，默认出勤，有档案的扣 1 节课时 */
+  var exList = getExtraAttendees({ type: type, id: flexId, studentId: studentId, time: time }, dateStr);
+  var exHit = [];
+  exList.forEach(function (it) { if (deductExtraAttendee(it, dateStr, time)) exHit.push(it.n); });
   /* 标记本节课完成 */
   if (type === 'flexible') {
     state.flexibleClasses.forEach(function (c) { if (c.id === flexId) c.status = 'done'; });
@@ -9140,7 +9751,8 @@ function doRollcall() {
     if (state.fixedDone[dateStr].indexOf(key) < 0) state.fixedDone[dateStr].push(key);
   }
   saveData(); closeModal('rollcallModal'); renderAll();
-  showToast('点名完成：出勤 ' + present + ' 人 · 请假 ' + absent + ' 人（请假未扣课时）');
+  showToast('点名完成：出勤 ' + present + ' 人 · 请假 ' + absent + ' 人（请假未扣课时）' +
+    (exHit.length ? '；本次临时参与「' + exHit.join('、') + '」各扣 1 节课时' : ''));
 }
 /* 静默设置成员请假标记（不弹提示不渲染，供点名用） */
 function toggleMemberLeaveQuiet(dateStr, studentId, memberId, mark) {
