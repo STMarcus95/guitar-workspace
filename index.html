@@ -1126,6 +1126,8 @@
   .chip-actions .chip-act-main:hover { color: var(--wood-dark); }
   .chip-actions .chip-act-warn { color: #b08968; }
   .chip-actions .chip-act-info { color: #4a7fb5; }
+  .chip-actions .chip-act-sign { color: var(--green); font-weight: 600; }
+  .chip-actions .chip-act-sign:hover { color: #2e7d32; }
   /* 删除按钮：44px 触控热区用 ::after 伪元素扩大，不撑高行高 */
   .chip-actions .chip-act-del { color: #c99; display: inline-flex; align-items: center; justify-content: center; padding: 0 3px; margin: 0; position: relative; }
   .chip-actions .chip-act-del::after {
@@ -2176,7 +2178,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v128</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v129</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -5176,6 +5178,16 @@ function renderSchedule() {
         ? '<span class="chip-act-info" onclick="openMemberLeave(\'' + c.studentId + '\',\'' + dStr + '\')" title="登记某个成员当天请假">成员假</span>'
         : '';
       var rsBtn = '';
+      /* v129：周课表课次卡补「签到/点名」入口——过去/今天的课都能直接在周课表里标记完成，
+         日期用当天 dStr（而非写死今天），保证 retrosign（如补签昨天）落到正确的那天。 */
+      var signBtn = '';
+      if (!leave && !done && !rsOut) {
+        if (grp) {
+          signBtn = '<span class="chip-act-sign" onclick="openRollcall(\'' + c.type + '\',\'' + (c.id || '') + '\',\'' + c.studentId + '\',\'' + c.time + '\',\'' + dStr + '\')" title="小组点名签到（含临时参与者）">点名</span>';
+        } else {
+          signBtn = '<span class="chip-act-sign" onclick="finishClass(\'' + c.type + '\',\'' + (c.id || '') + '\',\'' + c.studentId + '\',\'' + c.time + '\',\'' + dStr + '\')" title="标记本节课完成，扣 1 节课时">签到</span>';
+        }
+      }
       if (rsOut) {
         rsBtn = '<span class="chip-act-warn" onclick="cancelResched(\'' + rsOut.id + '\')" title="撤销这次调课">撤销调</span>';
       } else if (rsIn) {
@@ -5206,7 +5218,7 @@ function renderSchedule() {
         (leave ? ' <span class="chip-leave">已请假</span>' : '') +
         (loc ? '<span class="loc-tag"><span class="loc-dot" style="background:' + loc.color + '"></span></span>' : '') +
         rsBadge +
-        '<span class="chip-actions">' + (rsOut ? '' : leaveBtn + memBtn) + rsBtn +
+        '<span class="chip-actions">' + (rsOut ? '' : leaveBtn + memBtn + signBtn) + rsBtn +
         (c.type === 'flexible' ? '<span class="chip-act-del" onclick="delFlexClass(\'' + c.id + '\')" title="删除本次排课"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>' : '') +
         '</span></div>';
     });
@@ -9574,8 +9586,8 @@ document.addEventListener('click', function (e) {
 });
 
 /* 完成一节课：标记 + 扣课时 */
-function finishClass(type, flexId, studentId, time) {
-  var todayStr = fmtDate(new Date());
+function finishClass(type, flexId, studentId, time, dateStr) {
+  var todayStr = dateStr || fmtDate(new Date());
   var stu = getStudent(studentId);
   if (type === 'flexible') {
     state.flexibleClasses.forEach(function (c) { if (c.id === flexId) c.status = 'done'; });
@@ -9589,12 +9601,12 @@ function finishClass(type, flexId, studentId, time) {
     var hasHoursS = stu.hoursRemaining != null && stu.hoursRemaining !== '';
     if (hasHoursS) {
       deductHours(stu, 1);
-      logHours({ studentId: stu.id, name: stu.name, type: 'consume', delta: -1, after: stu.hoursRemaining, note: '完成课程扣课', time: time });
+      logHours({ studentId: stu.id, name: stu.name, type: 'consume', delta: -1, after: stu.hoursRemaining, note: '完成课程扣课', date: todayStr, time: time });
       msg += '，「' + stu.name + '」剩余 ' + stu.hoursRemaining + ' 节课时' + (hourGroupOf(stu) ? '（关联共用）' : '');
       if (stu.hoursRemaining <= 2) msg += '，记得提醒续费哦';
     } else {
       /* 未设课时也登记一条扣课流水，避免"上过的课凭空消失" */
-      logHours({ studentId: stu.id, name: stu.name, type: 'consume', delta: -1, after: null, note: '完成课程扣课', time: time });
+      logHours({ studentId: stu.id, name: stu.name, type: 'consume', delta: -1, after: null, note: '完成课程扣课', date: todayStr, time: time });
       msg += '，已登记为扣课（' + stu.name + ' 尚未设置剩余课时，请尽快续费）';
     }
   }
