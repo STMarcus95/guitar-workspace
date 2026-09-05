@@ -1,9 +1,9 @@
 /* 吉他教学工作台 PWA Service Worker
  * 缓存当前 HTML 与图标资源，支持离线打开。
  * 缓存策略：导航请求 cache-first（秒开）+ 后台静默更新；其余资源 network-first。
- * 缓存版本：与下方 CACHE_NAME 一致（v135）
+ * 缓存版本：与下方 CACHE_NAME 一致（v136）
  */
-var CACHE_NAME = 'guitar-workspace-v135';
+var CACHE_NAME = 'guitar-workspace-v136';
 var ASSETS_TO_CACHE = [
   './',
   './index.html',
