@@ -2076,12 +2076,12 @@
   .avatar-edit-row .avatar { width: 60px; height: 60px; font-size: 25px; object-fit: cover; }
   .avatar-edit-row .btn-ghost { min-height: 40px; padding: 0 12px; font-size: 12px; }
 
-  /* 倒计时徽章 */
-  .cd-chip { font-size: 12px; font-weight: 700; border-radius: 4px; padding: 0 5px; display: inline-block; line-height: 1.55; white-space: nowrap; }
+  /* 倒计时徽章（v126：缩小字号/字重，弱化脉冲，整体不抢眼） */
+  .cd-chip { font-size: 10.5px; font-weight: 500; border-radius: 4px; padding: 0 4px; display: inline-block; line-height: 1.5; white-space: nowrap; opacity: .82; }
   .cd-ok { background: #efe7da; color: var(--wood-dark); }
   .cd-soon {
     background: var(--red); color: #fff;
-    animation: cdPulse 1.6s ease-in-out infinite;
+    animation: cdPulse 2.2s ease-in-out infinite;
   }
   .cd-now { background: var(--green); color: #fff; }
   .cd-past { color: var(--text-light); }
@@ -2089,7 +2089,7 @@
   .r-item.soon-item { border-color: var(--red); background: var(--red-light); }
   @keyframes cdPulse {
     0%, 100% { opacity: 1; }
-    50% { opacity: .55; }
+    50% { opacity: .82; }
   }
 
   /* toast */
@@ -2181,7 +2181,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v125</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v126</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
