@@ -3,7 +3,7 @@
  * 缓存策略：导航请求 cache-first（秒开）+ 后台静默更新；其余资源 network-first。
  * 缓存版本：与下方 CACHE_NAME 一致（v130）
  */
-var CACHE_NAME = 'guitar-workspace-v130';
+var CACHE_NAME = 'guitar-workspace-v131';
 var ASSETS_TO_CACHE = [
   './',
   './index.html',
