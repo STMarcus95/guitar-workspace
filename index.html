@@ -2184,7 +2184,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v131</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v132</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -5283,6 +5283,16 @@ function renderSchedule() {
   document.getElementById('weekGrid').innerHTML = html;
 }
 
+/* 学员列表分组用的「有效上课地点」：学生自己设了就用学生的；学生没设但其档案来自学员管理 person，
+   则回退到 person 的地点。这样自动建档的学员（如尹澔）不会落到「未设置地点」。 */
+function studentEffectiveLocation(s) {
+  if (s.locationId) return s.locationId;
+  if (s.personId) {
+    var p = getPerson(s.personId);
+    if (p && p.locationId) return p.locationId;
+  }
+  return '';
+}
 function renderStudents() {
   var kw = (document.getElementById('searchInput').value || '').trim().toLowerCase();
   var list = state.students.filter(function (s) {
@@ -5299,7 +5309,7 @@ function renderStudents() {
     var groups = [], gmap = {};
     if (kw) {
       list.forEach(function (s) {
-        var key = s.locationId || '';
+        var key = studentEffectiveLocation(s);
         if (!(key in gmap)) { gmap[key] = { locId: key, items: [] }; groups.push(gmap[key]); }
         gmap[key].items.push(s);
       });
@@ -5309,7 +5319,7 @@ function renderStudents() {
         groups.push(gmap[loc.id]);
       });
       list.forEach(function (s) {
-        var key = s.locationId || '';
+        var key = studentEffectiveLocation(s);
         if (!(key in gmap)) { gmap[key] = { locId: key, items: [] }; groups.push(gmap[key]); }
         gmap[key].items.push(s);
       });
@@ -7055,7 +7065,7 @@ function ensurePersonStudent(p) {
   var stu = {
     id: uid(), name: p.name || '', contact: p.contact || '', note: '', mode: 'flex',
     hoursRemaining: (p.hoursRemaining == null || p.hoursRemaining === '') ? null : p.hoursRemaining,
-    locationId: '', avatar: p.avatar || '', birthday: p.birthday || '',
+    locationId: p.locationId || '', avatar: p.avatar || '', birthday: p.birthday || '',
     members: [], personId: p.id, createdAt: Date.now()
   };
   state.students.push(stu);
