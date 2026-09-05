@@ -1,9 +1,9 @@
 /* 吉他教学工作台 PWA Service Worker
  * 缓存当前 HTML 与图标资源，支持离线打开。
- * 缓存策略：network-first（优先网络，离线 fallback 缓存）
- * 缓存版本：与下方 CACHE_NAME 一致（v122）
+ * 缓存策略：导航请求 cache-first（秒开）+ 后台静默更新；其余资源 network-first。
+ * 缓存版本：与下方 CACHE_NAME 一致（v124）
  */
-var CACHE_NAME = 'guitar-workspace-v122';
+var CACHE_NAME = 'guitar-workspace-v124';
 var ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -52,7 +52,10 @@ self.addEventListener('activate', function (event) {
   );
 });
 
-/* network-first：先尝试网络（强制绕过 HTTP 缓存拿最新版），成功则更新缓存；失败则返回缓存 */
+/* 取值策略：
+ *  - 导航请求（打开 App 的 HTML）：cache-first + 后台静默更新 —— 重开时先秒出缓存页，
+ *    不再因 network-first + cache:'reload' 每次都等网络往返而卡顿；新版本在后台拉取，下次打开生效。
+ *  - 其余同源 GET 资源：沿用 network-first（联网拿最新，失败回缓存）。 */
 self.addEventListener('fetch', function (event) {
   var req = event.request;
   /* 只处理 GET */
@@ -61,8 +64,26 @@ self.addEventListener('fetch', function (event) {
   var url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
 
+  /* 导航请求：缓存优先，后台更新 */
+  if (req.mode === 'navigate') {
+    event.respondWith(
+      caches.match(req).then(function (cached) {
+        var fallback = cached || caches.match('./index.html');
+        var network = fetch(req, { cache: 'reload' }).then(function (resp) {
+          if (resp && resp.status === 200 && resp.type === 'basic') {
+            caches.open(CACHE_NAME).then(function (cache) { cache.put(req, resp.clone()); });
+          }
+          return resp;
+        }).catch(function () { return fallback || caches.match(req); });
+        return fallback || network;
+      })
+    );
+    return;
+  }
+
+  /* 其余资源：network-first */
   event.respondWith(
-    /* cache:'reload' 强制绕过浏览器 HTTP 缓存，直接打网络拿最新版本（解决 PWA 缓存导致的"看到的还是旧版"问题） */
+    /* cache:'reload' 强制绕过浏览器 HTTP 缓存，直接打网络拿最新版本 */
     fetch(req, { cache: 'reload' }).then(function (resp) {
       /* 成功：克隆响应并存入缓存 */
       if (resp && resp.status === 200 && resp.type === 'basic') {
@@ -76,8 +97,6 @@ self.addEventListener('fetch', function (event) {
       /* 网络失败：返回缓存 */
       return caches.match(req).then(function (cached) {
         if (cached) return cached;
-        /* 缓存也 miss 时，对导航请求返回根 index.html */
-        if (req.mode === 'navigate') return caches.match('./index.html');
         return new Response('', { status: 504, statusText: 'Offline' });
       });
     })
