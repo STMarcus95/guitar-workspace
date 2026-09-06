@@ -1905,6 +1905,15 @@
     overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
   }
   @media (min-width: 600px) { .modal { border-radius: 12px; } }
+  /* 添加学生字段较多：手机上使用接近全屏的可滚动抽屉，给底部固定操作栏预留空间，
+     防止“小组成员 / 备注”被保存按钮遮住，看起来像页面少了一截。 */
+  #stuModal .modal { max-height: 100dvh; padding-bottom: calc(18px + env(safe-area-inset-bottom)); }
+  #stuModal .modal-ops { box-shadow: 0 -8px 16px var(--glass-bg-strong); }
+  @media (max-width: 480px) {
+    #stuModal .modal { padding: 16px 16px calc(16px + env(safe-area-inset-bottom)); }
+    #stuModal .form-item { margin-bottom: 12px; }
+    #stuModal .modal-ops { margin-top: 12px; }
+  }
   .modal h3 { font-size: 15px; margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
   /* 轻量卡片弹窗（续费等动态创建） */
   .modal-card {
@@ -2078,7 +2087,9 @@
   }
   .radio-group input { display: none; }
   .radio-group label.sel { border-color: var(--orange); background: rgba(253,240,227,0.7); color: var(--orange-deep); font-weight: 700; }
-  .modal-ops { display: flex; gap: 10px; margin-top: 16px; position: sticky; bottom: 0; background: var(--glass-bg-strong); padding-top: 12px; padding-bottom: 2px; z-index: 3; }
+  /* v146：底部操作栏改不透明实底（v142 把全局毛玻璃降到 blur(6px) 后，半透明底会让滚动到下方的
+     字段文字透上来，"添加学生"页看起来像排版错乱）。手法同 v142 的 bottom-nav/stu-toolbar。 */
+  .modal-ops { display: flex; gap: 10px; margin-top: 16px; position: sticky; bottom: 0; background: linear-gradient(var(--glass-bg-strong), var(--glass-bg-strong)), var(--bg); padding-top: 12px; padding-bottom: 2px; z-index: 3; }
   .modal-ops button { flex: 1; min-height: 46px; border-radius: 12px; border: none; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
   .m-cancel { background: rgba(247,241,232,0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); color: var(--text-light); }
   .m-ok { background: var(--orange); color: #fff; }
@@ -2186,7 +2197,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v145</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v146</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -4182,6 +4193,67 @@ function removeConsumeLog(match) {
    修复策略：① 仍在档的学员，给其流水补上 personId，往后即使被删也能在学员管理看到；
    ② 已不在档的学员，按「姓名」归并到同名且唯一的学员管理档案（同名多人则不动，避免串档）。
    只在确有改动时 saveData，避免每次开屏都写盘。 */
+/* v146：旧版单人课扣课曾只更新 student.hoursRemaining，未同步其 person 课时池（反向：学员管理侧
+   续费/小组点名也曾只动 person、不动 student）。同一人同时出现在小组和单人课时，两边就显示不同余额。
+   修复原则：只用流水证据，绝不猜数——
+   ① 找到某一侧"最近一条流水 after == 该侧当前余额"（说明该侧数字与其流水一致）；
+   ② 且证据点之前另一侧没有任何流水（否则证据值里已缺一块历史，无法判定真值，保守跳过）；
+   ③ 目标值 = 证据侧当前余额 + 证据点之后另一侧流水的 delta 合计（另一侧流水一向即时生效）。 */
+function repairSoloPersonHourMismatch() {
+  if (!Array.isArray(state.students) || !Array.isArray(state.hoursLog)) return false;
+  var changed = false;
+  state.students.forEach(function (s) {
+    if (!s || !s.personId || membersOf(s).length) return;
+    var p = getPerson(s.personId);
+    if (!p || s.hoursRemaining == null || s.hoursRemaining === '' || p.hoursRemaining == null || p.hoursRemaining === '') return;
+    if (+s.hoursRemaining === +p.hoursRemaining) return;
+    /* 单人课场景流水：studentId 命中即可；v131 起单人课流水也带 personId，不能因此漏判
+       （李木兰 9/6 单人课扣课流水就带 personId，旧条件 h.personId 非空即跳过导致修不到） */
+    var soloLogs = [], personLogs = [];
+    (state.hoursLog || []).forEach(function (h) {
+      if (!h) return;
+      var isSolo = (h.studentId === s.id) && (!h.personId || h.personId === s.personId);
+      if (isSolo) { soloLogs.push(h); return; }
+      if (h.personId === p.id) personLogs.push(h);
+    });
+    function latestWithAfter(arr) {
+      var latest = null;
+      arr.forEach(function (h) {
+        if (h.after == null || h.after === '') return;
+        if (!latest || (h.createdAt || 0) >= (latest.createdAt || 0)) latest = h;
+      });
+      return latest;
+    }
+    function hasLogBefore(arr, ts) {
+      for (var i = 0; i < arr.length; i++) if ((arr[i].createdAt || 0) < ts) return true;
+      return false;
+    }
+    function deltaAfter(arr, ts) {
+      var d = 0;
+      arr.forEach(function (h) { if ((h.createdAt || 0) > ts) d += (h.delta || 0); });
+      return d;
+    }
+    /* 方向一：单人课流水佐证 → 回补 person（李木兰案：9/6 流水 after=2==student 余额，person 无更早流水 → person=2） */
+    var ls = latestWithAfter(soloLogs);
+    if (ls && +ls.after === +s.hoursRemaining && !hasLogBefore(personLogs, ls.createdAt || 0)) {
+      var targetP = Math.max(0, (+s.hoursRemaining) + deltaAfter(personLogs, ls.createdAt || 0));
+      if (+p.hoursRemaining !== targetP) { p.hoursRemaining = targetP; changed = true; }
+      return;
+    }
+    /* 方向二：person 侧流水佐证 → 回补 student（学员管理续费/小组点名之后，单人课余额落后的情形） */
+    var lp = latestWithAfter(personLogs);
+    if (lp && +lp.after === +p.hoursRemaining && !hasLogBefore(soloLogs, lp.createdAt || 0)) {
+      var targetS = Math.max(0, (+p.hoursRemaining) + deltaAfter(soloLogs, lp.createdAt || 0));
+      if (+s.hoursRemaining !== targetS) { s.hoursRemaining = targetS; changed = true; }
+    }
+  });
+  return changed;
+}
+/* v146：旧版 member manualDone 只有"补记事件"，无法证明当时是否已经扣过课时。
+   不根据它自动补写 consume 流水或递减 person 余额；明细层会直接展示这些历史事件。 */
+function repairLegacyMemberManualHours() {
+  return false;
+}
 function repairOrphanHours() {
   if (!Array.isArray(state.hoursLog)) return;
   var stuIds = {};
@@ -4208,6 +4280,9 @@ function repairOrphanHours() {
   });
   /* 直接落盘主数据，不调用 saveData（saveData 会触发自动备份并解析备份大对象，
      在开屏 loadData 阶段做会破坏 v124 的性能优化） */
+  /* 先归并旧流水归属；单人流水有明确证据时才修复余额分叉。
+     旧 manualDone 仅作为历史展示，不凭空补扣课时。 */
+  if (repairSoloPersonHourMismatch()) changed = true;
   if (changed) { try { writeRaw(JSON.stringify(state)); } catch (e) {} }
 }
 function removeHoursLogById(id) {
@@ -4502,8 +4577,11 @@ function locHtml(locId) {
   return '<span class="loc-tag"><span class="loc-dot" style="background:' + loc.color + '"></span>' + escapeHtml(loc.name) + '</span>';
 }
 function hoursBadge(stu) {
-  if (stu.hoursRemaining == null || stu.hoursRemaining === '') return '';
-  var h = stu.hoursRemaining;
+  /* v146：单人课优先取 person.hoursRemaining，避免与学员管理/小组成员课时池显示不一致 */
+  var h = (stu.personId && getPerson(stu.personId) && getPerson(stu.personId).hoursRemaining != null && getPerson(stu.personId).hoursRemaining !== '')
+    ? getPerson(stu.personId).hoursRemaining
+    : stu.hoursRemaining;
+  if (h == null || h === '') return '';
   var cls = h <= 2 ? 'hours-low' : (h <= 4 ? 'hours-mid' : 'hours-ok');
   return '<span class="hours-badge ' + cls + '">剩 ' + h + ' 节</span>';
 }
@@ -4863,6 +4941,18 @@ function memberPerson(stu, memberId) {
   }
   return null;
 }
+/* v146：按 memberId 全表反查其 personId（明细跨场景合并用：小组里的成员补记要归到同 person 的单人课视角） */
+function memberPersonIdByMid(memberId) {
+  if (!memberId) return '';
+  for (var i = 0; i < (state.students || []).length; i++) {
+    var ms = state.students[i].members;
+    if (!Array.isArray(ms)) continue;
+    for (var j = 0; j < ms.length; j++) {
+      if (ms[j] && ms[j].id === memberId) return ms[j].personId || '';
+    }
+  }
+  return '';
+}
 
 /* ===== 小组成员（enriched view model：合并 person 数据） ===== */
 function membersOf(stu) {
@@ -4953,7 +5043,10 @@ function extraPersonOf(item) {
 function deductExtraAttendee(item, dateStr, time) {
   var p = extraPersonOf(item);
   if (!p) return null;
-  if (p.hoursRemaining != null && p.hoursRemaining !== '' && p.hoursRemaining > 0) p.hoursRemaining--;
+  if (p.hoursRemaining != null && p.hoursRemaining !== '' && p.hoursRemaining > 0) {
+    p.hoursRemaining--;
+    mirrorPersonHoursToStudents(p); /* v146：同步名下单人课余额 */
+  }
   logHours({
     personId: p.id, name: p.name, type: 'consume', delta: -1,
     after: p.hoursRemaining, note: EXTRA_CONSUME_NOTE, date: dateStr, time: time || ''
@@ -4966,7 +5059,10 @@ function refundExtraAttendees(list, dateStr, time) {
     var p = extraPersonOf(it);
     if (!p) return;
     if (findConsumeLogIndex({ personId: p.id, date: dateStr, time: time, note: EXTRA_CONSUME_NOTE }) < 0) return;
-    if (p.hoursRemaining != null && p.hoursRemaining !== '') p.hoursRemaining++;
+    if (p.hoursRemaining != null && p.hoursRemaining !== '') {
+      p.hoursRemaining++;
+      mirrorPersonHoursToStudents(p); /* v146：同步名下单人课余额 */
+    }
     removeConsumeLog({ personId: p.id, date: dateStr, time: time, note: EXTRA_CONSUME_NOTE });
     logHours({
       personId: p.id, name: p.name, type: 'adjust', delta: +1,
@@ -5045,14 +5141,32 @@ function syncHourGroup(gid) {
     if (s.hoursRemaining != null && s.hoursRemaining !== '') s.hoursRemaining = val;
   });
 }
-/* 扣课时：关联组内所有成员一起扣 */
+/* 扣课时：关联组内所有成员一起扣；v146 同步 person.hoursRemaining，避免单人课扣课与学员管理/小组成员课时池不同步 */
 function deductHours(stu, n) {
   var gid = hourGroupOf(stu);
   var targets = gid ? hourGroupMembers(gid) : [stu];
   targets.forEach(function (s) {
     if (s.hoursRemaining != null && s.hoursRemaining !== '') {
       s.hoursRemaining = Math.max(0, s.hoursRemaining - n);
+      if (s.personId) {
+        var p = getPerson(s.personId);
+        if (p && p.hoursRemaining != null && p.hoursRemaining !== '') {
+          p.hoursRemaining = Math.max(0, p.hoursRemaining - n);
+        }
+      }
     }
+  });
+}
+/* v146：person 课时变动后，同步到其名下的单人课 student——同一个人只能有一个余额，
+   否则小组/学员管理改了 person，单人课档案还停在旧数（李木兰 3 节 vs 2 节就是这么分叉的）。
+   只覆盖已设置课时的 student；未设置的保持"未设置"，避免被凭空变成按课时计。 */
+function mirrorPersonHoursToStudents(p) {
+  if (!p || !p.id) return;
+  (state.students || []).forEach(function (s) {
+    if (!s || s.personId !== p.id) return;
+    if (Array.isArray(s.members) && s.members.length) return; /* 小组课不按 student 计课时 */
+    if (s.hoursRemaining == null || s.hoursRemaining === '') return;
+    s.hoursRemaining = p.hoursRemaining;
   });
 }
 /* 某成员在某天是否请假 */
@@ -7118,6 +7232,24 @@ function buildPersonHoursDetailModel(personId, opt) {
       recs.push({ date: h.date, time: h.time || '', source: 'log', id: h.id || '', note: h.note || (h.type === 'charge' ? '续费' : '调整'), originId: '', studentId: '', memberId: '', personId: personId, delta: h.delta || 0, logType: h.type, after: (h.after == null) ? '' : h.after });
     }
   });
+  /* v146：并入补记历史（成员补记按 memberId→person 匹配，单人课补记按 studentId 匹配），
+     流水已覆盖的以流水为准——学员管理侧的明细也要看到小组里补记的课（李木兰 8 月记录） */
+  var coveredByLog = {};
+  recs.forEach(function (r) {
+    if (r.logType !== 'consume') return;
+    coveredByLog[(r.date || '') + '|' + (r.time || '')] = 1;
+    if (!r.time) coveredByLog[(r.date || '') + '|'] = 1;
+  });
+  var myMemberIds = {};
+  (personGroups(personId) || []).forEach(function (g) {
+    (g.members || []).forEach(function (m) { if (m && m.personId === personId && m.id) myMemberIds[m.id] = 1; });
+  });
+  (state.manualDone || []).forEach(function (l) {
+    var mine = (l.memberId && myMemberIds[l.memberId]) || (!l.memberId && sids.indexOf(l.studentId) >= 0);
+    if (!mine) return;
+    if (coveredByLog[(l.date || '') + '|' + (l.time || '')] || coveredByLog[(l.date || '') + '|']) return;
+    recs.push({ date: l.date, time: l.time || '', source: 'manual', id: l.id || '', note: l.note || '补记上课', originId: '', studentId: '', memberId: '', personId: personId, delta: -1, logType: 'consume', after: '' });
+  });
   if (opt && (opt.from || opt.to)) {
     recs = recs.filter(function (r) {
       if (opt.from && String(r.date) < opt.from) return false;
@@ -7163,13 +7295,15 @@ function rechargePoolEntry(key) {
     showToast('已为「' + (p.name || '') + '」续费 ' + n + ' 节，剩余 ' + (p.hoursRemaining == null ? '未设置' : p.hoursRemaining + ' 节'));
   });
 }
-/* 学员管理里直接增减课时（未入组成员用；入组成员走 adjustMemberHours 保证与小组同步） */
+/* 学员管理里直接增减课时（未入组成员用；入组成员走 adjustMemberHours 保证与小组同步）；v146 同步该 person 名下的单人课 student.hoursRemaining */
 function poolAdjustHours(personId, n) {
   var p = getPerson(personId);
   if (!p) return;
   var cur = (p.hoursRemaining == null || p.hoursRemaining === '') ? 0 : p.hoursRemaining;
   var next = Math.max(0, cur + n);
   p.hoursRemaining = next;
+  /* v146：同步该 person 名下的单人课 */
+  mirrorPersonHoursToStudents(p);
   logHours({
     personId: p.id, name: p.name, type: n > 0 ? 'charge' : 'adjust',
     delta: n, after: next, note: n > 0 ? '续费' : '扣减', date: fmtDate(new Date())
@@ -7180,12 +7314,30 @@ function poolAdjustHours(personId, n) {
 function poolHoursDetail(key) {
   var t = poolHoursTarget(key);
   if (!t) { showToast('学员不存在'); return; }
-  showHoursTextModal({ studentId: t.studentId, memberId: t.memberId, personId: t.studentId ? '' : t.personId, from: '', to: '' });
+  if (t.studentId && t.memberId) {
+    showHoursTextModal({ studentId: t.studentId, memberId: t.memberId, from: '', to: '' });
+    return;
+  }
+  if (t.studentId) {
+    showHoursTextModal({ studentId: t.studentId, from: '', to: '' });
+    return;
+  }
+  var model = buildPersonHoursDetailModel(t.personId, { from: '', to: '' });
+  if (!model) { showToast('学员不存在'); return; }
+  showHoursTextModal({ personId: t.personId, from: '', to: '' });
 }
 function poolHoursDetailImage(key) {
   var t = poolHoursTarget(key);
   if (!t) { showToast('学员不存在'); return; }
-  showHoursImageModal({ studentId: t.studentId, memberId: t.memberId, personId: t.studentId ? '' : t.personId, from: '', to: '' });
+  if (t.studentId && t.memberId) {
+    showHoursImageModal({ studentId: t.studentId, memberId: t.memberId, from: '', to: '' });
+    return;
+  }
+  if (t.studentId) {
+    showHoursImageModal({ studentId: t.studentId, from: '', to: '' });
+    return;
+  }
+  showHoursImageModal({ personId: t.personId, from: '', to: '' });
 }
 /* 学员管理：补记上课入口。person 在组→定位到小组的 studentId+memberId；
    未入组 person→建立/取单人课档案；solo student→直接用其 id。 */
@@ -7496,7 +7648,12 @@ function openStudentModal(id) {
     document.getElementById('stuNote').value = s.note || '';
     setMode(s.mode);
     renderSlotEditor(s.mode === 'fixed' ? fixedSlotsOf(s) : []);
-    document.getElementById('stuHours').value = (s.hoursRemaining == null || s.hoursRemaining === '') ? '' : s.hoursRemaining;
+    /* v146：单人课已挂学员管理档案时，课时字段显示 person 共享余额（唯一账本），
+       否则编辑别的字段后点保存，会把 person 余额覆盖回 student 里的旧数 */
+    var editPerson = s.personId ? getPerson(s.personId) : null;
+    var editHours = (editPerson && editPerson.hoursRemaining != null && editPerson.hoursRemaining !== '')
+      ? editPerson.hoursRemaining : s.hoursRemaining;
+    document.getElementById('stuHours').value = (editHours == null || editHours === '') ? '' : editHours;
     document.getElementById('stuHourGroup').value = hourGroupOf(s);
     selLoc = s.locationId || '';
     pendingAvatar = s.avatar || '';
@@ -7556,6 +7713,20 @@ function saveStudent() {
      新增的单人课学员在 collectEditorMembers 里迁到学员管理建档，课时/头像一并并入。 */
   data.members = collectEditorMembers();
   if (data.members.length) data.hoursRemaining = null; /* 小组按成员计课时 */
+  function syncSoloPersonHours(saved) {
+    if (!saved || !saved.personId) return;
+    var p = getPerson(saved.personId);
+    if (!p) return;
+    /* 单人课已挂到学员管理档案时，person 是唯一课时账本；编辑保存时同步，
+       避免重新编辑资料把已扣后的余额覆盖回旧的 student.hoursRemaining。 */
+    if (data.members.length) return;
+    if (data.hoursRemaining != null && data.hoursRemaining !== '') {
+      p.hoursRemaining = data.hoursRemaining;
+      saved.hoursRemaining = data.hoursRemaining;
+    } else if (p.hoursRemaining != null && p.hoursRemaining !== '') {
+      saved.hoursRemaining = p.hoursRemaining;
+    }
+  }
   function finalizeSave() {
     syncHourGroup(data.hourGroupId);
     saveData(); closeModal('stuModal'); renderAll();
@@ -7568,11 +7739,16 @@ function saveStudent() {
   function applyData() {
     if (id) {
       var s = getStudent(id);
-      if (s) { Object.keys(data).forEach(function (k) { s[k] = data[k]; }); s.isSample = false; }
+      if (s) {
+        Object.keys(data).forEach(function (k) { s[k] = data[k]; });
+        s.isSample = false;
+        syncSoloPersonHours(s);
+      }
       showToast('已保存 ' + name + ' 的信息');
     } else {
       data.id = uid(); data.createdAt = Date.now();
       state.students.push(data);
+      syncSoloPersonHours(data);
       showToast('已添加学生 ' + name);
     }
     finalizeSave();
@@ -7706,8 +7882,13 @@ function renderStudentDetail() {
   var noteRow = s.note
     ? '<div class="ds-info-row"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9c6644" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>备注：' + escapeHtml(s.note) + '</div>' : '';
   var leaveRow = '<div class="ds-info-row"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9c6644" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>累计请假：' + leaveCountOf(s.id) + ' 次（请假不扣课时）</div>';
-  var low = (s.hoursRemaining != null && s.hoursRemaining !== '' && s.hoursRemaining <= 2);
-  var hoursVal = (s.hoursRemaining == null || s.hoursRemaining === '') ? null : s.hoursRemaining;
+  /* v146：单人课优先取 person.hoursRemaining，保持与学员管理/小组成员课时池一致 */
+  var personH = s.personId ? getPerson(s.personId) : null;
+  var effectiveHours = (personH && personH.hoursRemaining != null && personH.hoursRemaining !== '') ? personH.hoursRemaining : s.hoursRemaining;
+  /* 兼容历史：部分小组成员对象仍带旧的 hours 字段；membersOf 已优先取 person，
+     这里再明确按 person 课时显示，避免小组页残留旧快照数值。 */
+  var low = (effectiveHours != null && effectiveHours !== '' && effectiveHours <= 2);
+  var hoursVal = (effectiveHours == null || effectiveHours === '') ? null : effectiveHours;
   /* 续费汇总（单人课：按 studentId 查 hoursLog.charge） */
   var rs = rechargeSummary({ stuId: s.id });
   var renewTipHtml = rs.count
@@ -7872,8 +8053,15 @@ function adjustHours(id, delta) {
   var gid = hourGroupOf(s);
   var targets = gid ? hourGroupMembers(gid) : [s];
   targets.forEach(function (x) { x.hoursRemaining = next; });
+  /* v146：同步 person 课时池 */
+  if (s.personId) {
+    var p = getPerson(s.personId);
+    if (p && p.hoursRemaining != null && p.hoursRemaining !== '') {
+      p.hoursRemaining = next;
+    }
+  }
   var isRenew = delta > 0;
-  logHours({ studentId: s.id, name: s.name, type: isRenew ? 'charge' : 'adjust', delta: next - cur, after: next, note: isRenew ? '续费' : '手动' });
+  logHours({ studentId: s.id, personId: s.personId || '', name: s.name, type: isRenew ? 'charge' : 'adjust', delta: next - cur, after: next, note: isRenew ? '续费' : '手动' });
   saveData(); renderAll(); renderStudentDetail();
   var linkTip = gid ? '（关联共用）' : '';
   if (isRenew) showToast(s.name + ' 续费 ' + delta + ' 节，剩余 ' + next + ' 节' + linkTip);
@@ -7889,6 +8077,7 @@ function adjustMemberHours(studentId, memberId, delta) {
   var cur = (p.hoursRemaining == null || p.hoursRemaining === '') ? 0 : p.hoursRemaining;
   var next = Math.max(0, cur + delta);
   p.hoursRemaining = next;
+  mirrorPersonHoursToStudents(p); /* v146：同步该 person 名下的单人课余额 */
   var isRenew = delta > 0;
   logHours({ personId: p.id, studentId: s.id, name: p.name, type: isRenew ? 'charge' : 'adjust', delta: next - cur, after: next, note: isRenew ? '续费' : '手动' });
   saveData(); renderAll(); renderStudentDetail();
@@ -8102,15 +8291,58 @@ function hoursDetailRecords(studentId, memberId) {
       pushRec(l.date, l.time, 'manual', l.id, l.note, 'manual', '', -1, 'consume', '');
     });
   } else {
-    /* personId 命中：先补 group member 的 manualDone（按 memberId）；
-       再补「从学员管理导入、带 personId 的单人课学员」的补记——这类补记的 hoursLog 不带 personId，
-       只能按 studentId 维度匹配，否则拆成单人课后补记记录会看不见（含时间丢失）。 */
+    /* personId 命中（v146 扩展为"同人全场景"）：
+       流水已在路径A按 person 拉全；这里补两块流水之外的历史——
+       ① 该 person 名下所有单人课 student 的完成标记（fixedDone / flexibleClasses），
+          流水已覆盖的跳过：解决"旧完成没写流水时这节课在档案里凭空消失"；
+       ② manualDone 补记（本视角上下文的 + 同 person 跨上下文的：小组里的成员补记 ↔ 单人课补记），
+          流水已覆盖的以流水为准：解决"小组里补记的 8 月课，单人课档案明细里看不见"（李木兰案）。 */
+    var coveredByLog = {};
+    (state.hoursLog || []).forEach(function (h) {
+      if (!h || h.type !== 'consume' || h.personId !== personId) return;
+      coveredByLog[(h.date || '') + '|' + (h.time || '')] = 1;
+      if (!h.time) coveredByLog[(h.date || '') + '|'] = 1;
+    });
+    function isCovered(d, t) {
+      t = t || '';
+      return !!(coveredByLog[d + '|' + t] || coveredByLog[d + '|']);
+    }
+    /* 该 person 名下的单人课 student（当前 s 也在这个集合里，统一处理） */
+    var soloSidMap = {};
+    personStudentIds(personId).forEach(function (sid) {
+      var st = getStudent(sid);
+      if (st && !isGroup(st)) soloSidMap[sid] = 1;
+    });
+    /* ① 单人课完成标记 */
+    Object.keys(state.fixedDone || {}).forEach(function (d) {
+      (state.fixedDone[d] || []).forEach(function (k) {
+        var sid = k.split('|')[0];
+        if (!soloSidMap[sid]) return;
+        var t = k.split('|')[1] || '';
+        if (isCovered(d, t)) return;
+        pushRec(d, t, 'auto', '', '', 'fixed', d + '|' + t, -1, 'consume', '');
+      });
+    });
+    (state.flexibleClasses || []).forEach(function (c) {
+      if (!soloSidMap[c.studentId] || c.status !== 'done') return;
+      if (isCovered(c.date, c.time)) return;
+      pushRec(c.date, c.time || '', 'auto', c.id, '', 'flexible', '', -1, 'consume', '');
+    });
+    /* ② manualDone 补记 */
     (state.manualDone || []).forEach(function (l) {
+      var include = false;
       if (memberId) {
-        if (l.memberId === memberId) pushRec(l.date, l.time, 'manual', l.id, l.note, 'manual', '', -1, 'consume', '');
-      } else if (l.studentId === s.id && !l.memberId) {
-        pushRec(l.date, l.time, 'manual', l.id, l.note, 'manual', '', -1, 'consume', '');
+        /* 成员视角：自己的成员补记；或同 person 名下单人课的补记 */
+        if (l.memberId === memberId) include = true;
+        else if (!l.memberId && soloSidMap[l.studentId]) include = true;
+      } else {
+        /* 单人课视角：同 person 单人课的补记；或同 person 小组成员的补记 */
+        if (!l.memberId && soloSidMap[l.studentId]) include = true;
+        else if (l.memberId && memberPersonIdByMid(l.memberId) === personId) include = true;
       }
+      if (!include) return;
+      if (isCovered(l.date, l.time)) return;
+      pushRec(l.date, l.time, 'manual', l.id, l.note, 'manual', '', -1, 'consume', '');
     });
   }
   /* 合并补记重复：同 date|time 的"补记上课扣课" auto 记录与 manual 记录合并为一条 manual，
@@ -8171,6 +8403,11 @@ function buildHoursDetailText(model) {
   return lines.join('\n');
 }
 function copyHoursDetail(studentId, memberId, from, to) {
+  /* 允许学员管理档案直接按 personId 复制明细 */
+  if (studentId && !getStudent(studentId) && getPerson(studentId)) {
+    showHoursTextModal({ personId: studentId, from: from || '', to: to || '' });
+    return;
+  }
   showHoursTextModal({ studentId: studentId, memberId: memberId, from: from || '', to: to || '' });
 }
 /* 课时明细文本弹窗：支持与图片导出同样的自定义时间范围筛选，再一键复制 */
@@ -8257,10 +8494,18 @@ function buildHoursDetailModel(studentId, memberId, opt) {
     var m = getMember(s, memberId);
     if (!m) return null;
     name = m.name;
-    hours = (m.hours == null || m.hours === '') ? '未设置' : (m.hours + ' 节');
+    var memberPerson = m.personId ? getPerson(m.personId) : null;
+    var memberHours = memberPerson && memberPerson.hoursRemaining != null && memberPerson.hoursRemaining !== ''
+      ? memberPerson.hoursRemaining : m.hours;
+    hours = (memberHours == null || memberHours === '') ? '未设置' : (memberHours + ' 节');
     leaveCnt = memberLeaveCount(studentId, memberId);
   } else {
-    hours = (s.hoursRemaining == null || s.hoursRemaining === '') ? '未设置' : (s.hoursRemaining + ' 节');
+    /* 单人课已关联学员档案时，导出/复制明细也使用 person 的共享余额，
+       与档案页、学员管理页保持一致。 */
+    var linkedPerson = s.personId ? getPerson(s.personId) : null;
+    var effectiveHours = linkedPerson && linkedPerson.hoursRemaining != null && linkedPerson.hoursRemaining !== ''
+      ? linkedPerson.hoursRemaining : s.hoursRemaining;
+    hours = (effectiveHours == null || effectiveHours === '') ? '未设置' : (effectiveHours + ' 节');
     leaveCnt = leaveCountOf(s.id);
   }
   var now = new Date();
@@ -8571,6 +8816,7 @@ function saveManualDone() {
         var hasHours = gp.hoursRemaining != null && gp.hoursRemaining !== '';
         if (hasHours) {
           gp.hoursRemaining = Math.max(0, gp.hoursRemaining - 1);
+          mirrorPersonHoursToStudents(gp); /* v146：同步名下单人课余额 */
         }
         logHours({ personId: gp.id, studentId: sid, memberId: mid, name: gp.name, type: 'consume', delta: -1, after: hasHours ? gp.hoursRemaining : null, note: '补记上课扣课', date: date, time: timeVal });
         msg += hasHours ? '，并扣减 1 节课时（剩 ' + gp.hoursRemaining + ' 节）' : '，已登记为扣课（该成员尚未设置剩余课时，登记后请尽快续费）';
@@ -8633,6 +8879,7 @@ function delManualDone(id) {
           var p = getPerson(matchedLog.personId);
           if (p && p.hoursRemaining != null && p.hoursRemaining !== '') {
             p.hoursRemaining++;
+            mirrorPersonHoursToStudents(p); /* v146：同步名下单人课余额 */
             logHours({ personId: p.id, studentId: rec.studentId, memberId: rec.memberId || '', name: p.name, type: 'adjust', delta: +1, after: p.hoursRemaining, note: '删除补记退还课时', date: rec.date });
           }
         } else {
@@ -8669,6 +8916,7 @@ function refundHoursByRec(rec) {
     if (p && p.hoursRemaining != null && p.hoursRemaining !== '') {
       var pNext = Math.max(0, p.hoursRemaining + backDelta);
       p.hoursRemaining = pNext;
+      mirrorPersonHoursToStudents(p); /* v146：同步名下单人课余额 */
       logHours({ personId: p.id, studentId: rec.studentId || '', memberId: rec.memberId || '', name: p.name, type: 'adjust', delta: backDelta, after: pNext, note: '删除课时记录退还', date: rec.date, time: rec.time || '' });
     }
   } else if (rec.studentId) {
@@ -9978,6 +10226,7 @@ function undoFinishCore(type, flexId, studentId, time, dateStr) {
       if (rcIdx >= 0) {
         if (p && p.hoursRemaining != null && p.hoursRemaining !== '' && p.hoursRemaining > 0) {
           p.hoursRemaining++;
+          mirrorPersonHoursToStudents(p); /* v146：同步名下单人课余额 */
           logHours({ personId: p.id, studentId: stu.id, memberId: m.id, name: p.name, type: 'adjust', delta: +1, after: p.hoursRemaining, note: '撤销点名（退还课时）', date: dStr, time: time });
         }
         /* 删除成员点名那条 consume 流水（未设课时时也删除占位的 delta=-1流水） */
@@ -10023,6 +10272,7 @@ function finishClassQuiet(c, todayStr) {
       var p = memberPerson(stu, m.id);
       if (p && p.hoursRemaining != null && p.hoursRemaining !== '' && p.hoursRemaining > 0) {
         p.hoursRemaining--;
+        mirrorPersonHoursToStudents(p); /* v146：同步名下单人课余额 */
         logHours({ personId: p.id, studentId: stu.id, memberId: m.id, name: p.name, type: 'consume', delta: -1, after: p.hoursRemaining, note: '点名出勤扣课', date: todayStr, time: c.time });
       } else if (p) {
         logHours({ personId: p.id, studentId: stu.id, memberId: m.id, name: p.name, type: 'consume', delta: -1, after: null, note: '点名出勤扣课', date: todayStr, time: c.time });
@@ -10040,13 +10290,19 @@ function finishClassQuiet(c, todayStr) {
   /* 本次临时参与者（自动完成也要扣，否则课上了但课时没记） */
   getExtraAttendees(c, todayStr).forEach(function (it) { deductExtraAttendee(it, todayStr, c.time); });
 }
-/* 退还课时到学员或课时共享组（与 deductHours 镜像） */
+/* 退还课时到学员或课时共享组（与 deductHours 镜像）；v146 同步 person.hoursRemaining */
 function addBackHours(stu, n) {
   var gid = hourGroupOf(stu);
   var targets = gid ? hourGroupMembers(gid) : [stu];
   targets.forEach(function (s) {
     if (s.hoursRemaining != null && s.hoursRemaining !== '') {
       s.hoursRemaining = (s.hoursRemaining || 0) + n;
+      if (s.personId) {
+        var p = getPerson(s.personId);
+        if (p && p.hoursRemaining != null && p.hoursRemaining !== '') {
+          p.hoursRemaining = (p.hoursRemaining || 0) + n;
+        }
+      }
     }
   });
 }
@@ -10127,6 +10383,7 @@ function doRollcall() {
       var p = memberPerson(stu, m.id);
       if (p && p.hoursRemaining != null && p.hoursRemaining !== '' && p.hoursRemaining > 0) {
         p.hoursRemaining--;
+        mirrorPersonHoursToStudents(p); /* v146：同步名下单人课余额 */
         logHours({ personId: p.id, studentId: stu.id, memberId: m.id, name: p.name, type: 'consume', delta: -1, after: p.hoursRemaining, note: '点名出勤扣课', date: dateStr, time: time });
       } else if (p) {
         /* 未设课时或课时为 0 的成员也要登记一条扣课流水 */
