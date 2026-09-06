@@ -2186,7 +2186,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v144</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v145</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -3426,6 +3426,34 @@ function idbSet(key, val) {
     });
   });
 }
+/* 删除某个键；列出全部键（v145 备份完整快照的清理用） */
+function idbDel(key) {
+  return idbOpen().then(function (ok) {
+    if (!ok) return false;
+    return new Promise(function (resolve) {
+      try {
+        var tx = _idbDb.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).delete(key);
+        tx.oncomplete = function () { resolve(true); };
+        tx.onerror = function () { resolve(false); };
+        tx.onabort = function () { resolve(false); };
+      } catch (e) { resolve(false); }
+    });
+  });
+}
+function idbAllKeys() {
+  return idbOpen().then(function (ok) {
+    if (!ok) return [];
+    return new Promise(function (resolve) {
+      try {
+        var tx = _idbDb.transaction(IDB_STORE, 'readonly');
+        var r = tx.objectStore(IDB_STORE).getAllKeys();
+        r.onsuccess = function () { resolve(r.result || []); };
+        r.onerror = function () { resolve([]); };
+      } catch (e) { resolve([]); }
+    });
+  });
+}
 /* 启动时探测存储能力，并用一次真实写入验证（有的环境 open 成功但写入被拒） */
 function initStore() {
   return idbOpen().then(function (ok) {
@@ -3806,6 +3834,27 @@ function autoBackupSnapshot() {
   try { return slimSnapshotText(JSON.stringify(state)); }
   catch (e) { return JSON.stringify(state); }
 }
+/* ===== v145：备份完整快照（含头像）单独存进 IndexedDB =====
+   v143 为塞进 localStorage 的 5MB 上限，把备份快照里的 base64 头像全剥掉了，
+   代价是恢复备份后头像全部丢失。v144 迁移 IndexedDB 后容量充裕（几百 MB 起），
+   这个妥协没必要留着：localStorage 里照旧只存瘦身快照（保住 5MB 配额），
+   完整快照另存 IndexedDB（bk_<时间戳>）。恢复时优先用完整快照，头像不丢；
+   IDB 里没有（旧备份 / 回退到 localStorage 模式）才用瘦身快照，行为与 v143 一致。 */
+function storeFullBackup(ts, fullRaw) {
+  if (STORE_MODE !== 'idb' || !fullRaw) return;
+  /* fire-and-forget：完整快照写失败不影响主流程，恢复时自动回退瘦身快照 */
+  idbSet('bk_' + ts, fullRaw);
+}
+function pruneFullBackups(keepTs) {
+  if (STORE_MODE !== 'idb') return;
+  idbAllKeys().then(function (keys) {
+    (keys || []).forEach(function (k) {
+      if (String(k).indexOf('bk_') !== 0) return;
+      var ts = Number(String(k).slice(3));
+      if (keepTs.indexOf(ts) < 0) idbDel(k);   /* 备份列表里已不存在的快照，IDB 里的完整版一并清掉 */
+    });
+  });
+}
 function pushAutoBackup(force) {
   var today = fmtDate(new Date());
   if (!lastAutoBackupDate) {
@@ -3821,11 +3870,22 @@ function pushAutoBackup(force) {
         try { b.snapshot = slimSnapshotText(b.snapshot); } catch (e) {}
       }
     });
-    arr.push({ ts: Date.now(), date: today, snapshot: autoBackupSnapshot() });
+    /* v145：完整快照（含头像）只在内存里生成一次，瘦身版进 localStorage，完整版进 IndexedDB */
+    var fullRaw = null;
+    try { fullRaw = JSON.stringify(state); } catch (e) {}
+    var slimRaw;
+    try { slimRaw = (fullRaw != null) ? slimSnapshotText(fullRaw) : autoBackupSnapshot(); }
+    catch (e) { slimRaw = (fullRaw != null) ? fullRaw : autoBackupSnapshot(); }
+    arr.push({ ts: Date.now(), date: today, snapshot: slimRaw });
     if (arr.length > 7) arr = arr.slice(-7);
     if (saveBackups(arr)) {
       lastAutoBackupDate = today;
       try { localStorage.setItem(LAST_BACKUP_DATE_KEY, today); } catch (e) { /* 容量满则忽略 */ }
+      /* saveBackups 内部容量不足时会裁剪，实际存下的列表以 _backupCache 为准 */
+      var stored = loadBackups();
+      var lastB = stored.length ? stored[stored.length - 1] : null;
+      if (lastB) storeFullBackup(lastB.ts, fullRaw);
+      pruneFullBackups(stored.map(function (x) { return x.ts; }));
     }
   } catch (e) { /* 忽略 */ }
 }
@@ -3864,16 +3924,30 @@ function restoreBackup(ts) {
   for (var i = 0; i < arr.length; i++) if (arr[i].ts === ts) b = arr[i];
   if (!b) { showToast('未找到该备份'); return; }
   showConfirm('恢复本地备份', '将用 ' + fmtDateTime(b.ts) + ' 的本地备份覆盖当前全部数据，可随时再用其他备份恢复。确认？', function () {
-    try {
-      applyStateSnapshot(JSON.parse(b.snapshot));
-      saveData(); renderAll(); renderBackupList();
-      showToast('已恢复到 ' + fmtDateTime(b.ts));
-    } catch (e) { showToast('恢复失败：' + (e && e.message ? e.message : '未知错误')); }
+    doRestoreBackup(b);
   });
+}
+/* v145：优先用 IndexedDB 里的完整快照（含头像），没有再回退瘦身快照（v143 行为） */
+function doRestoreBackup(b) {
+  var apply = function (snap, withAvatar) {
+    try {
+      applyStateSnapshot(JSON.parse(snap));
+      saveData(); renderAll(); renderBackupList();
+      showToast('已恢复到 ' + fmtDateTime(b.ts) + (withAvatar ? '（含头像）' : ''));
+    } catch (e) { showToast('恢复失败：' + (e && e.message ? e.message : '未知错误')); }
+  };
+  if (STORE_MODE === 'idb') {
+    idbGet('bk_' + b.ts).then(function (full) {
+      apply(full || b.snapshot, !!full);
+    });
+  } else {
+    apply(b.snapshot, false);
+  }
 }
 function delBackup(ts) {
   var arr = loadBackups().filter(function (x) { return x.ts !== ts; });
   saveBackups(arr);
+  if (STORE_MODE === 'idb') idbDel('bk_' + ts);   /* v145：完整快照一并清掉 */
   lastAutoBackupDate = arr.length ? arr[arr.length - 1].date : '';
   try { localStorage.setItem(LAST_BACKUP_DATE_KEY, lastAutoBackupDate); } catch (e) {}
   renderBackupList();
