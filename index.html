@@ -2186,7 +2186,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v143</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v144</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -3360,28 +3360,147 @@ function cleanupExpiredData() {
   return changed;
 }
 
+/* ===== v144 存储层：IndexedDB 主存储 + localStorage 回退 =====
+   为什么迁：localStorage 每 origin 只有约 5MB 硬上限（浏览器规定，应用无法调大），
+   头像一多就撑爆——v143 之前正是被备份快照吃满，连主数据都写不进去。
+   IndexedDB 容量通常几百 MB 起，不受这个 5MB 限制。
+   安全设计（数据安全优先于一切）：
+   1. 主数据迁到 IndexedDB（它是大头且会持续增长）；备份是瘦身快照（约 0.3MB）
+      暂留 localStorage，并保留 v143 的裁剪/自愈保护 —— 把改造面压到最小。
+   2. localStorage 保留"迁移时刻的静态快照"作为应急回退，迁移后不再随之更新。
+   3. IndexedDB 不可用（隐私模式/被禁用）→ 自动回退 localStorage，行为与 v143 完全一致。
+   4. IDB 写入失败 → 立即回退写 localStorage，绝不丢数据。 */
+var IDB_NAME = 'marcus_guitar_workspace';
+var IDB_VER = 1;
+var IDB_STORE = 'kv';
+var _idbDb = null;
+var _rawCache = null;          /* 主数据内存镜像：保证 readRaw() 仍可同步调用 */
+var STORE_MODE = 'local';      /* 'idb' | 'local'，启动时探测决定 */
+
+function idbOpen() {
+  return new Promise(function (resolve) {
+    if (_idbDb) { resolve(true); return; }
+    if (typeof indexedDB === 'undefined' || !indexedDB) { resolve(false); return; }
+    var req;
+    try { req = indexedDB.open(IDB_NAME, IDB_VER); } catch (e) { resolve(false); return; }
+    if (!req) { resolve(false); return; }
+    var done = false;
+    var fin = function (v) { if (!done) { done = true; resolve(v); } };
+    req.onupgradeneeded = function () {
+      try {
+        var db = req.result;
+        if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+      } catch (e) {}
+    };
+    req.onsuccess = function () { _idbDb = req.result; fin(true); };
+    req.onerror = function () { fin(false); };
+    req.onblocked = function () { fin(false); };
+    /* 保险：极少数环境既不触发 success 也不触发 error，5s 后判定不可用 */
+    setTimeout(function () { fin(false); }, 5000);
+  });
+}
+function idbGet(key) {
+  return idbOpen().then(function (ok) {
+    if (!ok) return null;
+    return new Promise(function (resolve) {
+      try {
+        var tx = _idbDb.transaction(IDB_STORE, 'readonly');
+        var r = tx.objectStore(IDB_STORE).get(key);
+        r.onsuccess = function () { resolve(r.result == null ? null : String(r.result)); };
+        r.onerror = function () { resolve(null); };
+      } catch (e) { resolve(null); }
+    });
+  });
+}
+function idbSet(key, val) {
+  return idbOpen().then(function (ok) {
+    if (!ok) return false;
+    return new Promise(function (resolve) {
+      try {
+        var tx = _idbDb.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).put(val, key);
+        tx.oncomplete = function () { resolve(true); };
+        tx.onerror = function () { resolve(false); };
+        tx.onabort = function () { resolve(false); };
+      } catch (e) { resolve(false); }
+    });
+  });
+}
+/* 启动时探测存储能力，并用一次真实写入验证（有的环境 open 成功但写入被拒） */
+function initStore() {
+  return idbOpen().then(function (ok) {
+    if (!ok) { STORE_MODE = 'local'; return false; }
+    return idbSet('__probe__', '1').then(function (w) {
+      STORE_MODE = w ? 'idb' : 'local';
+      return w;
+    });
+  });
+}
+/* 读取主数据：优先 IndexedDB，首次自动从 localStorage 迁移 */
+function readRawAsync() {
+  if (window.__MARCUS_LAN__ && window.__marcusRemote) return Promise.resolve(window.__marcusRemote.get());
+  if (STORE_MODE === 'idb') {
+    return idbGet('main').then(function (v) {
+      if (v != null) return v;
+      var ls = null;
+      try { ls = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+      if (ls) idbSet('main', ls);   /* 迁移：旧数据写入 IDB，localStorage 留作静态应急快照 */
+      return ls;
+    });
+  }
+  var raw = null;
+  try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+  return Promise.resolve(raw);
+}
+/* 同步读取：返回内存镜像（启动时已填充），供 storageUsedBytes 等同步场景使用 */
 function readRaw() {
   if (window.__MARCUS_LAN__ && window.__marcusRemote) return window.__marcusRemote.get();
+  if (_rawCache != null) return _rawCache;
   try { return localStorage.getItem(STORAGE_KEY); } catch (e) { return null; }
 }
-function writeRaw(s) {
-  if (window.__MARCUS_LAN__ && window.__marcusRemote) { window.__marcusRemote.set(s); return; }
-  try { localStorage.setItem(STORAGE_KEY, s); return; } catch (e) {}
-  /* v143 配额自愈：主数据写不进去时，先清掉本地自动备份腾空间，再重试一次。
-     备份丢了可以再生成，主数据丢了就真丢了——保数据优先。
-     （旧版备份快照含 base64 头像，最多 7 份能把 origin 配额整个吃满，导致主数据也写不进去。） */
+/* localStorage 写入（含 v143 配额自愈：主数据优先，必要时清备份腾空间） */
+function localWrite(s, quiet) {
+  try { localStorage.setItem(STORAGE_KEY, s); return true; } catch (e) {}
   try { localStorage.removeItem(BACKUP_KEY); } catch (e) {}
   _backupCache = []; lastAutoBackupDate = '';
   try {
     localStorage.setItem(STORAGE_KEY, s);
-    showToast('存储空间已满，已自动清理本地自动备份来保存数据。当前数据已安全保存，建议尽快在设置里导出一份备份');
-  } catch (e) {
-    showSaveFailedToast();
-  }
+    if (!quiet) showToast('存储空间已满，已自动清理本地自动备份来保存数据。当前数据已安全保存，建议尽快在设置里导出一份备份');
+    return true;
+  } catch (e) { return false; }
 }
-function loadData() {
+/* v144：IDB 模式下把 localStorage 当「延迟镜像」——多一层保险。
+   延后一拍写，不阻塞界面交互；写不进去也绝不影响主数据（IDB 已存）。 */
+function mirrorToLocal(s) {
+  setTimeout(function () {
+    if (_rawCache !== s) return;          /* 已有更新的数据，跳过这次镜像 */
+    try { localStorage.setItem(STORAGE_KEY, s); return; } catch (e) {}
+    /* 镜像塞不下（数据量超过 localStorage 5MB 上限）：放弃镜像并清掉旧镜像，
+       把有限的 localStorage 空间留给自动备份——主数据在 IndexedDB 里，不丢。
+       注意：这里绝不为了镜像去删备份，备份是 IDB 出问题时的救命稻草。 */
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+  }, 0);
+}
+function writeRaw(s) {
+  _rawCache = s;
+  if (window.__MARCUS_LAN__ && window.__marcusRemote) { window.__marcusRemote.set(s); return; }
+  if (STORE_MODE === 'idb') {
+    idbSet('main', s).then(function (ok) {
+      if (ok) { mirrorToLocal(s); return; }
+      /* IndexedDB 写入失败 → 立即回退 localStorage，绝不丢数据 */
+      if (localWrite(s, false)) idbSet('main', s);   /* 多为瞬时故障，重试一次 */
+      else showSaveFailedToast();
+    });
+    return;
+  }
+  /* local 模式：v143 原逻辑（含配额自愈） */
+  if (!localWrite(s, false)) showSaveFailedToast();
+}
+/* v144：raw 可由异步存储层传入（IndexedDB）；不传则退回同步读 localStorage */
+function loadData(raw) {
   try {
-    var raw = readRaw();
+    if (raw == null) raw = readRaw();
+    if (typeof raw === 'string') _rawCache = raw;
     if (raw) {
       var d = JSON.parse(raw);
       if (d && typeof d === 'object') {
@@ -5727,12 +5846,14 @@ function renderSettings() {
     var extra = '';
     if (bytes >= 0) {
       extra = ' 当前数据量约 ' + formatBytes(bytes);
-      if (bytes > 3 * 1024 * 1024) extra += '，接近存储上限，建议尽快导出备份并清理过期数据。';
+      /* v144：IndexedDB 模式下容量充裕，只有回退到 localStorage 才需要警戒 5MB 上限 */
+      if (STORE_MODE === 'idb') extra += '（已启用大容量存储，容量上限大幅提升）。';
+      else if (bytes > 3 * 1024 * 1024) extra += '，接近存储上限，建议尽快导出备份并清理过期数据。';
       else if (bytes > 1 * 1024 * 1024) extra += '，数据较多，建议定期导出备份。';
     }
     var base = window.__MARCUS_LAN__
       ? '数据保存在本机电脑（局域网共享文件）中，所有连入的设备共用同一份。建议每周导出一次备份。'
-      : '数据保存在当前浏览器中，建议每周导出一次备份。换设备或清浏览器缓存前，务必先导出。';
+      : '数据保存在当前浏览器中' + (STORE_MODE === 'idb' ? '（大容量存储）' : '（基础存储）') + '，建议每周导出一次备份。换设备或清浏览器缓存前，务必先导出。';
     sizeTip.textContent = base + extra;
   }
 
@@ -10854,19 +10975,55 @@ document.querySelectorAll('.modal-mask').forEach(function (m) {
 
 /* ================= 启动 ================= */
 document.addEventListener('click', onFlexStudentPickerDocClick);
-loadData();
-applyTheme(state.settings.theme);
-applyLayout();
-refreshGroupAvatars(function () {
-  renderAll();
-  updateCountdowns();
-});
-setInterval(function () {
-  updateCountdowns();
-  var n = new Date();
-  if (n.getDate() !== window.__lastDay) { window.__lastDay = n.getDate(); renderAll(); updateCountdowns(); }
-}, 30000);
-window.__lastDay = (new Date()).getDate();
+
+var __booted = false, __bootRaw = null;
+function bootRender() {
+  applyTheme(state.settings.theme);
+  applyLayout();
+  refreshGroupAvatars(function () {
+    renderAll();
+    updateCountdowns();
+  });
+  setInterval(function () {
+    updateCountdowns();
+    var n = new Date();
+    if (n.getDate() !== window.__lastDay) { window.__lastDay = n.getDate(); renderAll(); updateCountdowns(); }
+  }, 30000);
+  window.__lastDay = (new Date()).getDate();
+}
+function bootWith(raw) {
+  if (__booted) return false;
+  __booted = true;
+  __bootRaw = (typeof raw === 'string') ? raw : null;
+  loadData(raw);
+  bootRender();
+  return true;
+}
+/* v144：主数据改存 IndexedDB（容量几百 MB，不再受 localStorage 5MB 限制）。
+   IndexedDB 是异步的，所以启动改成异步；没有 indexedDB 的环境（隐私模式、
+   被禁用、测试环境）直接走同步路径，行为与 v143 完全一致。 */
+if (typeof indexedDB !== 'undefined' && indexedDB && !window.__MARCUS_LAN__) {
+  var __bootTimer = setTimeout(function () {
+    /* 保险：极端环境下 IDB 迟迟不响应 → 先用 localStorage 起来，绝不让用户看白屏 */
+    bootWith(readRaw());
+  }, 900);
+  initStore().then(readRawAsync).then(function (raw) {
+    clearTimeout(__bootTimer);
+    if (bootWith(raw)) return;
+    /* 已经用 localStorage 抢先启动 → IDB 里若有更新的数据，静默接管刷新 */
+    if (typeof raw === 'string' && raw !== __bootRaw) {
+      loadData(raw);
+      renderAll();
+      updateCountdowns();
+    }
+  }, function () {
+    clearTimeout(__bootTimer);
+    bootWith(readRaw());
+  });
+} else {
+  STORE_MODE = 'local';
+  bootWith(readRaw());
+}
 </script>
 </body>
 </html>
