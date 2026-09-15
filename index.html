@@ -1538,6 +1538,26 @@
     display: flex; align-items: center; padding: 8px 4px 10px;
     font-size: calc(13px * var(--fs)); color: var(--text-light);
   }
+  /* v160: 学员管理「删除课时」弹窗的记录列表 */
+  .pdh-list { display: flex; flex-direction: column; gap: 6px; max-height: 50vh; overflow-y: auto; overflow-x: hidden; }
+  .pdh-empty { padding: 26px 8px; text-align: center; color: var(--text-light); font-size: calc(13px * var(--fs)); }
+  .pdh-item {
+    display: flex; align-items: center; gap: 7px;
+    padding: 9px 10px; border-radius: 12px;
+    background: var(--soft); border: 1px solid var(--soft-border);
+    font-size: calc(13px * var(--fs));
+  }
+  .pdh-item .pdh-date { flex: none; color: var(--text-light); font-size: calc(11px * var(--fs)); }
+  .pdh-item .pdh-note { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pdh-item .pdh-delta { flex: none; font-weight: 700; }
+  .pdh-item .pdh-delta.plus { color: var(--green); }
+  .pdh-item .pdh-delta.minus { color: var(--red); }
+  .pdh-del {
+    flex: none; border: 0; background: none; color: var(--red);
+    font-family: inherit; font-size: calc(12px * var(--fs));
+    padding: 0 8px; min-height: 32px; border-radius: 9px; cursor: pointer;
+  }
+  .pdh-del:active { background: rgba(214,69,69,.12); }
   .export-opt-group { display: flex; flex-direction: column; gap: 9px; }
   .export-opt, .export-format { display: flex; align-items: center; gap: 8px; font-size: calc(13px * var(--fs)); color: var(--text); cursor: pointer; }
   /* 回收站 / 备份列表项 */
@@ -2247,7 +2267,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v159</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v160</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -7379,9 +7399,12 @@ function buildPersonHoursDetailModel(personId, opt) {
       (!h.personId && h.studentId && sids.indexOf(h.studentId) >= 0);
     if (!isMine) return;
     if (h.type === 'consume' && (h.delta || 0) < 0) {
-      recs.push({ date: h.date, time: h.time || '', source: 'log', id: h.id || '', note: h.note || '上课扣课', originId: '', studentId: '', memberId: '', personId: personId, delta: h.delta || -1, logType: 'consume', after: (h.after == null) ? '' : h.after });
+      /* v160：带上 origin / studentId / memberId —— 学员管理的「删除课时」要靠它精确回删流水
+         （v160 之前 origin 缺失，删续费/调整记录时会落进兜底的 removeConsumeLog，而它只认 consume，
+          于是"记录删了、流水还在"）。 */
+      recs.push({ date: h.date, time: h.time || '', source: 'log', id: h.id || '', note: h.note || '上课扣课', origin: 'hoursLog', originId: '', studentId: h.studentId || '', memberId: h.memberId || '', personId: personId, delta: h.delta || -1, logType: 'consume', after: (h.after == null) ? '' : h.after });
     } else if (h.type === 'charge' || h.type === 'adjust') {
-      recs.push({ date: h.date, time: h.time || '', source: 'log', id: h.id || '', note: h.note || (h.type === 'charge' ? '续费' : '调整'), originId: '', studentId: '', memberId: '', personId: personId, delta: h.delta || 0, logType: h.type, after: (h.after == null) ? '' : h.after });
+      recs.push({ date: h.date, time: h.time || '', source: 'log', id: h.id || '', note: h.note || (h.type === 'charge' ? '续费' : '调整'), origin: 'hoursLog', originId: '', studentId: h.studentId || '', memberId: h.memberId || '', personId: personId, delta: h.delta || 0, logType: h.type, after: (h.after == null) ? '' : h.after });
     }
   });
   /* v146：并入补记历史（成员补记按 memberId→person 匹配，单人课补记按 studentId 匹配），
@@ -7400,7 +7423,7 @@ function buildPersonHoursDetailModel(personId, opt) {
     var mine = (l.memberId && myMemberIds[l.memberId]) || (!l.memberId && sids.indexOf(l.studentId) >= 0);
     if (!mine) return;
     if (coveredByLog[(l.date || '') + '|' + (l.time || '')] || coveredByLog[(l.date || '') + '|']) return;
-    recs.push({ date: l.date, time: l.time || '', source: 'manual', id: l.id || '', note: l.note || '补记上课', originId: '', studentId: '', memberId: '', personId: personId, delta: -1, logType: 'consume', after: '' });
+    recs.push({ date: l.date, time: l.time || '', source: 'manual', id: l.id || '', note: l.note || '补记上课', originId: '', studentId: l.studentId || '', memberId: l.memberId || '', personId: personId, delta: -1, logType: 'consume', after: '' });
   });
   if (opt && (opt.from || opt.to)) {
     recs = recs.filter(function (r) {
@@ -7490,6 +7513,73 @@ function poolHoursDetailImage(key) {
     return;
   }
   showHoursImageModal({ personId: t.personId, from: '', to: '' });
+}
+/* ===== v160：学员管理「删除课时」=====
+   列出该学员已登记的课时记录（扣课 / 续费 / 调整 / 补记），逐条可删。
+   删除确认统一走 delHourRecord → 会问一句「是否退回课时」（只删记录 / 删除并退还 / 删除并扣减）。 */
+var pdhKey = '';
+function poolDelHours(key) {
+  var t = poolHoursTarget(key);
+  if (!t) { showToast('学员不存在'); return; }
+  pdhKey = key;
+  var wrap = document.getElementById('pdhModal');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.id = 'pdhModal'; wrap.className = 'modal-mask';
+    document.body.appendChild(wrap);
+  }
+  wrap.innerHTML =
+    '<div class="modal-card" style="max-width:94vw;width:440px">' +
+      '<div class="modal-title">删除课时 · <span id="pdhName"></span></div>' +
+      '<div id="pdhSub" style="padding:0 16px;font-size:calc(12px * var(--fs));color:var(--text-light);line-height:1.6"></div>' +
+      '<div id="pdhBody" style="padding:12px 16px"></div>' +
+      '<div class="modal-ops">' +
+        '<button class="m-cancel" onclick="closePdhModal()">关闭</button>' +
+      '</div>' +
+    '</div>';
+  wrap.classList.add('show');
+  wrap.onclick = function (e) { if (e.target === wrap) closePdhModal(); };
+  renderPdhList();
+}
+function closePdhModal() {
+  pdhKey = '';
+  var wrap = document.getElementById('pdhModal');
+  if (wrap) wrap.classList.remove('show');
+}
+/* 删除后由 doDelHourRecord 回调，列表随之刷新 */
+function pdhRefresh() {
+  if (pdhKey) renderPdhList();
+}
+function pdhModel() {
+  var t = poolHoursTarget(pdhKey);
+  if (!t) return null;
+  if (t.studentId && t.memberId) return buildHoursDetailModel(t.studentId, t.memberId, { from: '', to: '' });
+  if (t.studentId) return buildHoursDetailModel(t.studentId, '', { from: '', to: '' });
+  return buildPersonHoursDetailModel(t.personId, { from: '', to: '' });
+}
+function renderPdhList() {
+  var body = document.getElementById('pdhBody');
+  if (!body) return;
+  var nameEl = document.getElementById('pdhName');
+  var subEl = document.getElementById('pdhSub');
+  var model = pdhModel();
+  if (!model) { body.innerHTML = '<div class="pdh-empty">学员不存在</div>'; return; }
+  if (nameEl) nameEl.textContent = model.name || '';
+  var recs = model.recs || []; /* 已按 新→旧 排好 */
+  if (subEl) subEl.textContent = '当前剩余 ' + model.hours + ' · 共 ' + recs.length + ' 条记录。删除时可自行选择是否退回课时；选择退还会留一条退还凭据，方便日后核对。';
+  if (!recs.length) { body.innerHTML = '<div class="pdh-empty">暂无可删除的课时记录</div>'; return; }
+  body.innerHTML = '<div class="pdh-list">' + recs.map(function (r) {
+    var d = (r.delta == null ? -1 : +r.delta) || 0;
+    var label = r.source === 'manual' ? '补' : (r.logType === 'charge' ? '续' : (r.logType === 'adjust' ? '调' : '扣'));
+    var tagCls = r.source === 'manual' ? 'det-tag' : (r.logType === 'charge' ? 'det-tag charge' : (r.logType === 'adjust' ? 'det-tag adjust' : 'det-tag'));
+    return '<div class="pdh-item">' +
+      '<span class="' + tagCls + '">' + label + '</span>' +
+      '<span class="pdh-date">' + escapeHtml(fmtCN(r.date)) + (r.time ? ' ' + escapeHtml(r.time) : '') + '</span>' +
+      '<span class="pdh-note">' + escapeHtml(r.note || '课时记录') + '</span>' +
+      '<span class="pdh-delta ' + (d > 0 ? 'plus' : 'minus') + '">' + (d > 0 ? '+' : '') + d + '</span>' +
+      '<button class="pdh-del" onclick="delHourRecordEncoded(\'' + encodeURIComponent(JSON.stringify(r)) + '\')">删除</button>' +
+      '</div>';
+  }).join('') + '</div>';
 }
 /* 学员管理：补记上课入口。person 在组→定位到小组的 studentId+memberId；
    未入组 person→建立/取单人课档案；solo student→直接用其 id。 */
@@ -7595,6 +7685,7 @@ function openPoolEditor(key) {
       '<button class="btn-copy" style="min-height:34px;padding:0 10px;font-size:calc(12px * var(--fs))" onclick="poolManualDone(\'' + key + '\')">补记上课</button>' +
       '<button class="btn-copy" style="min-height:34px;padding:0 10px;font-size:calc(12px * var(--fs))" onclick="poolHoursDetail(\'' + key + '\')">课时明细</button>' +
       '<button class="btn-copy" style="min-height:34px;padding:0 10px;font-size:calc(12px * var(--fs))" onclick="poolHoursDetailImage(\'' + key + '\')">明细图片</button>' +
+      '<button class="btn-copy" style="min-height:34px;padding:0 10px;font-size:calc(12px * var(--fs));color:var(--red);border-color:rgba(214,69,69,.42)" onclick="poolDelHours(\'' + key + '\')">删除课时</button>' +
       '</div></div>' +
     '<div class="set-tip">' + grpTip + '</div>' +
     '<div class="form-item"><label>课表（未来 7 天 · 只读，增删请到课表管理）</label>' + poolUpcomingHtml(e) + '</div>' +
@@ -9085,43 +9176,88 @@ function refundHoursByRec(rec) {
 function delHourRecordEncoded(enc) {
   try { delHourRecord(JSON.parse(decodeURIComponent(enc))); } catch (e) { showToast('删除参数错误'); }
 }
+/* v160：一条课时记录删除后「课时该往回走多少」——用于生成两个按钮的文案 */
+function hoursRevertInfo(rec) {
+  var delta = (rec.delta == null ? -1 : +rec.delta) || 0;
+  if (rec.logType === 'charge') return { back: -delta, kind: 'charge' };
+  if (rec.logType === 'adjust') return { back: -delta, kind: 'adjust' };
+  return { back: Math.abs(delta), kind: 'consume' };
+}
+/* v160：删除已登记的课时记录，一律先问一句「是否退回课时」。
+   旧版是无提示自动反向修正，用户没有选择权（有时只想抹掉记录、不想动余额）。 */
 function delHourRecord(rec) {
   if (!rec) return;
   if (rec.source === 'manual') { delManualDone(rec.id); return; }
-  var isCharge = rec.logType === 'charge';
-  var isAdjust = rec.logType === 'adjust';
-  var delta = (rec.delta == null ? -1 : +rec.delta) || 0;
-  var actionTip = isCharge ? '将扣减 ' + Math.abs(delta) + ' 节课时' : (isAdjust ? '会按调整量反向修正课时' : '将退还 1 节课时（如有）');
-  var note = '删除后' + actionTip + '。确认删除 ' + (rec.date ? fmtCN(rec.date) : '') + (rec.time ? ' ' + rec.time : '') + ' 的“' + (rec.note || '课时记录') + '”吗？';
-  showConfirm('删除课时记录', note, function () {
-    if (rec.origin === 'hoursLog' || rec.origin === 'hoursLog-single') {
-      /* hoursLog 中的自动扣课：按 id 删除并退还 */
-      removeHoursLogById(rec.id);
-      refundHoursByRec(rec);
-    } else if (rec.origin === 'fixed') {
-      /* 固定课完成标记 + consume 流水 */
-      var parts = (rec.originId || '').split('|');
-      var d = parts[0] || rec.date;
-      var t = parts[1] || rec.time || '';
-      var arr = state.fixedDone[d] || [];
-      var key = rec.studentId + '|' + t;
-      var idx = arr.indexOf(key);
-      if (idx >= 0) arr.splice(idx, 1);
-      removeConsumeLog({ studentId: rec.studentId, personId: rec.personId, memberId: rec.memberId, date: d, time: t, note: '完成课程扣课' });
-      refundHoursByRec(rec);
-    } else if (rec.origin === 'flexible') {
-      /* 灵活排课完成标记改回 upcoming */
-      (state.flexibleClasses || []).forEach(function (c) { if (c.id === rec.originId && c.status === 'done') c.status = 'upcoming'; });
-      removeConsumeLog({ studentId: rec.studentId, personId: rec.personId, memberId: rec.memberId, date: rec.date, time: rec.time || '', note: '完成课程扣课' });
-      refundHoursByRec(rec);
-    } else {
-      /* 兜底：按匹配条件删除一条 consume */
-      removeConsumeLog({ studentId: rec.studentId, personId: rec.personId, memberId: rec.memberId, date: rec.date, time: rec.time || '', note: rec.note === '上课扣课' ? '' : rec.note });
-      refundHoursByRec(rec);
+  var info = hoursRevertInfo(rec);
+  var d = (rec.delta == null ? 0 : +rec.delta) || 0;
+  var head = (rec.date ? fmtCN(rec.date) : '') + (rec.time ? ' ' + rec.time : '') +
+    ' 的「' + (rec.note || '课时记录') + '」（' + (d > 0 ? '+' : '') + d + ' 节）';
+  var ask, mainLabel;
+  var back = Math.abs(info.back); /* 展示用绝对值，否则续费记录会出现「扣减 -10 节」 */
+  if (info.kind === 'consume') {
+    ask = head + '\n\n删除后是否把这 ' + back + ' 节课时退回给学员？';
+    mainLabel = '删除并退还 ' + back + ' 节';
+  } else if (info.kind === 'charge') {
+    ask = head + '\n\n删除后是否从剩余课时里扣减 ' + back + ' 节？';
+    mainLabel = '删除并扣减 ' + back + ' 节';
+  } else {
+    ask = head + '\n\n删除后是否按调整量反向修正课时（' + (info.back > 0 ? '+' : '') + info.back + ' 节）？';
+    mainLabel = '删除并修正课时';
+  }
+  showConfirmTriple('删除课时记录', ask,
+    '只删记录（课时不变）', function () { doDelHourRecord(rec, false); },
+    mainLabel, function () { doDelHourRecord(rec, true); });
+}
+/* 真正执行删除。refund=true 时同时反向修正课时余额（扣课退还 / 续费扣减 / 调整反向） */
+function doDelHourRecord(rec, refund) {
+  if (!rec) return;
+  __removeHourRecordOnly(rec, refund);
+  saveData(); renderAll(); renderStudentDetail();
+  pdhRefresh(); /* 学员管理「删除课时」弹窗开着时同步刷新列表 */
+  showToast(refund ? '已删除课时记录并同步修正课时' : '已删除课时记录（课时不变）');
+}
+/* 只做删除动作（不落盘、不渲染、不提示），单条删除与批量删除共用 */
+function __removeHourRecordOnly(rec, refund) {
+  if (!rec) return;
+  if (rec.source === 'manual') {
+    /* 补记：删 manualDone + 对应 consume 流水 */
+    state.manualDone = (state.manualDone || []).filter(function (r) { return r.id !== rec.id; });
+    removeConsumeLog({ studentId: rec.studentId, personId: rec.personId, memberId: rec.memberId, date: rec.date, time: rec.time || '', note: '补记上课扣课' });
+    if (refund) refundHoursByRec(rec);
+    return;
+  }
+  if (rec.origin === 'hoursLog' || rec.origin === 'hoursLog-single') {
+    /* hoursLog 里的流水：按 id 删除（consume / charge / adjust 都认，旧兜底只认 consume） */
+    removeHoursLogById(rec.id);
+    /* 固定课的"完成课程扣课"：顺带清掉已完成标记，否则课表明细里还会冒出同一条记录 */
+    if (rec.note === '完成课程扣课' && rec.studentId) {
+      var fdArr = state.fixedDone[rec.date] || [];
+      var fk = rec.studentId + '|' + (rec.time || '');
+      var fki = fdArr.indexOf(fk);
+      if (fki >= 0) fdArr.splice(fki, 1);
     }
-    saveData(); renderAll(); renderStudentDetail();
-    showToast('已删除课时记录并同步修正课时');
-  });
+    if (refund) refundHoursByRec(rec);
+  } else if (rec.origin === 'fixed') {
+    /* 固定课完成标记 + consume 流水 */
+    var parts = (rec.originId || '').split('|');
+    var d = parts[0] || rec.date;
+    var t = parts[1] || rec.time || '';
+    var arr = state.fixedDone[d] || [];
+    var key = rec.studentId + '|' + t;
+    var idx = arr.indexOf(key);
+    if (idx >= 0) arr.splice(idx, 1);
+    removeConsumeLog({ studentId: rec.studentId, personId: rec.personId, memberId: rec.memberId, date: d, time: t, note: '完成课程扣课' });
+    if (refund) refundHoursByRec(rec);
+  } else if (rec.origin === 'flexible') {
+    /* 灵活排课完成标记改回 upcoming */
+    (state.flexibleClasses || []).forEach(function (c) { if (c.id === rec.originId && c.status === 'done') c.status = 'upcoming'; });
+    removeConsumeLog({ studentId: rec.studentId, personId: rec.personId, memberId: rec.memberId, date: rec.date, time: rec.time || '', note: '完成课程扣课' });
+    if (refund) refundHoursByRec(rec);
+  } else {
+    /* 兜底：按匹配条件删除一条 consume */
+    removeConsumeLog({ studentId: rec.studentId, personId: rec.personId, memberId: rec.memberId, date: rec.date, time: rec.time || '', note: rec.note === '上课扣课' ? '' : rec.note });
+    if (refund) refundHoursByRec(rec);
+  }
 }
 
 /* 课时明细月份折叠状态：key=YYYY-MM，value=true 表示折叠 */
@@ -9213,38 +9349,18 @@ function delSelectedHours() {
     try { var r = JSON.parse(decodeURIComponent(k)); if (r && r.date) recs.push(r); } catch (e) {}
   });
   if (!recs.length) { showToast('没有选择可删除的记录'); return; }
-  showConfirm('批量删除课时记录', '确认删除选中的 ' + recs.length + ' 条课时记录？删除后会按记录类型分别修正课时（扣课退还、续费扣减、调整反向）。', function () {
-    recs.forEach(function (rec) {
-      if (rec.source === 'manual') {
-        state.manualDone = (state.manualDone || []).filter(function (r) { return r.id !== rec.id; });
-        removeConsumeLog({ studentId: rec.studentId, personId: rec.personId, memberId: rec.memberId, date: rec.date, time: rec.time || '', note: '补记上课扣课' });
-        refundHoursByRec(rec);
-      } else if (rec.origin === 'hoursLog' || rec.origin === 'hoursLog-single') {
-        removeHoursLogById(rec.id);
-        refundHoursByRec(rec);
-      } else if (rec.origin === 'fixed') {
-        var parts = (rec.originId || '').split('|');
-        var d = parts[0] || rec.date;
-        var t = parts[1] || rec.time || '';
-        var arr = state.fixedDone[d] || [];
-        var key = rec.studentId + '|' + t;
-        var idx = arr.indexOf(key);
-        if (idx >= 0) arr.splice(idx, 1);
-        removeConsumeLog({ studentId: rec.studentId, personId: rec.personId, memberId: rec.memberId, date: d, time: t, note: '完成课程扣课' });
-        refundHoursByRec(rec);
-      } else if (rec.origin === 'flexible') {
-        (state.flexibleClasses || []).forEach(function (c) { if (c.id === rec.originId && c.status === 'done') c.status = 'upcoming'; });
-        removeConsumeLog({ studentId: rec.studentId, personId: rec.personId, memberId: rec.memberId, date: rec.date, time: rec.time || '', note: '完成课程扣课' });
-        refundHoursByRec(rec);
-      } else {
-        removeConsumeLog({ studentId: rec.studentId, personId: rec.personId, memberId: rec.memberId, date: rec.date, time: rec.time || '', note: rec.note === '上课扣课' ? '' : rec.note });
-        refundHoursByRec(rec);
-      }
-    });
-    detailBatchSel = {};
-    saveData(); renderAll(); renderStudentDetail();
-    showToast('已批量删除 ' + recs.length + ' 条课时记录');
-  });
+  /* v160：批量删除同样先问一句是否退回课时 */
+  showConfirmTriple('批量删除课时记录',
+    '确认删除选中的 ' + recs.length + ' 条课时记录？\n\n「只删记录」课时余额保持不变；「删除并修正课时」会按每条的类型分别处理（扣课退还、续费扣减、调整反向）。',
+    '只删记录（课时不变）', function () { doBatchDelHours(recs, false); },
+    '删除并修正课时', function () { doBatchDelHours(recs, true); });
+}
+function doBatchDelHours(recs, refund) {
+  recs.forEach(function (rec) { __removeHourRecordOnly(rec, refund); });
+  detailBatchSel = {};
+  saveData(); renderAll(); renderStudentDetail();
+  showToast(refund ? '已批量删除 ' + recs.length + ' 条课时记录并修正课时'
+    : '已批量删除 ' + recs.length + ' 条课时记录（课时不变）');
 }
 
 /* 学员管理面板内：批量删除（软删除，进回收站；同时支持 person / student 两类条目） */
