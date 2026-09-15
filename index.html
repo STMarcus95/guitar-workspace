@@ -1097,8 +1097,9 @@
   .cls-chip.fixed-c { background: rgba(243,236,225,0.55); }
   .cls-chip.flex-c { background: rgba(253,240,227,0.52); }
   .cls-chip.cancelled-c { opacity: .5; text-decoration: line-through; }
-  .cls-chip.done-c { opacity: .55; background: #e9ece9; }
-  .cls-chip.leave-c { opacity: .6; background: #f1ece3; }
+  /* v157: 原为硬编码浅灰/浅米底，午夜主题（--text 浅色）下浅底浅字几乎不可读 → 改走主题变量 */
+  .cls-chip.done-c { opacity: .8; background: var(--green-light); }
+  .cls-chip.leave-c { opacity: .85; background: var(--orange-light); }
   .cls-chip.leave-c .chip-name { text-decoration: line-through; }
   .chip-mark {
     font-size: calc(12px * var(--fs)); font-weight: 700; color: #fff;
@@ -1118,11 +1119,13 @@
   .cls-chip .loc-tag .loc-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
   /* 操作按钮：靠右；整组不收缩，放不下时换行仍保持右对齐
      v135：用户反馈周课表操作按钮太显眼——字号缩小、去绿色框、整体弱化，靠右排列 */
-  .chip-actions { margin-left: auto; display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; flex-wrap: nowrap; flex-shrink: 0; }
+  .chip-actions { margin-left: auto; display: inline-flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: nowrap; flex-shrink: 0; }
+  /* v157: 原来实际高度约 19px（padding 2px 4px），手指很难点准 → 抬到 30px 并加大间距，
+     同时删除键的隐形热区从 44px 收到 36px，避免横向盖住「调课」造成误删 */
   .chip-actions > span {
-    display: inline-flex; align-items: center;
+    display: inline-flex; align-items: center; justify-content: center;
     font-size: calc(11px * var(--fs)); font-weight: 500;
-    border-radius: 4px; padding: 2px 4px; margin: -2px -2px; line-height: 1.35;
+    border-radius: 4px; padding: 6px 8px; margin: -2px -2px; min-height: 30px; line-height: 1.35;
     cursor: pointer; white-space: nowrap;
   }
   .chip-actions .chip-act-main { color: var(--text-light); }
@@ -1139,7 +1142,7 @@
   .chip-actions .chip-act-del { color: #c99; display: inline-flex; align-items: center; justify-content: center; padding: 0 3px; margin: 0; position: relative; }
   .chip-actions .chip-act-del::after {
     content: ""; position: absolute; left: 50%; top: 50%;
-    transform: translate(-50%, -50%); width: 44px; height: 44px;
+    transform: translate(-50%, -50%); width: 36px; height: 36px;
   }
   /* 调课状态徽标（"已调至 9月2 19:30" 等）放进 chip-actions 末尾 */
   .rs-badge { font-size: calc(13px * var(--fs)); font-weight: 600; padding: 0 4px; border-radius: 4px; white-space: nowrap; }
@@ -1188,7 +1191,7 @@
   .search-box input {
     width: 100%; min-height: 34px;
     border: 1px solid var(--wood-light); border-radius: 12px;
-    padding: 0 12px 0 34px; font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */; font-family: inherit; /* v151: 13px→16px 防 iOS 聚焦自动缩放（同 v112 先例） */
+    padding: 0 12px 0 34px; font-size: 16px; font-family: inherit; /* v151: 13px→16px 防 iOS 聚焦自动缩放（同 v112 先例） */
     background: var(--soft); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
     color: var(--text); outline: none; text-align: center;
   }
@@ -1208,7 +1211,7 @@
   @media (max-width: 600px) { .stu-list { grid-template-columns: 1fr; } }
   @media (max-width: 600px) {
     .stu-toolbar { gap: 6px; margin: 6px 0 12px; }
-    .search-box input { min-height: 32px; font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */; padding-left: 30px; } /* v151: 13px→16px 防 iOS 聚焦自动缩放 */
+    .search-box input { min-height: 32px; font-size: 16px; padding-left: 30px; } /* v151: 13px→16px 防 iOS 聚焦自动缩放 */
     .search-box svg { width: 14px; height: 14px; left: 10px; }
     .stu-toolbar-actions { gap: 6px; }
     .stu-toolbar-actions .btn-ghost, .stu-toolbar-actions .btn-add { min-height: 32px; font-size: calc(12px * var(--fs)); padding: 0 10px; }
@@ -1585,7 +1588,7 @@
   .set-input, .set-area {
     width: 100%; min-height: 46px;
     border: 1px solid var(--wood-light); border-radius: 12px;
-    padding: 10px 14px; font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */; font-family: inherit;
+    padding: 10px 14px; font-size: 16px; font-family: inherit;
     background: var(--input-bg); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
     color: var(--text); outline: none;
   }
@@ -1909,7 +1912,7 @@
   /* 添加学生字段较多：手机上使用接近全屏的可滚动抽屉。
      v147：顶部 padding 计入 safe-area-inset-top（100dvh 顶到屏幕最上方时标题不被状态栏压住）；
      按钮栏不再吸底（见 .modal-ops），滚到最后才出现，底部安全区衬垫回到弹窗自身。 */
-  #stuModal .modal { max-height: 100dvh; padding-top: calc(20px + env(safe-area-inset-top)); }
+  #stuModal .modal { max-height: 100vh; max-height: 100dvh; padding-top: calc(20px + env(safe-area-inset-top)); }
   @media (max-width: 480px) {
     #stuModal .modal { padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom)); }
     #stuModal .form-item { margin-bottom: 12px; }
@@ -1940,7 +1943,7 @@
   .form-item input, .form-item select, .form-item textarea {
     width: 100%; min-height: 44px;
     border: 1px solid var(--wood-light); border-radius: 12px;
-    padding: 8px 12px; font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */; font-family: inherit;
+    padding: 8px 12px; font-size: 16px; font-family: inherit;
     background: var(--soft); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
     color: var(--text); outline: none;
   }
@@ -1983,7 +1986,7 @@
   .stu-picker-search svg { color: var(--text-light); flex: none; }
   .stu-picker-search input {
     flex: 1; min-height: 38px; border: none; background: transparent;
-    font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */; color: var(--text); outline: none; font-family: inherit;
+    font-size: 16px; color: var(--text); outline: none; font-family: inherit;
   }
   .stu-picker-list { overflow-x: hidden; overflow-y: auto; flex: 1; padding: 4px; }
   .stu-picker-item {
@@ -2137,6 +2140,10 @@
   .toast.has-act { padding-right: 64px; }
   @media (min-width: 769px) { .toast { bottom: 40px; } }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  /* v157: 父级 .toast 是 pointer-events:none（免得挡住底部点击），但带「撤销」按钮时必须恢复可点，
+     否则扣课时后的撤销按钮永远点不动（历史 bug：扣了课时却撤不回来） */
+  .toast.has-act.show { pointer-events: auto; }
+  .toast.has-act.show .toast-act { pointer-events: auto; }
 
   /* 示例数据横幅 */
   .sample-banner {
@@ -2203,7 +2210,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v156</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v157</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -2311,7 +2318,7 @@
     <div class="stu-toolbar">
       <div class="search-box">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#8c7a66" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input type="text" id="searchInput" placeholder="搜索学员" oninput="renderStudents()">
+        <input type="text" id="searchInput" placeholder="搜索学员" oninput="onStuSearchInput()">
       </div>
       <div class="stu-toolbar-actions">
         <button class="btn-ghost" onclick="openPoolModal()">
@@ -3034,7 +3041,7 @@
           批量删除
         </button>
       </div>
-      <input type="text" id="poolSearch" placeholder="搜索姓名 / 电话" oninput="renderPoolList()" style="width:100%;min-height:40px;padding:8px 12px;border:1px solid #ddd0bd;border-radius:12px;font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */;font-family:inherit;margin-bottom:8px"><!-- v112: 13px→16px 防 iOS 聚焦缩放 -->
+      <input type="text" id="poolSearch" placeholder="搜索姓名 / 电话" oninput="onPoolSearchInput()" style="width:100%;min-height:40px;padding:8px 12px;border:1px solid #ddd0bd;border-radius:12px;font-size: 16px;font-family:inherit;margin-bottom:8px"><!-- v112: 13px→16px 防 iOS 聚焦缩放 -->
     </div>
     <div class="set-tip" style="margin:0 0 8px">每位学员一份档案，跨小组共享课时与身份。点学员可编辑资料 🎂</div>
     <div id="poolList" style="max-height:46vh;overflow-x:hidden;overflow-y:auto"></div>
@@ -3128,7 +3135,7 @@
     <div class="cp-row"><label>色相</label><input type="range" id="cpHue" min="0" max="360" value="210" oninput="updateCpFromSliders()"></div>
     <div class="cp-row"><label>饱和</label><input type="range" id="cpSat" min="0" max="100" value="60" oninput="updateCpFromSliders()"></div>
     <div class="cp-row"><label>明度</label><input type="range" id="cpVal" min="0" max="100" value="70" oninput="updateCpFromSliders()"></div>
-    <div class="cp-row"><label>十六进制</label><input type="text" id="cpHex" class="set-input" style="min-height:38px;font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */" maxlength="7" oninput="updateCpFromHex()"></div><!-- v112: 13px→16px 防 iOS 聚焦缩放 -->
+    <div class="cp-row"><label>十六进制</label><input type="text" id="cpHex" class="set-input" style="min-height:38px;font-size: 16px;" maxlength="7" oninput="updateCpFromHex()"></div><!-- v112: 13px→16px 防 iOS 聚焦缩放 -->
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeColorPicker()">取消</button>
       <button class="btn-add" onclick="confirmColorPicker()">确定</button>
@@ -3159,7 +3166,7 @@
     </div>
     <div id="cex-studentFilterBox" style="margin-bottom:12px;padding:10px;border:1px dashed var(--soft-border);border-radius:12px;background:var(--soft)">
       <div class="set-label" style="font-size: calc(13px * var(--fs));margin-bottom:6px">指定学员（默认全部）</div>
-      <select id="cex-studentFilter" class="set-input" style="min-height:40px;font-size:16px;/* v155: 固定 16px 不随档缩放 */"><option value="">全部学员</option></select><!-- v112: 14px→16px 防 iOS 聚焦缩放 -->
+      <select id="cex-studentFilter" class="set-input" style="min-height:40px;font-size:16px;/* 输入控件固定 16px，不随字体档缩放 */"><option value="">全部学员</option></select><!-- v112: 14px→16px 防 iOS 聚焦缩放 -->
     </div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeModal('customExportModal')">取消</button>
@@ -3720,6 +3727,25 @@ function showSaveFailedToast() {
   }
 }
 var lastSaveBytes = 0;
+/* v157: 合并写入。saveData() 是「全量 JSON.stringify(state)（含 base64 头像，可达数 MB）+ 写 IDB + 镜像 localStorage」，
+   设置模板/备注这类连续输入每敲一个字就跑一次，明显卡顿。改成 400ms 内多次调用合并成一次；
+   页面切到后台或被关闭时强制落盘（pagehide / visibilitychange），不会丢数据。
+   关键路径（扣课时、删除、导入）继续直接调 saveData()，语义不变。 */
+var __saveTimer = null, __saveDirty = false;
+function saveDataSoon(delay) {
+  __saveDirty = true;
+  if (__saveTimer) clearTimeout(__saveTimer);
+  __saveTimer = setTimeout(function () {
+    __saveTimer = null;
+    if (__saveDirty) { __saveDirty = false; saveData(); }
+  }, delay || 400);
+}
+function flushSave() {
+  if (__saveTimer) { clearTimeout(__saveTimer); __saveTimer = null; }
+  if (__saveDirty) { __saveDirty = false; saveData(); }
+}
+window.addEventListener('pagehide', flushSave);
+document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flushSave(); });
 
 /* ================= 回收站（软删除 + 7 天可恢复） ================= */
 function getFlexClass(id) {
@@ -4213,24 +4239,6 @@ function migratePersons() {
   saveData();
 }
 /* 清理未被任何小组引用的 person 记录 */
-function cleanupPersons() {
-  if (!Array.isArray(state.persons)) return;
-  var used = {};
-  state.students.forEach(function (s) {
-    if (Array.isArray(s.members)) s.members.forEach(function (m) { if (m && m.personId) used[m.personId] = true; });
-  });
-  /* 有剩余课时、或有课时流水的档案一律保留：
-     学员管理是持久档案，删除小组不应把「人」和「剩余课时」一起删掉，否则学员换组/暂停后课时就丢了。 */
-  var hasLog = {};
-  (state.hoursLog || []).forEach(function (h) { if (h.personId) hasLog[h.personId] = true; });
-  state.persons = state.persons.filter(function (p) {
-    if (used[p.id]) return true;
-    if (p.hoursRemaining != null && p.hoursRemaining !== '' && p.hoursRemaining > 0) return true;
-    if (hasLog[p.id]) return true;
-    return false;
-  });
-}
-
 /* ===== 课时流水账 ===== */
 var HOURS_TYPE_LABEL = { consume: '扣课', charge: '充值', adjust: '调整' };
 function logHours(opt) {
@@ -4378,18 +4386,7 @@ function removeHoursLogById(id) {
   }
 }
 /* 某学员（person）的流水，新→旧 */
-function personHoursLog(personId) {
-  return (state.hoursLog || []).filter(function (r) { return r.personId === personId; }).reverse();
-}
 /* 某学生条目相关的流水：单人课=studentId 命中；小组课=所有成员 personId 命中 */
-function studentHoursLog(stu) {
-  if (!stu) return [];
-  var pids = {};
-  if (Array.isArray(stu.members)) stu.members.forEach(function (m) { if (m && m.personId) pids[m.personId] = 1; });
-  return (state.hoursLog || []).filter(function (r) {
-    return (r.studentId === stu.id && !r.personId) || (r.personId && pids[r.personId]);
-  }).reverse();
-}
 /* 时间段内流水汇总（月度财务小结用） */
 function hoursLogSummary(startStr, endStr, locId) {
   var sum = { charge: 0, consume: 0, adjust: 0, count: 0 };
@@ -4647,14 +4644,24 @@ function groupAvatarPositions(n, size, gap) {
 }
 function refreshGroupAvatars(done) {
   var list = state.students.filter(function (s) { return membersOf(s).length > 1; });
+  /* v157 ①：只合成还没有小组头像的。原来每次开屏都给所有小组重压一遍 128px JPEG 并写回 state，
+     反复有损压缩会让画质越来越差、base64 越来越大（还跟着持久化）。 */
+  list = list.filter(function (s) { return !s.avatar; });
   var left = list.length;
   if (!left) { if (done) done(); return; }
+  var finished = false;
+  function finish() { if (finished) return; finished = true; if (done) done(); }
+  /* v157 ②：超时兜底。若某张成员头像既不上 load 也不 error（损坏的 base64、极端内存压力），
+     原来 left 永不归零 → done 永不执行 → 开屏 renderAll 不跑 = 白屏。2.5s 后强制放行。 */
+  var guard = setTimeout(finish, 2500);
   list.forEach(function (s) {
-    composeGroupAvatar(s, 128, function (dataUrl) {
-      s.avatar = dataUrl || s.avatar;
-      left--;
-      if (left === 0 && done) done();
-    });
+    try {
+      composeGroupAvatar(s, 128, function (dataUrl) {
+        if (dataUrl) s.avatar = dataUrl;
+        left--;
+        if (left <= 0) { clearTimeout(guard); finish(); }
+      });
+    } catch (e) { left--; if (left <= 0) { clearTimeout(guard); finish(); } }
   });
 }
 function locHtml(locId) {
@@ -4721,14 +4728,6 @@ function getReschedOut(dateStr, studentId, time) {
   return null;
 }
 /* 查某日期是否有从别处调来的课 */
-function getReschedIn(dateStr, studentId) {
-  var list = state.reschedules || [];
-  for (var i = 0; i < list.length; i++) {
-    var r = list[i];
-    if (r.toDate === dateStr && r.studentId === studentId) return r;
-  }
-  return null;
-}
 /* '2026-08-17' -> '8月17日' */
 function fmtDateCN(s) {
   if (!s) return '';
@@ -5010,15 +5009,6 @@ function personGroups(personId) {
   });
 }
 /* 该 person 所属的所有机构（locationId），用于「从学员管理添加」时按机构优先排序 */
-function personLocationIds(personId) {
-  var ids = {};
-  state.students.forEach(function (s) {
-    if (Array.isArray(s.members) && s.members.some(function (m) { return m.personId === personId; }) && s.locationId) {
-      ids[s.locationId] = true;
-    }
-  });
-  return Object.keys(ids);
-}
 /* 返回该成员背后真正的 person 对象（可写入） */
 function memberPerson(stu, memberId) {
   if (!stu || !Array.isArray(stu.members)) return null;
@@ -5056,7 +5046,6 @@ function membersOf(stu) {
   });
 }
 function isGroup(stu) { return membersOf(stu).length > 0; }
-function headCountOf(stu) { return isGroup(stu) ? membersOf(stu).length : 1; }
 function getMember(stu, memberId) {
   var ms = membersOf(stu);
   for (var i = 0; i < ms.length; i++) if (ms[i].id === memberId) return ms[i];
@@ -8558,14 +8547,14 @@ function showHoursTextModal(range) {
       '<div class="modal-title" id="hoursTextTitle">复制课时明细（文本）</div>' +
       '<div style="padding:10px 16px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
         '<label style="font-size:calc(12px * var(--fs));color:var(--text-light)">起始</label>' +
-        '<input id="hoursTextFrom" type="date" value="' + (range.from || '') + '" style="font-family:inherit;font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */;padding:4px 6px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card)">' +
+        '<input id="hoursTextFrom" type="date" value="' + (range.from || '') + '" style="font-family:inherit;font-size: 16px;padding:4px 6px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card)">' +
         '<label style="font-size:calc(12px * var(--fs));color:var(--text-light)">结束</label>' +
-        '<input id="hoursTextTo" type="date" value="' + (range.to || '') + '" style="font-family:inherit;font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */;padding:4px 6px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card)">' +
+        '<input id="hoursTextTo" type="date" value="' + (range.to || '') + '" style="font-family:inherit;font-size: 16px;padding:4px 6px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card)">' +
         '<button class="btn-ghost" style="font-size:calc(12px * var(--fs));padding:4px 10px" onclick="__hoursTextApply()">应用</button>' +
         '<button class="btn-ghost" style="font-size:calc(12px * var(--fs));padding:4px 10px" onclick="__hoursTextAll()">全部</button>' +
       '</div>' +
       '<div id="hoursTextBody" style="padding:12px 16px">' +
-        '<textarea id="hoursTextPreview" readonly style="width:100%;height:240px;box-sizing:border-box;font-family:inherit;font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */;line-height:1.6;padding:10px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card);color:var(--text);resize:vertical"></textarea>' +
+        '<textarea id="hoursTextPreview" readonly style="width:100%;height:240px;box-sizing:border-box;font-family:inherit;font-size: 16px;line-height:1.6;padding:10px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card);color:var(--text);resize:vertical"></textarea>' +
       '</div>' +
       '<div class="modal-ops">' +
         '<button class="m-cancel" onclick="closeModal(\'hoursTextModal\')">关闭</button>' +
@@ -8759,14 +8748,6 @@ function drawHoursDetailCanvas(model) {
 function copyHoursDetailImage(studentId, memberId) {
   showHoursImageModal({ studentId: studentId, memberId: memberId, from: '', to: '' });
 }
-function dataURLToBlob(d) {
-  try {
-    var parts = d.split(','), mime = (parts[0].match(/:(.*?);/) || [, 'image/png'])[1];
-    var b = atob(parts[1]), u8 = new Uint8Array(b.length);
-    for (var i = 0; i < b.length; i++) u8[i] = b.charCodeAt(i);
-    return new Blob([u8], { type: mime });
-  } catch (e) { return null; }
-}
 /* 课时明细图片弹窗：支持自定义时间范围筛选后导出图片 */
 function showHoursImageModal(range) {
   var modalId = 'hoursImgModal';
@@ -8820,9 +8801,9 @@ function showHoursImageModal(range) {
       '<div class="modal-title" id="hoursImgTitle">课时明细图片</div>' +
       '<div style="padding:10px 16px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
         '<label style="font-size:calc(12px * var(--fs));color:var(--text-light)">起始</label>' +
-        '<input id="hoursImgFrom" type="date" value="' + (range.from || '') + '" style="font-family:inherit;font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */;padding:4px 6px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card)">' +
+        '<input id="hoursImgFrom" type="date" value="' + (range.from || '') + '" style="font-family:inherit;font-size: 16px;padding:4px 6px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card)">' +
         '<label style="font-size:calc(12px * var(--fs));color:var(--text-light)">结束</label>' +
-        '<input id="hoursImgTo" type="date" value="' + (range.to || '') + '" style="font-family:inherit;font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */;padding:4px 6px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card)">' +
+        '<input id="hoursImgTo" type="date" value="' + (range.to || '') + '" style="font-family:inherit;font-size: 16px;padding:4px 6px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card)">' +
         '<button class="btn-ghost" style="font-size:calc(12px * var(--fs));padding:4px 10px" onclick="__hoursImgApply()">应用</button>' +
         '<button class="btn-ghost" style="font-size:calc(12px * var(--fs));padding:4px 10px" onclick="__hoursImgAll()">全部</button>' +
       '</div>' +
@@ -9242,11 +9223,6 @@ function poolBatchSelectAll() {
     poolBatchSel[key] = true;
     row.classList.add('batch-selected');
   });
-  renderPoolBatchCount();
-}
-function poolBatchSelectNone() {
-  poolBatchSel = {};
-  document.querySelectorAll('.pool-row.batch-selected').forEach(function (row) { row.classList.remove('batch-selected'); });
   renderPoolBatchCount();
 }
 function renderPoolBatchBar() {
@@ -10714,7 +10690,7 @@ function saveSettings() {
   state.settings.teacherName = document.getElementById('setTeacher').value.trim();
   state.settings.reminderTemplate = document.getElementById('setTemplate').value;
   state.settings.renewTemplate = document.getElementById('setRenewTemplate').value;
-  saveData();
+  saveDataSoon();   /* v157: 连续输入 → 合并写入 */
 }
 function resetTemplate() {
   document.getElementById('setTemplate').value = DEFAULT_TEMPLATE;
@@ -10967,13 +10943,20 @@ function importData(ev) {
   reader.onload = function () {
     try {
       var d = JSON.parse(reader.result);
-      if (!d || !Array.isArray(d.students)) throw new Error('bad');
-      /* 版本兼容检查：导入旧版本时提示用户 */
+      if (!d || typeof d !== 'object' || !Array.isArray(d.students)) throw new Error('bad');
+      /* v157: 结构 + id 白名单校验。学员/成员 id 会被原样拼进 onclick 字符串，
+         畸形 id（含引号等）会截断属性注入脚本；残缺结构也可能让后续渲染崩掉。 */
+      var ID_RE = /^[A-Za-z0-9_-]{1,60}$/;
+      var badId = null;
+      d.students.forEach(function (st) {
+        if (!st || typeof st !== 'object') { badId = badId || '(空记录)'; return; }
+        if (st.id != null && !ID_RE.test(String(st.id))) badId = badId || String(st.id).slice(0, 24);
+        if (Array.isArray(st.members)) st.members.forEach(function (m) {
+          if (m && m.id != null && !ID_RE.test(String(m.id))) badId = badId || String(m.id).slice(0, 24);
+        });
+      });
+      if (badId) throw new Error('bad-id:' + badId);
       var importVer = d.version || 0;
-      if (importVer < DATA_VERSION) {
-        /* 降级导入：保留数据，会自动 migrate 字段 */
-        console.warn('导入数据版本 ' + importVer + '（当前 ' + DATA_VERSION + '），将自动迁移');
-      }
       showConfirm('导入数据', (importVer && importVer < DATA_VERSION
           ? '导入旧版本数据（v' + importVer + '）将自动迁移到当前版本。导入'
           : '导入')
@@ -11032,13 +11015,17 @@ function importData(ev) {
         /* 先应用主题再渲染，避免主题闪烁 */
         applyTheme(state.settings.theme);
         applyBrand();
-        refreshGroupAvatars(function () {
-          saveData(); renderAll();
-          showToast('导入成功，共 ' + state.students.length + ' 个学生');
-        });
+        saveData(); renderAll();
+        showToast('导入成功，共 ' + state.students.length + ' 个学生');
+        refreshGroupAvatars();   /* v157: 头像合成不再卡在导入流程里 */
       });
-    } catch (e) { showToast('文件格式不对，导入失败'); }
+    } catch (e) {
+      var em = String((e && e.message) || '');
+      if (em.indexOf('bad-id:') === 0) showToast('备份里有不合法的 ID（' + em.slice(7) + '…），导入已中止');
+      else showToast('文件格式不对：请选择本工具导出的 JSON 备份（内含 students 数组）');
+    }
   };
+  reader.onerror = function () { showToast('读取文件失败，请重新选择'); };
   reader.readAsText(file);
   ev.target.value = '';
 }
@@ -11220,6 +11207,19 @@ document.addEventListener('click', function (e) {
   }
 });
 
+/* v157: 搜索框防抖。原来每敲一个字就全量重建列表（学员卡片里内联了 base64 头像），
+   单次 innerHTML 可达数 MB，输入时明显掉帧 → 180ms 防抖。函数本身保持可立即调用（其它调用点不受影响）。 */
+var __stuSearchTimer = null;
+function onStuSearchInput() {
+  clearTimeout(__stuSearchTimer);
+  __stuSearchTimer = setTimeout(function () { renderStudents(); }, 180);
+}
+var __poolSearchTimer = null;
+function onPoolSearchInput() {
+  clearTimeout(__poolSearchTimer);
+  __poolSearchTimer = setTimeout(function () { renderPoolList(); }, 180);
+}
+
 /* toast：action 可传 { label, fn }，显示一个操作按钮（如「撤销」），展示时长延长到 4s */
 var toastTimer = null;
 function showToast(msg, action) {
@@ -11313,10 +11313,14 @@ function updateCountdowns() {
   var nowMin = now.getHours() * 60 + now.getMinutes();
   var todayKey = fmtDate(now);
   var nodes = document.querySelectorAll('.cd-chip[data-t]');
+  /* v157: 原实现每个 chip 都调一次 getClassesOfDate(now)（内部遍历全部学员 + 调课 + 排序）→ O(chip×学员×调课)，
+     而它每 30 秒和每次 renderAll 都跑。改为循环外只算一次，按 studentId|time 建索引查表。 */
+  var __clsIdx = {};
+  getClassesOfDate(now).forEach(function (c) { __clsIdx[c.studentId + '|' + c.time] = c; });
   nodes.forEach(function (el) {
     /* 防御：若该课实质上已请假（单人请假 / 小组全员请假），不展示上课倒计时，改为「已请假」 */
     if (el.dataset.sid && el.dataset.t) {
-      var matched = getClassesOfDate(now).filter(function (c) { return c.studentId === el.dataset.sid && c.time === el.dataset.t; })[0];
+      var matched = __clsIdx[el.dataset.sid + '|' + el.dataset.t];
       if (matched && isClassEffectivelyLeave(todayKey, matched)) {
         el.className = 'cd-chip cd-leave';
         el.textContent = '已请假';
@@ -11501,10 +11505,10 @@ function bootRender() {
   applyLayout();
   applyGlass();      /* v154: 玻璃液化效果 */
   applyFontZoom();   /* v154: 字体大小 */
-  refreshGroupAvatars(function () {
-    renderAll();
-    updateCountdowns();
-  });
+  /* v157: 先渲染再补头像——页面不再依赖头像合成回调，任何异常都不会白屏 */
+  renderAll();
+  updateCountdowns();
+  refreshGroupAvatars(function () { renderAll(); });
   setInterval(function () {
     updateCountdowns();
     var n = new Date();
