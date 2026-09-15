@@ -2202,7 +2202,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v153</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v154</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -2341,6 +2341,12 @@
       <div class="set-sub-head">页面布局</div>
       <div class="layout-opts" id="layoutOpts"></div>
       <div class="set-tip">小屏手机用「紧凑」一屏能看更多，平板 / 大屏用「宽松」更舒展。</div>
+      <div class="set-sub-head">玻璃液化效果</div>
+      <div class="layout-opts" id="glassOpts"></div>
+      <div class="set-tip">卡片与弹窗的毛玻璃流动感。「关闭」最清晰也最省电，老旧手机推荐；「液态」朦胧流动感最强。</div>
+      <div class="set-sub-head">字体大小</div>
+      <div class="layout-opts" id="fontOpts"></div>
+      <div class="set-tip">整页文字与按钮一起缩放，选「大 / 特大」看得更清楚，不影响任何数据。</div>
       </div></div>
     </section>
 
@@ -3246,6 +3252,68 @@ var LAYOUT_OPTS = [
   { key: 'compact', label: '紧凑', desc: '小屏 · 一屏多看' },
   { key: 'roomy', label: '宽松', desc: '平板 · 大屏' }
 ];
+/* v154: 玻璃液化效果（毛玻璃强度）——off 关掉最省电最清晰；standard 与历史默认一致 */
+var GLASS_OPTS = [
+  { key: 'off', label: '关闭', value: 'none', desc: '最清晰 · 最省电' },
+  { key: 'soft', label: '轻柔', value: 'blur(3px) saturate(130%)', desc: '轻微朦胧' },
+  { key: 'standard', label: '标准', value: 'blur(6px) saturate(150%)', desc: '均衡（默认）' },
+  { key: 'strong', label: '液态', value: 'blur(14px) saturate(185%)', desc: '流动感最强' }
+];
+/* v154: 字体大小——zoom 作用于整页坐标系，fixed 弹窗/键盘适配同比例缩放不受影响 */
+var FONT_OPTS = [
+  { key: 'small', label: '小', zoom: 0.9, desc: '一屏更多内容' },
+  { key: 'standard', label: '标准', zoom: 1, desc: '默认' },
+  { key: 'large', label: '大', zoom: 1.1, desc: '看得更清楚' },
+  { key: 'xlarge', label: '特大', zoom: 1.25, desc: '视力友好' }
+];
+function applyGlass() {
+  var key = state.settings.glass || 'standard';
+  var o = GLASS_OPTS.filter(function (x) { return x.key === key; })[0] || GLASS_OPTS[2];
+  document.documentElement.style.setProperty('--glass-blur', o.value);
+}
+function applyFontZoom() {
+  var key = state.settings.font || 'standard';
+  var o = FONT_OPTS.filter(function (x) { return x.key === key; })[0] || FONT_OPTS[1];
+  document.body.style.zoom = (o.zoom === 1) ? '' : String(o.zoom);
+}
+function renderGlassOpts() {
+  var box = document.getElementById('glassOpts');
+  if (!box) return;
+  var cur = state.settings.glass || 'standard';
+  box.innerHTML = GLASS_OPTS.map(function (o) {
+    return '<button type="button" class="lo-btn' + (cur === o.key ? ' on' : '') + '" onclick="setGlass(\'' + o.key + '\')">' +
+      '<span class="lo-label">' + o.label + '</span>' +
+      '<span class="lo-desc">' + o.desc + '</span>' +
+      '</button>';
+  }).join('');
+}
+function setGlass(key) {
+  state.settings.glass = key;
+  applyGlass();
+  saveData();
+  renderGlassOpts();
+  var o = GLASS_OPTS.filter(function (x) { return x.key === key; })[0];
+  showToast('玻璃效果已切换为「' + (o ? o.label : key) + '」');
+}
+function renderFontOpts() {
+  var box = document.getElementById('fontOpts');
+  if (!box) return;
+  var cur = state.settings.font || 'standard';
+  box.innerHTML = FONT_OPTS.map(function (o) {
+    return '<button type="button" class="lo-btn' + (cur === o.key ? ' on' : '') + '" onclick="setFont(\'' + o.key + '\')">' +
+      '<span class="lo-label">' + o.label + '</span>' +
+      '<span class="lo-desc">' + o.desc + '</span>' +
+      '</button>';
+  }).join('');
+}
+function setFont(key) {
+  state.settings.font = key;
+  applyFontZoom();
+  saveData();
+  renderFontOpts();
+  var o = FONT_OPTS.filter(function (x) { return x.key === key; })[0];
+  showToast('字体大小已切换为「' + (o ? o.label : key) + '」');
+}
 function applyLayout() {
   var key = state.settings.layout || 'auto';
   document.body.classList.remove('layout-compact', 'layout-roomy');
@@ -3318,7 +3386,7 @@ function defaultState() {
     extraAttendees: {},
     reschedules: [],
     locations: JSON.parse(JSON.stringify(REAL_SCHEDULE.locations)),
-    settings: { teacherName: '', reminderTemplate: DEFAULT_TEMPLATE, renewTemplate: DEFAULT_RENEW_TEMPLATE, expandedLocs: [], theme: 'classic', brandName: '', brandAvatar: '', todayCollapsed: false, tomorrowCollapsed: false, weekCollapsed: false, backupHintDismissedAt: 0, backupHintDismissedCount: 0, lowHoursCollapsed: false }
+    settings: { teacherName: '', reminderTemplate: DEFAULT_TEMPLATE, renewTemplate: DEFAULT_RENEW_TEMPLATE, expandedLocs: [], theme: 'classic', brandName: '', brandAvatar: '', todayCollapsed: false, tomorrowCollapsed: false, weekCollapsed: false, backupHintDismissedAt: 0, backupHintDismissedCount: 0, lowHoursCollapsed: false, glass: 'standard', font: 'standard' }
   };
 }
 var state = defaultState();
@@ -6030,6 +6098,8 @@ function renderSettings() {
   document.getElementById('setRenewTemplate').value = state.settings.renewTemplate || DEFAULT_RENEW_TEMPLATE;
   renderThemePicker();
   renderLayoutOpts();
+  renderGlassOpts();
+  renderFontOpts();
   /* 地点列表 */
   var html = '';
   state.locations.forEach(function (loc) {
@@ -11015,6 +11085,7 @@ function confirmClearAll() {
     applyBrand();   /* 顶部品牌名称 / 品牌头像 */
     applyLayout();  /* body 的布局样式类（紧凑/宽松） */
     applyTheme(state.settings.theme);
+    applyGlass(); applyFontZoom(); /* v154: 玻璃/字体恢复默认 */
     /* 若「学员管理」弹窗正开着，同步清空其列表与编辑器 */
     var poolM = document.getElementById('poolModal');
     if (poolM && poolM.classList.contains('show')) {
@@ -11423,6 +11494,8 @@ var __booted = false, __bootRaw = null;
 function bootRender() {
   applyTheme(state.settings.theme);
   applyLayout();
+  applyGlass();      /* v154: 玻璃液化效果 */
+  applyFontZoom();   /* v154: 字体大小 */
   refreshGroupAvatars(function () {
     renderAll();
     updateCountdowns();
