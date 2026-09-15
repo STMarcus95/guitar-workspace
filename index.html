@@ -2199,7 +2199,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v149</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v150</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -10976,18 +10976,48 @@ function closeModal(id) { document.getElementById(id).classList.remove('show'); 
 /* 弹窗打开时锁定背景滚动 + 适配 iOS 软键盘：避免手机端在弹窗里操作导致后面页面跟着动，或输入框被键盘挡住。
    普通浏览器用 overflow:hidden；iOS Safari 对 body 的 overflow:hidden 无效，必须用 position:fixed + 记录滚动位置。 */
 var __scrollLocked = false, __scrollY = 0;
-/* 软键盘弹出时把弹窗遮罩高度收到可视区域内，避免底部按钮被键盘遮挡 */
+/* 软键盘弹出时把弹窗遮罩完整钉在【可视视口】上（v150）。
+   旧逻辑只设 height=vv.height 但锚点仍是布局视口 top:0——键盘弹出瞬间浏览器会平移可视视口
+   （iOS Safari / 不支持 interactive-widget 的浏览器布局视口不缩放），遮罩与可见区域错位，
+   遮罩下方露出一截未遮罩的背景页面，看起来"整页被抬起来"。
+   v150：top/left/width/height 全部跟随 visualViewport（含 offsetTop/offsetLeft 平移偏移），
+   同时把弹窗本体 max-height 压到可视高度内（88vh 按"大视口"算会超高被切顶），并在键盘刚弹出时
+   把聚焦的搜索框滚到可视区中央。键盘收起后全部还原。 */
+var __vvFull = 0;      /* 无键盘时的视口高（启动/键盘收起时记录，用于判断键盘开合，兼容 resizes-content 下 innerHeight 也缩小的情形） */
+var __kbWasOpen = false;
 function __fixKeyboard() {
   var vv = window.visualViewport;
   if (!vv) return;
+  var ih = window.innerHeight || vv.height || 0;
+  if (!__vvFull) __vvFull = Math.max(ih, vv.height);
+  var kbOpen = (__vvFull - vv.height) > 120;
+  if (!kbOpen) __vvFull = Math.max(ih, vv.height, __vvFull);
   var active = document.activeElement;
   var inModal = active && active.closest && (active.closest('.modal') || active.closest('.detail-sheet'));
-  var open = !!document.querySelector('.modal-mask.show, .detail-mask.show');
-  if (open && inModal && vv.height < (window.innerHeight || vv.height) - 40) {
-    document.querySelectorAll('.modal-mask.show, .detail-mask.show').forEach(function (m) { m.style.height = vv.height + 'px'; });
-  } else {
-    document.querySelectorAll('.modal-mask.show, .detail-mask.show').forEach(function (m) { m.style.height = ''; });
+  var masks = document.querySelectorAll('.modal-mask.show, .detail-mask.show');
+  if (!masks.length) { __kbWasOpen = false; return; }
+  var pin = kbOpen && inModal;
+  masks.forEach(function (m) {
+    if (pin) {
+      m.style.top = (vv.offsetTop || 0) + 'px';
+      m.style.left = (vv.offsetLeft || 0) + 'px';
+      m.style.bottom = 'auto';
+      m.style.right = 'auto';
+      m.style.width = vv.width + 'px';
+      m.style.height = vv.height + 'px';
+    } else {
+      m.style.top = ''; m.style.left = ''; m.style.bottom = ''; m.style.right = '';
+      m.style.width = ''; m.style.height = '';
+    }
+    var sheet = m.querySelector('.modal') || m.querySelector('.detail-sheet');
+    if (sheet) sheet.style.maxHeight = pin ? Math.max(200, vv.height - 24) + 'px' : '';
+  });
+  /* 键盘刚弹出的那一次：把聚焦的搜索框（或它所在的选人面板）滚到可视区中央，不等 250ms */
+  if (pin && !__kbWasOpen && active && active.scrollIntoView) {
+    var panel = active.closest ? (active.closest('.stu-picker-panel') || active.closest('.modal') || active.closest('.detail-sheet')) : null;
+    try { (panel || active).scrollIntoView({ block: 'center' }); } catch (e) { try { active.scrollIntoView(); } catch (e2) {} }
   }
+  __kbWasOpen = pin;
 }
 function __applyBodyScrollLock() {
   var open = !!document.querySelector('.modal-mask.show, .detail-mask.show');
@@ -11015,9 +11045,10 @@ if (typeof MutationObserver !== 'undefined') {
   var __lockObserver = new MutationObserver(__applyBodyScrollLock);
   if (document.body) __lockObserver.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'], childList: true });
 }
-/* iOS 软键盘弹出/收起时同步调整弹窗高度 */
+/* iOS/安卓 软键盘弹出、收起、以及键盘弹出引起的可视视口平移（pan）时同步钉住弹窗遮罩 */
 if (window.visualViewport && window.visualViewport.addEventListener) {
   window.visualViewport.addEventListener('resize', __fixKeyboard);
+  window.visualViewport.addEventListener('scroll', __fixKeyboard); /* 平移也要跟：遮罩钉在可视视口上才不会露背景 */
 }
 document.addEventListener('focusin', function (e) { if (e.target && e.target.closest && (e.target.closest('.modal') || e.target.closest('.detail-sheet'))) setTimeout(__fixKeyboard, 250); });
 document.addEventListener('focusout', function () { setTimeout(__fixKeyboard, 250); });
