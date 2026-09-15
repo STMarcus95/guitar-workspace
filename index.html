@@ -95,6 +95,7 @@
     --glass-bg-strong: rgba(255,255,255,0.78);
     --glass-border: rgba(255,255,255,0.85);
     --glass-blur: blur(6px) saturate(150%);
+    --fs: 1; /* v155: 字体大小倍率——只缩放字号，不动布局坐标系（fixed 弹窗/sticky/键盘适配均不受影响） */
     --glass-shadow: 0 8px 32px rgba(122,79,46,0.12);
     --glass-shadow-sm: 0 4px 16px rgba(122,79,46,0.08);
     /* ===== 主题联动变量 ===== */
@@ -424,7 +425,7 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Roboto, sans-serif;
     background: var(--bg);
     color: var(--text);
-    font-size: 13px;
+    font-size: calc(13px * var(--fs));
     line-height: 1.6;
     min-height: 100vh;
     width: 100%;
@@ -466,7 +467,7 @@
     overflow-wrap: anywhere; word-break: break-word;
   }
   @media (min-width: 769px) {
-    body { padding-bottom: 32px; font-size: 13px; }
+    body { padding-bottom: 32px; font-size: calc(13px * var(--fs)); }
     .wrap { padding: 20px; }
   }
 
@@ -495,14 +496,14 @@
   .h-title:hover .brand-edit { opacity: 1; }
   .brand-edit { opacity: .5; transition: opacity .15s; flex: none; width: 14px; height: 14px; }
   /* 版本号：头部品牌名旁边小字，方便用户确认是否拿到最新版 */
-  .brand-ver { font-size: 12px; color: var(--text-light); opacity: 0.65; margin-left: 2px; align-self: flex-end; padding-bottom: 2px; font-variant-numeric: tabular-nums; user-select: text; }
+  .brand-ver { font-size: calc(12px * var(--fs)); color: var(--text-light); opacity: 0.65; margin-left: 2px; align-self: flex-end; padding-bottom: 2px; font-variant-numeric: tabular-nums; user-select: text; }
   .h-meta { display: flex; flex-direction: column; min-width: 0; }
   .h-name-row { display: flex; align-items: flex-end; gap: 6px; }
   .h-logo { flex: none; width: 80px; height: 80px; filter: drop-shadow(0 3px 7px rgba(0,0,0,.5)); }
   .h-logo svg, .h-logo img { width: 80px; height: 80px; display: block; }
   .h-logo img { border-radius: 12px; object-fit: cover; border: 2px solid #e8c074; box-sizing: border-box; }
-  h1 { font-size: 17px; font-weight: 700; letter-spacing: 0.5px; background: var(--gold-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
-  .h-date { font-size: 12px; opacity: .85; white-space: nowrap; margin-left: 0; margin-top: 3px; }
+  h1 { font-size: calc(17px * var(--fs)); font-weight: 700; letter-spacing: 0.5px; background: var(--gold-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; }
+  .h-date { font-size: calc(12px * var(--fs)); opacity: .85; white-space: nowrap; margin-left: 0; margin-top: 3px; }
   @media (max-width: 480px) {
     .h-top { flex-direction: column; align-items: flex-start; gap: 10px; }
     .h-date { margin-left: 0; margin-top: 2px; }
@@ -515,7 +516,7 @@
     border: 1px solid var(--btn-border);
     color: var(--btn-text); border-radius: 12px;
     min-height: 36px; padding: 0 10px;
-    font-size: 12px; cursor: pointer;
+    font-size: calc(12px * var(--fs)); cursor: pointer;
     transition: background .15s;
     font-family: inherit;
   }
@@ -548,20 +549,20 @@
   .panel-title {
     display: flex; align-items: center; gap: 8px;
     min-height: 32px;
-    font-size: 15px; font-weight: 700; margin-bottom: 10px;
+    font-size: calc(15px * var(--fs)); font-weight: 700; margin-bottom: 10px;
     padding: 0; color: var(--wood-dark);
   }
   /* 面板标题图标统一主色（覆盖内联杂色），形成一致的视觉语言 */
   .panel-title > svg { stroke: var(--orange); flex-shrink: 0; }
   .panel-title .cnt {
-    margin-left: auto; font-size: 12px; font-weight: 500;
+    margin-left: auto; font-size: calc(12px * var(--fs)); font-weight: 500;
     color: var(--text-light);
   }
   /* 折叠面板：标题可点击，箭头旋转 */
   .panel-title.togglable { cursor: pointer; user-select: none; -webkit-user-select: none; border-radius: 12px; }
   .panel-title.togglable .panel-arrow { min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; margin: -6px -10px -6px 0; }
   .panel-arrow { flex: none; transition: transform .18s ease; color: var(--text-light); }
-  @media (min-width: 769px) { .panel-title { font-size: 15px; } }
+  @media (min-width: 769px) { .panel-title { font-size: calc(15px * var(--fs)); } }
   .panel-fold.panel-col .panel-arrow { transform: rotate(-90deg); }
   .panel-fold.panel-col .panel-body { display: none; }
   .panel-fold.panel-col .panel-title { margin-bottom: 0; }
@@ -576,7 +577,7 @@
   .acc + .acc { margin-top: 12px; }
   .acc-head {
     display: flex; align-items: center; gap: 10px;
-    font-size: 15px; font-weight: 700;
+    font-size: calc(15px * var(--fs)); font-weight: 700;
     padding: 14px 16px; cursor: pointer; user-select: none;
     -webkit-tap-highlight-color: transparent;
   }
@@ -605,7 +606,7 @@
   .tag-hot {
     background: var(--orange-light); color: var(--orange-deep);
     border: 1px solid var(--orange-border);
-    font-size: 12px; padding: 1px 8px; border-radius: 99px; font-weight: 600;
+    font-size: calc(12px * var(--fs)); padding: 1px 8px; border-radius: 99px; font-weight: 600;
   }
   .r-item {
     display: flex; align-items: center; gap: 10px;
@@ -619,18 +620,18 @@
   .r-item.done-r { background: rgba(230,244,236,0.5); border-color: rgba(196,227,210,0.6); }
   .r-item.leave-r { background: rgba(243,239,232,0.5); border-color: rgba(221,213,200,0.5); opacity: .75; }
   .badge-leave {
-    display: inline-block; font-size: 12px; font-weight: 600; color: var(--text-light);
+    display: inline-block; font-size: calc(12px * var(--fs)); font-weight: 600; color: var(--text-light);
     background: #e8e1d5; border-radius: 4px; padding: 0 4px; vertical-align: 1px; line-height: 1.55;
   }
   .btn-leave {
     border: 1px solid #ddd0bd; background: #faf7f1; color: #9c8468;
-    border-radius: 12px; font-size: 12px; font-weight: 600; padding: 3px 8px;
+    border-radius: 12px; font-size: calc(12px * var(--fs)); font-weight: 600; padding: 3px 8px;
     min-height: 26px; cursor: pointer; white-space: nowrap;
   }
   .btn-leave:active { background: #f0e9dd; }
   .btn-leave-undo {
     border: 1px solid #ddd0bd; background: var(--card); color: var(--text-light);
-    border-radius: 12px; font-size: 12px; font-weight: 600; padding: 3px 8px;
+    border-radius: 12px; font-size: calc(12px * var(--fs)); font-weight: 600; padding: 3px 8px;
     min-height: 26px; cursor: pointer; flex-shrink: 0; white-space: nowrap;
   }
   .r-item:last-child { margin-bottom: 0; }
@@ -638,15 +639,15 @@
   .stat-controls { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
   .stat-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .stat-row-date { flex-wrap: nowrap; }
-  .stat-lab { font-size: 13px; font-weight: 600; color: var(--wood-dark); flex-shrink: 0; }
-  .stat-sep { font-size: 13px; color: var(--text-light); flex-shrink: 0; }
+  .stat-lab { font-size: calc(13px * var(--fs)); font-weight: 600; color: var(--wood-dark); flex-shrink: 0; }
+  .stat-sep { font-size: calc(13px * var(--fs)); color: var(--text-light); flex-shrink: 0; }
   .stat-input { min-height: 38px; padding: 0 8px; width: auto; flex: 1; min-width: 110px; max-width: 200px; }
   .stat-row-date .stat-input { min-width: 0; max-width: none; flex: 1 1 0; }
   .stat-row-date .stat-loc { flex: 0 1 auto; min-width: 90px; max-width: 130px; }
   .stat-row-date .stat-go { min-height: 38px; padding: 0 14px; flex-shrink: 0; }
   .stat-qk-row { gap: 6px; }
-  .stat-qk { min-height: 34px; padding: 0 10px; font-size: 12px; }
-  .stat-check { font-size: 13px; color: var(--text-light); display: inline-flex; align-items: center; gap: 5px; }
+  .stat-qk { min-height: 34px; padding: 0 10px; font-size: calc(12px * var(--fs)); }
+  .stat-check { font-size: calc(13px * var(--fs)); color: var(--text-light); display: inline-flex; align-items: center; gap: 5px; }
   .stat-check input { accent-color: var(--orange-deep); }
   .stat-sum { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0 8px; }
   .stat-sum-item {
@@ -654,13 +655,13 @@
     border: 1px solid rgba(240,207,174,0.6);
     border-radius: 12px; padding: 8px 10px; text-align: center;
   }
-  .stat-sum-item b { display: block; font-size: 17px; color: var(--orange-deep); line-height: 1.3; }
-  .stat-sum-item span { font-size: 12px; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+  .stat-sum-item b { display: block; font-size: calc(17px * var(--fs)); color: var(--orange-deep); line-height: 1.3; }
+  .stat-sum-item span { font-size: calc(12px * var(--fs)); color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
   .stat-charge { color: #2e7d4f !important; }
   .stat-consume { color: #b5482a !important; }
   .stat-adjust { color: #4f5bab !important; }
-  .stat-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
-  .stat-table th { text-align: left; font-size: 12px; color: var(--text-light); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid #eadfce; }
+  .stat-table { width: 100%; border-collapse: collapse; font-size: calc(13px * var(--fs)); table-layout: fixed; }
+  .stat-table th { text-align: left; font-size: calc(12px * var(--fs)); color: var(--text-light); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid #eadfce; }
   .stat-table td { padding: 7px 8px; border-bottom: 1px dashed #efe6d7; vertical-align: middle; }
   .stat-table tr:last-child td { border-bottom: none; }
   .stat-table .num { font-weight: 700; color: var(--wood-dark); }
@@ -679,13 +680,13 @@
   }
   @media (max-width: 360px) {
     .stat-sum { grid-template-columns: repeat(2, 1fr); }
-    .stat-table { font-size: 12px; }
+    .stat-table { font-size: calc(12px * var(--fs)); }
     .stat-table th, .stat-table td { padding: 6px 4px; }
   }
-  .stat-empty { font-size: 13px; color: var(--text-light); padding: 10px 2px; }
+  .stat-empty { font-size: calc(13px * var(--fs)); color: var(--text-light); padding: 10px 2px; }
   /* 头像尺寸一律写死为「卡片内容高度以内」的确定值：
      <img> 头像若用 width:auto 会退化成照片原始分辨率、把卡片撑爆，故必须显式 width+height + object-fit:cover */
-  .r-item .avatar { width: 28px; height: 28px; font-size: 12px; flex-shrink: 0; align-self: center; object-fit: cover; border-radius: 8px; }
+  .r-item .avatar { width: 28px; height: 28px; font-size: calc(12px * var(--fs)); flex-shrink: 0; align-self: center; object-fit: cover; border-radius: 8px; }
   /* ===== 今日/明日课程卡：纵向布局（头像 + 信息(课程名 / 时间·地点) + 操作）===== */
   #todayList .r-item, #tomorrowPanel .r-item {
     background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
@@ -702,27 +703,27 @@
     display: flex; align-items: center; justify-content: center;
     /* v95: 让头像在动态计算高度时始终垂直居中，避免上下留红隙 */
   }
-  #todayList .r-item .r-avatar .avatar { width: 34px; height: 34px; font-size: 13px; border-radius: 8px; flex-shrink: 0; object-fit: cover; object-position: center 30%; }
-  #tomorrowList .r-item .r-avatar .avatar { width: 38px; height: 38px; font-size: 13px; border-radius: 8px; flex-shrink: 0; object-fit: cover; object-position: center 30%; }
+  #todayList .r-item .r-avatar .avatar { width: 34px; height: 34px; font-size: calc(13px * var(--fs)); border-radius: 8px; flex-shrink: 0; object-fit: cover; object-position: center 30%; }
+  #tomorrowList .r-item .r-avatar .avatar { width: 38px; height: 38px; font-size: calc(13px * var(--fs)); border-radius: 8px; flex-shrink: 0; object-fit: cover; object-position: center 30%; }
   /* 中间信息列：课程名 + 时间·地点（纵向堆叠，前天版本） */
   #todayList .r-item .r-info, #tomorrowList .r-item .r-info {
     flex: 1; min-width: 0; overflow: hidden;
     display: flex; flex-direction: column; justify-content: center; gap: 1px;
   }
   #todayList .r-item .r-info .r-name {
-    font-size: 12px; font-weight: 700; color: var(--wood-dark); line-height: 1.25;
+    font-size: calc(12px * var(--fs)); font-weight: 700; color: var(--wood-dark); line-height: 1.25;
     display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
   }
   #todayList .r-item .r-info .r-meta {
-    font-size: 11px; color: var(--text-light); line-height: 1.2;
+    font-size: calc(11px * var(--fs)); color: var(--text-light); line-height: 1.2;
     display: flex; align-items: center; gap: 4px; flex-wrap: nowrap;
   }
   #todayList .r-item .r-info .r-meta .r-time {
-    font-weight: 700; color: var(--orange-deep); font-size: 12px; flex-shrink: 0;
+    font-weight: 700; color: var(--orange-deep); font-size: calc(12px * var(--fs)); flex-shrink: 0;
   }
   #todayList .r-item.done-r .r-info .r-meta .r-time { color: var(--green); }
   #todayList .r-item .r-info .r-loc {
-    font-size: 10px; color: var(--text-light); line-height: 1.2;
+    font-size: calc(10px * var(--fs)); color: var(--text-light); line-height: 1.2;
     display: flex; align-items: center; gap: 3px;
   }
   /* 右侧：状态标签 + 操作按钮 */
@@ -732,7 +733,7 @@
   }
   #todayList .r-item .r-status, #tomorrowList .r-item .r-status {
     display: inline-block; min-width: 36px; height: 18px; padding: 0 8px;
-    border-radius: 12px; font-size: 12px; font-weight: 600;
+    border-radius: 12px; font-size: calc(12px * var(--fs)); font-weight: 600;
     line-height: 18px; text-align: center; white-space: nowrap;
   }
   #todayList .r-item .r-status.status-active { background: var(--orange-deep); color: #fff; }
@@ -746,9 +747,9 @@
   #todayList .r-item.done-r { background: rgba(230,244,236,0.55); }
   /* 今天上课标签 */
   #todayList .grp-chip,
-  #todayList .badge-leave { font-size: 10px; padding: 0 5px; line-height: 1.5; border-radius: 12px; font-weight: 600; }
+  #todayList .badge-leave { font-size: calc(10px * var(--fs)); padding: 0 5px; line-height: 1.5; border-radius: 12px; font-weight: 600; }
   /* v127：今日列表的倒计时徽章同样走低调小字，不再被上面的 12px 覆盖 */
-  #todayList .cd-chip { font-size: 9px; font-weight: 400; padding: 0 1px; border-radius: 3px; line-height: 1.35; opacity: .7; }
+  #todayList .cd-chip { font-size: calc(9px * var(--fs)); font-weight: 400; padding: 0 1px; border-radius: 3px; line-height: 1.35; opacity: .7; }
   /* 已完成 / 请假 → 紧凑单行 */
   #todayList .r-item.r-fin,
   #todayList .r-item.leave-r,
@@ -763,16 +764,16 @@
   #todayList .r-item.r-fin .fin-time,
   #todayList .r-item.leave-r .fin-time,
   #tomorrowList .r-item.r-fin .fin-time,
-  #tomorrowList .r-item.leave-r .fin-time { font-size: 12px; font-weight: 600; color: var(--text-light); flex-shrink: 0; min-width: 40px; }
+  #tomorrowList .r-item.leave-r .fin-time { font-size: calc(12px * var(--fs)); font-weight: 600; color: var(--text-light); flex-shrink: 0; min-width: 40px; }
   #todayList .r-item.r-fin .fin-name,
   #todayList .r-item.leave-r .fin-name,
   #tomorrowList .r-item.r-fin .fin-name,
   #tomorrowList .r-item.leave-r .fin-name {
-    font-size: 13px; font-weight: 600; color: var(--wood); text-align: left;
+    font-size: calc(13px * var(--fs)); font-weight: 600; color: var(--wood); text-align: left;
     flex: 1; min-width: 0; overflow: visible; text-overflow: clip; white-space: normal; line-height: 1.4;
   }
   #todayList .r-item.leave-r .fin-name, #tomorrowList .r-item.leave-r .fin-name { color: #7a6a56; }
-  #todayList .r-item.r-fin .badge-done, #tomorrowList .r-item.r-fin .badge-done { margin-left: auto; flex-shrink: 0; font-size: 12px; }
+  #todayList .r-item.r-fin .badge-done, #tomorrowList .r-item.r-fin .badge-done { margin-left: auto; flex-shrink: 0; font-size: calc(12px * var(--fs)); }
   #todayList .r-item.leave-r .badge-leave, #tomorrowList .r-item.leave-r .badge-leave { margin-left: 6px; flex-shrink: 0; }
   #todayList .r-item.leave-r .cd-chip, #tomorrowList .r-item.leave-r .cd-chip { display: none; }
   #todayList .r-actions .btn-leave,
@@ -780,12 +781,12 @@
   #todayList .r-actions .btn-copy,
   #tomorrowList .r-actions .btn-leave,
   #tomorrowList .r-actions .btn-leave-undo,
-  #tomorrowList .r-actions .btn-copy { min-height: 30px; padding: 5px 10px; font-size: 11px; border-radius: 12px; }
+  #tomorrowList .r-actions .btn-copy { min-height: 30px; padding: 5px 10px; font-size: calc(11px * var(--fs)); border-radius: 12px; }
   #todayList .r-item.r-fin .btn-leave-undo,
   #todayList .r-item.leave-r .btn-leave-undo,
   #tomorrowList .r-item.r-fin .btn-leave-undo,
-  #tomorrowList .r-item.leave-r .btn-leave-undo { min-height: 30px; padding: 4px 10px; font-size: 12px; border-radius: 12px; }
-  #todayList .r-actions .badge-done, #tomorrowList .r-actions .badge-done { font-size: 12px; }
+  #tomorrowList .r-item.leave-r .btn-leave-undo { min-height: 30px; padding: 4px 10px; font-size: calc(12px * var(--fs)); border-radius: 12px; }
+  #todayList .r-actions .badge-done, #tomorrowList .r-actions .badge-done { font-size: calc(12px * var(--fs)); }
   .avatar {
     /* 方形头像：默认 40px（兜底），各上下文再覆写自身尺寸；
        必须有显式 width+height + object-fit:cover，避免 <img> 用照片原始分辨率撑爆容器 */
@@ -795,7 +796,7 @@
     object-position: center 30%;   /* v96: 所有 img 头像统一裁剪焦点，竖构图人脸在框内上下居中 */
     display: inline-flex; align-items: center; justify-content: center;
     vertical-align: middle;   /* v95: 消除 inline-flex 在部分浏览器中的基线偏移 */
-    color: #fff; font-size: 16px; font-weight: 700;
+    color: #fff; font-size: calc(16px * var(--fs)); font-weight: 700;
     cursor: pointer; transition: transform .12s;
   }
   .avatar:active { transform: scale(.92); }
@@ -846,21 +847,21 @@
     -webkit-user-drag: none; -webkit-touch-callout: none; user-select: none; touch-action: none;
   }
   .r-info { flex: 1; min-width: 0; }
-  .r-name { font-weight: 500; font-size: 15px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-  .r-meta { font-size: 12px; color: var(--text-light); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .r-name { font-weight: 500; font-size: calc(15px * var(--fs)); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .r-meta { font-size: calc(12px * var(--fs)); color: var(--text-light); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
   .r-time { font-weight: 700; color: var(--orange-deep); font-variant-numeric: tabular-nums; }
   .r-item.done-r .r-time { color: var(--green); }
   .badge-done {
-    font-size: 12px; color: var(--green); font-weight: 600;
+    font-size: calc(12px * var(--fs)); color: var(--green); font-weight: 600;
     display: inline-flex; align-items: center; gap: 3px;
   }
   .loc-dot {
     display: inline-block; width: 8px; height: 8px;
     border-radius: 50%; flex-shrink: 0; vertical-align: middle;
   }
-  .loc-tag { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-light); }
+  .loc-tag { display: inline-flex; align-items: center; gap: 4px; font-size: calc(12px * var(--fs)); color: var(--text-light); }
   .hours-badge {
-    font-size: 12px; font-weight: 700; padding: 0 6px;
+    font-size: calc(12px * var(--fs)); font-weight: 700; padding: 0 6px;
     border-radius: 99px; line-height: 1.5;
   }
   .hours-ok { background: #efe7da; color: var(--wood-dark); }
@@ -871,7 +872,7 @@
     background: var(--orange); color: #fff;
     border: none; border-radius: 12px;
     min-height: 36px; padding: 0 11px;
-    font-size: 12px; font-weight: 600; cursor: pointer;
+    font-size: calc(12px * var(--fs)); font-weight: 600; cursor: pointer;
     transition: background .15s; flex-shrink: 0;
     font-family: inherit;
   }
@@ -881,13 +882,13 @@
   .btn-copy.btn-red { background: var(--red); }
   .empty-tip {
     text-align: center; color: var(--text-light);
-    font-size: 13px; padding: 18px 0;
+    font-size: calc(13px * var(--fs)); padding: 18px 0;
   }
   .btn-copy-all {
     width: 100%; margin-top: 8px;
     background: var(--wood); color: #fff;
     border: none; border-radius: 12px;
-    min-height: 40px; font-size: 12px; font-weight: 600;
+    min-height: 40px; font-size: calc(12px * var(--fs)); font-weight: 600;
     cursor: pointer; transition: background .15s; font-family: inherit;
   }
   .btn-copy-all:hover { background: var(--wood-dark); }
@@ -903,7 +904,7 @@
     display: flex; align-items: center; gap: 8px; flex-wrap: nowrap;
   }
   .low-hours .lh-text {
-    flex: 1; min-width: 0; font-size: 13px; color: var(--red); font-weight: 600;
+    flex: 1; min-width: 0; font-size: calc(13px * var(--fs)); color: var(--red); font-weight: 600;
     display: flex; align-items: center; gap: 6px;
     overflow: hidden;
   }
@@ -918,13 +919,13 @@
   .low-hours.collapsed .lh-text { flex: 0 0 auto; min-width: 0; overflow: visible; }
   .low-hours.collapsed .lh-tags { display: none; }
   .low-hours.collapsed .btn-copy { margin-left: auto; }
-  .low-hours .btn-copy { min-height: 30px; padding: 0 9px; font-size: 12px; border-radius: 12px; }
+  .low-hours .btn-copy { min-height: 30px; padding: 0 9px; font-size: calc(12px * var(--fs)); border-radius: 12px; }
   .lh-tag {
     display: inline-flex; align-items: center; gap: 3px;
     flex-shrink: 0;
     background: #fff; border: 1px solid #f0b4b4;
     border-radius: 99px; padding: 2px 7px;
-    font-size: 12px; color: var(--red); font-weight: 600;
+    font-size: calc(12px * var(--fs)); color: var(--red); font-weight: 600;
     cursor: pointer; user-select: none; white-space: nowrap;
   }
   .lh-tag:hover { background: #fff5f5; }
@@ -946,7 +947,7 @@
     color: var(--orange-deep);
     border-radius: 12px;
     padding: 10px 14px;
-    font-size: 13px;
+    font-size: calc(13px * var(--fs));
     display: flex; align-items: center; gap: 8px;
   }
   .backup-hint .bh-text { flex: 1; }
@@ -968,7 +969,7 @@
   .tab {
     flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px;
     min-height: 44px; border: none; background: transparent;
-    border-radius: 12px; font-size: 13px; font-weight: 600;
+    border-radius: 12px; font-size: calc(13px * var(--fs)); font-weight: 600;
     color: var(--text-light); cursor: pointer; font-family: inherit;
     transition: all .15s;
   }
@@ -981,13 +982,13 @@
     display: flex; align-items: center; justify-content: space-between; gap: 8px;
     margin-bottom: 12px; flex-wrap: wrap;
   }
-  .week-label { font-size: 13px; font-weight: 700; }
+  .week-label { font-size: calc(13px * var(--fs)); font-weight: 700; }
   .week-btns { display: flex; gap: 8px; }
   .btn-sm {
     min-height: 40px; padding: 0 13px;
     border: 1px solid var(--wood-light);
     background: var(--card); color: var(--wood);
-    border-radius: 12px; font-size: 13px; font-weight: 600;
+    border-radius: 12px; font-size: calc(13px * var(--fs)); font-weight: 600;
     cursor: pointer; font-family: inherit; transition: all .15s;
     display: inline-flex; align-items: center; gap: 4px;
   }
@@ -1007,17 +1008,17 @@
     text-align: left;
   }
   .mini-stats .ms-cap b {
-    font-size: 13px; font-weight: 700; color: var(--wood-dark); line-height: 1.15;
+    font-size: calc(13px * var(--fs)); font-weight: 700; color: var(--wood-dark); line-height: 1.15;
     display: flex; align-items: center; gap: 5px;
   }
-  .mini-stats .ms-cap span { font-size: 11px; color: var(--text-light); line-height: 1.15; }
+  .mini-stats .ms-cap span { font-size: calc(11px * var(--fs)); color: var(--text-light); line-height: 1.15; }
   /* 统计栏移动端缩小规则已移除（恢复到前天：3 等宽胶囊，各端一致） */
   .mini-stats .ms-cap.ms-remind b { position: relative; }
   .mini-stats .ms-cap.ms-remind b.pending::after {
     content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--red); flex-shrink: 0;
   }
   .bday-chip {
-    font-size: 12px; color: #c2588a; font-weight: 600;
+    font-size: calc(12px * var(--fs)); color: #c2588a; font-weight: 600;
     margin: 0 0 12px; min-height: 0;   /* v89：底部间距统一 12px，去掉负边距上拉 */
   }
   .bday-chip:empty { display: none; }
@@ -1044,7 +1045,7 @@
   .day-row.past .day-add { opacity: .6; }
   .day-past-tag {
     display: inline-block;
-    font-size: 12px; font-weight: 600; color: #a39685;
+    font-size: calc(12px * var(--fs)); font-weight: 600; color: #a39685;
     border: 1px solid #d9cfc3; border-radius: 99px; padding: 0 5px; line-height: 1.5;
     background: var(--soft);
   }
@@ -1059,10 +1060,10 @@
   .day-header-bar {
     flex: none; width: 4px; height: 20px; border-radius: 12px; background: var(--wood-light);
   }
-  .day-week { font-size: 13px; font-weight: 700; color: var(--text); }
-  .day-num { font-size: 12px; font-weight: 600; color: var(--text-light); }
+  .day-week { font-size: calc(13px * var(--fs)); font-weight: 700; color: var(--text); }
+  .day-num { font-size: calc(12px * var(--fs)); font-weight: 600; color: var(--text-light); }
   .day-header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-  .day-weekday { font-size: 12px; color: var(--text-light); }
+  .day-weekday { font-size: calc(12px * var(--fs)); color: var(--text-light); }
   .day-arrow {
     flex: none; width: 20px; height: 20px; color: var(--text-light);
     transition: transform .18s ease;
@@ -1072,7 +1073,7 @@
   /* v139: 日卡横向留白进一步收窄，让胶囊更贴近卡片边缘 */
   .day-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; padding: 0 2px 8px; }
   .day-body .cls-chip { margin-bottom: 0; }
-  .day-empty { font-size: 12px; color: var(--text-light); opacity: .85; padding: 2px 0; }
+  .day-empty { font-size: calc(12px * var(--fs)); color: var(--text-light); opacity: .85; padding: 2px 0; }
   @media (min-width: 769px) {
     .day-body { padding: 0 3px 10px; }
     .day-header { padding: 0 3px; }
@@ -1089,7 +1090,7 @@
     border: 1px solid rgba(255,255,255,0.35);
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
     border-radius: 10px;
-    padding: 3px 4px; margin-bottom: 6px; font-size: 13px;
+    padding: 3px 4px; margin-bottom: 6px; font-size: calc(13px * var(--fs));
     min-height: 28px; min-width: 0;
   }
   .cls-chip:last-child { margin-bottom: 0; }
@@ -1100,27 +1101,27 @@
   .cls-chip.leave-c { opacity: .6; background: #f1ece3; }
   .cls-chip.leave-c .chip-name { text-decoration: line-through; }
   .chip-mark {
-    font-size: 12px; font-weight: 700; color: #fff;
+    font-size: calc(12px * var(--fs)); font-weight: 700; color: #fff;
     border-radius: 4px; padding: 1px 5px; flex-shrink: 0; line-height: 1.4;
   }
   .chip-mark.m-fix { background: var(--wood); }
   .chip-mark.m-flex { background: var(--orange); }
   .chip-time {
     flex: none; width: 40px;
-    font-size: 13px; font-weight: 700; color: var(--orange-deep);
+    font-size: calc(13px * var(--fs)); font-weight: 700; color: var(--orange-deep);
     text-align: left; font-variant-numeric: tabular-nums; /* v104: 等宽数字，各胶囊时间严格对齐 */
   }
   /* v100: 名字自适应撑满剩余宽度，让胶囊内容从左拉到右，减少右侧空白 */
   .cls-chip .chip-name { font-weight: 500; min-width: 2em; flex: 1 1 auto; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .cls-chip .chip-leave { font-size: 12px; color: #fff; background: #b3a696; padding: 0 5px; border-radius: 4px; line-height: 1.5; flex-shrink: 0; }
-  .cls-chip .loc-tag { font-size: 12px; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+  .cls-chip .chip-leave { font-size: calc(12px * var(--fs)); color: #fff; background: #b3a696; padding: 0 5px; border-radius: 4px; line-height: 1.5; flex-shrink: 0; }
+  .cls-chip .loc-tag { font-size: calc(12px * var(--fs)); display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
   .cls-chip .loc-tag .loc-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
   /* 操作按钮：靠右；整组不收缩，放不下时换行仍保持右对齐
      v135：用户反馈周课表操作按钮太显眼——字号缩小、去绿色框、整体弱化，靠右排列 */
   .chip-actions { margin-left: auto; display: inline-flex; align-items: center; justify-content: flex-end; gap: 4px; flex-wrap: nowrap; flex-shrink: 0; }
   .chip-actions > span {
     display: inline-flex; align-items: center;
-    font-size: 11px; font-weight: 500;
+    font-size: calc(11px * var(--fs)); font-weight: 500;
     border-radius: 4px; padding: 2px 4px; margin: -2px -2px; line-height: 1.35;
     cursor: pointer; white-space: nowrap;
   }
@@ -1141,22 +1142,22 @@
     transform: translate(-50%, -50%); width: 44px; height: 44px;
   }
   /* 调课状态徽标（"已调至 9月2 19:30" 等）放进 chip-actions 末尾 */
-  .rs-badge { font-size: 13px; font-weight: 600; padding: 0 4px; border-radius: 4px; white-space: nowrap; }
+  .rs-badge { font-size: calc(13px * var(--fs)); font-weight: 600; padding: 0 4px; border-radius: 4px; white-space: nowrap; }
   .rs-b-out { color: var(--text-light); background: rgba(170,150,128,.16); }
   .rs-b-in { color: #a06a1c; background: rgba(224,118,46,.15); }
   .cls-chip.rs-out-c { opacity: .6; }
   .cls-chip.rs-out-c .chip-mark { background: #b3a696; }
   .cls-chip.rs-out-c .chip-name { text-decoration: line-through; }
   .cls-chip.rs-in-c { box-shadow: inset 0 0 0 1px rgba(224,118,46,.4); }
-  .rs-chip-in { font-size: 12px; font-weight: 600; color: #a06a1c; background: rgba(224,118,46,.12); padding: 0 5px; border-radius: 4px; margin-left: 2px; line-height: 1.6; }
-  .rs-note { font-size: 12px; color: #a06a1c; display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0; }
+  .rs-chip-in { font-size: calc(12px * var(--fs)); font-weight: 600; color: #a06a1c; background: rgba(224,118,46,.12); padding: 0 5px; border-radius: 4px; margin-left: 2px; line-height: 1.6; }
+  .rs-note { font-size: calc(12px * var(--fs)); color: #a06a1c; display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0; }
   .r-item.rs-out-r { opacity: .62; background: rgba(200,190,178,.16); border-left: 3px solid #cbb9a6; }
-  .r-item.rs-out-r .badge-rs-out { font-size: 12px; font-weight: 600; color: var(--text-light); }
+  .r-item.rs-out-r .badge-rs-out { font-size: calc(12px * var(--fs)); font-weight: 600; color: var(--text-light); }
   .rs-info { display: flex; flex-direction: column; gap: 6px; padding: 10px; background: rgba(243,236,225,.5); border-radius: 12px; }
   .rs-stu-row { display: flex; align-items: center; gap: 10px; }
-  .rs-stu-name { font-weight: 500; font-size: 13px; }
-  .rs-from-line { font-size: 12px; color: var(--text-light); margin-top: 2px; }
-  .rs-tip { font-size: 12px; color: var(--text-light); background: rgba(224,118,46,.08); border: 1px dashed rgba(224,118,46,.35); border-radius: 4px; padding: 8px 10px; margin: 4px 0 12px; line-height: 1.5; }
+  .rs-stu-name { font-weight: 500; font-size: calc(13px * var(--fs)); }
+  .rs-from-line { font-size: calc(12px * var(--fs)); color: var(--text-light); margin-top: 2px; }
+  .rs-tip { font-size: calc(12px * var(--fs)); color: var(--text-light); background: rgba(224,118,46,.08); border: 1px dashed rgba(224,118,46,.35); border-radius: 4px; padding: 8px 10px; margin: 4px 0 12px; line-height: 1.5; }
   .rs-tip b { color: var(--orange-deep); }
   .day-add {
     align-self: flex-start;
@@ -1166,13 +1167,13 @@
     background: transparent; color: var(--orange-deep); font-weight: 600; /* v108: 「+ 排课」橙色保留，字重 700→600（用户反馈 700 偏粗） */
     /* v111: 按钮框整体缩小（34→28 / padding 收紧），字号保持 12px 不动（用户口味：框小字不小） */
     border-radius: 10px; min-height: 28px; padding: 3px 12px;
-    font-size: 12px; cursor: pointer; font-family: inherit;
+    font-size: calc(12px * var(--fs)); cursor: pointer; font-family: inherit;
     transition: background .18s, border-color .18s, color .18s, transform .12s;
   }
   .day-add:hover { border-color: var(--orange); color: var(--orange-deep); background: rgba(255,247,238,0.7); }
   @media (max-width: 560px) {
     /* 手机上 +排课整行加宽，点击区域更大、不易误触；v111 高度 44→36 与桌面同步收小 */
-    .day-add { width: 100%; align-self: stretch; min-height: 36px; margin-top: 2px; font-size: 13px; display: flex; align-items: center; justify-content: center; }
+    .day-add { width: 100%; align-self: stretch; min-height: 36px; margin-top: 2px; font-size: calc(13px * var(--fs)); display: flex; align-items: center; justify-content: center; }
   }
 
   /* ===== 学生 ===== */
@@ -1187,7 +1188,7 @@
   .search-box input {
     width: 100%; min-height: 34px;
     border: 1px solid var(--wood-light); border-radius: 12px;
-    padding: 0 12px 0 34px; font-size: 16px; font-family: inherit; /* v151: 13px→16px 防 iOS 聚焦自动缩放（同 v112 先例） */
+    padding: 0 12px 0 34px; font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */; font-family: inherit; /* v151: 13px→16px 防 iOS 聚焦自动缩放（同 v112 先例） */
     background: var(--soft); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
     color: var(--text); outline: none; text-align: center;
   }
@@ -1197,20 +1198,20 @@
   .btn-add {
     min-height: 42px; padding: 0 18px;
     background: var(--orange); color: #fff; border: none;
-    border-radius: 12px; font-size: 13px; font-weight: 600;
+    border-radius: 12px; font-size: calc(13px * var(--fs)); font-weight: 600;
     cursor: pointer; font-family: inherit;
     display: inline-flex; align-items: center; gap: 5px;
   }
   .btn-add:hover { background: var(--orange-deep); }
-  .stu-toolbar .btn-ghost { min-height: 34px; padding: 0 12px; font-size: 13px; }
+  .stu-toolbar .btn-ghost { min-height: 34px; padding: 0 12px; font-size: calc(13px * var(--fs)); }
   .stu-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
   @media (max-width: 600px) { .stu-list { grid-template-columns: 1fr; } }
   @media (max-width: 600px) {
     .stu-toolbar { gap: 6px; margin: 6px 0 12px; }
-    .search-box input { min-height: 32px; font-size: 16px; padding-left: 30px; } /* v151: 13px→16px 防 iOS 聚焦自动缩放 */
+    .search-box input { min-height: 32px; font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */; padding-left: 30px; } /* v151: 13px→16px 防 iOS 聚焦自动缩放 */
     .search-box svg { width: 14px; height: 14px; left: 10px; }
     .stu-toolbar-actions { gap: 6px; }
-    .stu-toolbar-actions .btn-ghost, .stu-toolbar-actions .btn-add { min-height: 32px; font-size: 12px; padding: 0 10px; }
+    .stu-toolbar-actions .btn-ghost, .stu-toolbar-actions .btn-add { min-height: 32px; font-size: calc(12px * var(--fs)); padding: 0 10px; }
     .stu-toolbar-actions .btn-ghost svg, .stu-toolbar-actions .btn-add svg { width: 13px; height: 13px; }
   }
   .stu-card {
@@ -1224,18 +1225,18 @@
   }
   .stu-card.expanded { box-shadow: var(--glass-shadow); }
   /* v99: 学员卡头像放大至 44px，卡片整体压扁（扁长胶囊感） */
-  .stu-card .avatar { width: 44px; height: 44px; font-size: 17px; flex-shrink: 0; object-fit: cover; }
+  .stu-card .avatar { width: 44px; height: 44px; font-size: calc(17px * var(--fs)); flex-shrink: 0; object-fit: cover; }
   .stu-head .stu-chev { transition: transform .2s; color: var(--text-light); flex-shrink: 0; }
   .stu-card.expanded .stu-head .stu-chev { transform: rotate(90deg); }
   .stu-group-title {
     grid-column: 1 / -1; display: flex; align-items: center; gap: 8px;
-    font-size: 15px; font-weight: 700; color: var(--wood-dark);
+    font-size: calc(15px * var(--fs)); font-weight: 700; color: var(--wood-dark);
     margin: 8px 0 0; padding: 7px 6px; cursor: pointer; user-select: none;
     border-radius: 12px; letter-spacing: .3px;
   }
   .stu-group-title:hover { background: var(--soft); }
   .stu-group-title .loc-dot { width: 10px; height: 10px; }
-  .stu-group-title .g-cnt { font-weight: 500; color: var(--text-light); font-size: 12px; margin-left: auto; }
+  .stu-group-title .g-cnt { font-weight: 500; color: var(--text-light); font-size: calc(12px * var(--fs)); margin-left: auto; }
   .stu-group-title .g-chev { color: var(--text-light); transition: transform .2s; flex-shrink: 0; }
   .stu-group-title.expanded .g-chev { transform: rotate(90deg); }
   .stu-group-body {
@@ -1247,21 +1248,21 @@
   .stu-head { display: flex; align-items: center; gap: 10px; min-height: 44px; }
   .stu-head-right { flex: 1; min-width: 0; padding-top: 1px; }
   .stu-row1 { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-  .stu-name { font-size: 15px; font-weight: 500; }
+  .stu-name { font-size: calc(15px * var(--fs)); font-weight: 500; }
   .stu-badge {
-    font-size: 12px; font-weight: 600; padding: 1px 7px; border-radius: 99px; line-height: 1.45;
+    font-size: calc(12px * var(--fs)); font-weight: 600; padding: 1px 7px; border-radius: 99px; line-height: 1.45;
   }
   .stu-badge.b-fix { background: #f3ece1; color: var(--wood-dark); }
   .stu-badge.b-flex { background: var(--orange-light); color: var(--orange-deep); }
-  .stu-meta { font-size: 12px; color: var(--text-light); display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 1px; }
-  .stu-note { font-size: 12px; color: var(--text-light); background: rgba(247,241,232,0.5); border: 1px solid rgba(255,255,255,0.5); border-radius: 12px; padding: 6px 9px; }
+  .stu-meta { font-size: calc(12px * var(--fs)); color: var(--text-light); display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 1px; }
+  .stu-note { font-size: calc(12px * var(--fs)); color: var(--text-light); background: rgba(247,241,232,0.5); border: 1px solid rgba(255,255,255,0.5); border-radius: 12px; padding: 6px 9px; }
   .stu-ops { display: none; gap: 6px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--soft-border); }
   .stu-card.expanded .stu-ops { display: flex; }
   .op-btn {
     flex: 1; min-height: 38px; border-radius: 12px;
     border: 1px solid var(--soft-border); background: var(--soft);
     backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-    color: var(--wood); font-size: 12px; font-weight: 600;
+    color: var(--wood); font-size: calc(12px * var(--fs)); font-weight: 600;
     cursor: pointer; font-family: inherit;
     display: inline-flex; align-items: center; justify-content: center; gap: 4px;
   }
@@ -1301,39 +1302,39 @@
     position: absolute; top: 10px; right: 14px;
     width: 30px; height: 30px; border-radius: 50%;
     border: none; background: rgba(59,42,26,.08); color: var(--wood-dark);
-    font-size: 16px; line-height: 1; cursor: pointer;
+    font-size: calc(16px * var(--fs)); line-height: 1; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     z-index: 5; transition: background .15s, transform .1s;
   }
   .ds-close:active { background: rgba(59,42,26,.16); transform: scale(.92); }
   .ds-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; min-height: 66px; }
   .ds-head .avatar { width: 66px; height: 66px; font-size: 28px; flex-shrink: 0; object-fit: cover; }
-  .ds-name { font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .ds-name { font-size: calc(17px * var(--fs)); font-weight: 600; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .ds-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
   .ds-info {
     background: rgba(247,241,232,0.5);
     border: 1px solid var(--soft-border);
     border-radius: 12px; padding: 11px 13px;
-    font-size: 13px; color: var(--text-light); margin-bottom: 12px;
+    font-size: calc(13px * var(--fs)); color: var(--text-light); margin-bottom: 12px;
     display: flex; flex-direction: column; gap: 5px;
   }
   .ds-info .ds-info-row { display: flex; align-items: center; gap: 7px; }
   .ds-info svg { flex-shrink: 0; }
-  .ds-sec-title { font-size: 13px; font-weight: 700; color: var(--wood-dark); display: flex; align-items: center; gap: 6px; margin: 16px 0 9px; }
+  .ds-sec-title { font-size: calc(13px * var(--fs)); font-weight: 700; color: var(--wood-dark); display: flex; align-items: center; gap: 6px; margin: 16px 0 9px; }
   .ds-hours { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
-  .ds-renew-tip { flex: 1 1 100%; font-size: 12px; color: var(--text-light); line-height: 1.4; }
+  .ds-renew-tip { flex: 1 1 100%; font-size: calc(12px * var(--fs)); color: var(--text-light); line-height: 1.4; }
   .ds-renew-tip.muted { opacity: 0.7; }
   .ds-renew-tip b { color: var(--orange-deep); font-weight: 700; }
   .ds-h-num {
     font-size: 34px; font-weight: 800; color: var(--orange-deep); min-width: 58px; text-align: center;
   }
   .ds-h-num.red { color: var(--red); }
-  .ds-h-num.muted { font-size: 15px; color: var(--text-light); }
+  .ds-h-num.muted { font-size: calc(15px * var(--fs)); color: var(--text-light); }
   .ds-h-btns { display: flex; gap: 8px; flex: 1; }
   .h-btn {
     flex: 1; min-height: 40px; border-radius: 12px;
     border: 1px solid var(--wood-light); background: var(--card);
-    font-size: 18px; font-weight: 700; color: var(--wood);
+    font-size: calc(18px * var(--fs)); font-weight: 700; color: var(--wood);
     cursor: pointer; font-family: inherit;
   }
   .h-btn:hover { border-color: var(--orange); color: var(--orange-deep); background: var(--orange-light); }
@@ -1346,37 +1347,37 @@
     background: rgba(247,241,232,0.5);
     border: 1px solid var(--soft-border); border-radius: 12px; padding: 7px 12px; min-height: 50px;
   }
-  .ds-member-name { font-weight: 500; color: var(--wood-dark); font-size: 13px; min-width: 64px; }
-  .ds-member-contact { display: block; font-size: 12px; font-weight: 400; color: var(--text-light); margin-top: 1px; }
+  .ds-member-name { font-weight: 500; color: var(--wood-dark); font-size: calc(13px * var(--fs)); min-width: 64px; }
+  .ds-member-contact { display: block; font-size: calc(12px * var(--fs)); font-weight: 400; color: var(--text-light); margin-top: 1px; }
   .ds-member-main { display: flex; flex-direction: column; gap: 2px; margin-left: 4px; flex: 1; min-width: 0; }
   .ds-member-sub { display: flex; align-items: baseline; gap: 10px; }
   .ds-member-sub .ds-h-num { min-width: auto; text-align: left; }
   .ds-member-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; margin-left: auto; }
-  .ds-member-lv { font-size: 12px; color: var(--text-light); }
-  .ds-member-cross { display: block; font-size: 12px; font-weight: 400; color: #7c5cbf; margin-top: 2px; line-height: 1.4; }
-  .ds-member-renew { flex: 1 1 100%; font-size: 12px; color: var(--text-light); line-height: 1.3; margin-top: 4px; }
+  .ds-member-lv { font-size: calc(12px * var(--fs)); color: var(--text-light); }
+  .ds-member-cross { display: block; font-size: calc(12px * var(--fs)); font-weight: 400; color: #7c5cbf; margin-top: 2px; line-height: 1.4; }
+  .ds-member-renew { flex: 1 1 100%; font-size: calc(12px * var(--fs)); color: var(--text-light); line-height: 1.3; margin-top: 4px; }
   .ds-member-renew.muted { opacity: 0.6; }
   .ds-member-renew b { color: var(--orange-deep); font-weight: 700; }
   .grp-chip {
-    display: inline-flex; align-items: center; font-size: 12px; font-weight: 600; color: #4a7fb5;
+    display: inline-flex; align-items: center; font-size: calc(12px * var(--fs)); font-weight: 600; color: #4a7fb5;
     background: #e8f0f9; border-radius: 99px; padding: 1px 6px; vertical-align: middle; line-height: 1.4;
   }
   /* 本次临时参与者（试听/蹭课）：绿色 chip 与正式成员区分开，一眼看出"这次多出来的人" */
   /* 本次临时参与者：绿色 = 无档案不扣课时；橙色 = 有档案会扣课时 */
   .extra-chip {
     display: inline-flex; align-items: center; max-width: 100%;
-    font-size: 11px; font-weight: 600; color: var(--green);
+    font-size: calc(11px * var(--fs)); font-weight: 600; color: var(--green);
     background: var(--green-light); border-radius: 99px; padding: 1px 7px; vertical-align: middle; line-height: 1.5;
   }
   .extra-chip.ex-linked { color: var(--orange-deep); background: var(--orange-light); border: 1px solid var(--orange-border); }
   /* 「本次临时」小标签：和蓝色的「N人组」区分开，一眼看出这不是编制内的人 */
-  .extra-label { font-size: 11px; color: var(--text-light); }
+  .extra-label { font-size: calc(11px * var(--fs)); color: var(--text-light); }
   .extra-chip .ex-minus { opacity: .75; margin-right: 1px; }
-  .extra-chip .ex-kh { font-size: 10px; opacity: .8; margin-left: 3px; }
+  .extra-chip .ex-kh { font-size: calc(10px * var(--fs)); opacity: .8; margin-left: 3px; }
   .btn-extra-add {
     display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
     min-height: 20px; padding: 0 7px; margin-left: 5px;
-    font-size: 11px; font-weight: 600; font-family: inherit;
+    font-size: calc(11px * var(--fs)); font-weight: 600; font-family: inherit;
     color: var(--wood-dark); background: var(--orange-light);
     border: 1px solid var(--orange-border); border-radius: 8px;
     cursor: pointer; vertical-align: middle; transition: transform .12s;
@@ -1384,19 +1385,19 @@
   .btn-extra-add:active { transform: scale(.92); }
   /* 弹窗里每位临时参与者的状态标记 */
   .ex-tag {
-    display: inline-flex; align-items: center; font-size: 10px; font-weight: 600;
+    display: inline-flex; align-items: center; font-size: calc(10px * var(--fs)); font-weight: 600;
     color: var(--text-light); background: var(--bg); border: 1px solid var(--soft-border);
     border-radius: 99px; padding: 0 5px; margin-left: 5px; line-height: 1.6; cursor: default;
   }
   .ex-tag-on { color: var(--orange-deep); background: var(--orange-light); border-color: var(--orange-border); }
   .add-sched-mem .asm-link {
-    cursor: pointer; font-size: 11px; color: var(--wood-dark); padding: 0 4px; margin-left: 3px;
+    cursor: pointer; font-size: calc(11px * var(--fs)); color: var(--wood-dark); padding: 0 4px; margin-left: 3px;
     border-left: 1px solid var(--soft-border);
   }
   .add-sched-mem.asm-linked { border-color: var(--orange-border); background: #fffaf3; }
   .mem-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; width: 100%; margin-top: 6px; padding-top: 8px; border-top: 1px dashed #e8ddca; }
   .mem-chip {
-    display: inline-block; font-size: 12px; font-weight: 600; color: var(--wood-dark);
+    display: inline-block; font-size: calc(12px * var(--fs)); font-weight: 600; color: var(--wood-dark);
     background: var(--bg); border: 1px solid #e8ddca; border-radius: 4px;
     padding: 3px 10px; cursor: pointer; user-select: none;
   }
@@ -1406,7 +1407,7 @@
   .slot-edit-row .slot-time { flex: 1; }
   .link-chip {
     display: inline-flex; align-items: center; gap: 2px;
-    font-size: 12px; color: #7c5cbf; background: #f0eafb;
+    font-size: calc(12px * var(--fs)); color: #7c5cbf; background: #f0eafb;
     border: 1px solid #ddd0f5; border-radius: 99px;
     padding: 1px 6px; font-weight: 600; white-space: nowrap; line-height: 1.45;
   }
@@ -1422,42 +1423,42 @@
     /* v96: 头像在 48px 容器内垂直居中（所有头像统一上下居中） */
     display: flex; align-items: center; justify-content: center;
   }
-  .mem-ava .avatar { width: 40px; height: 40px; font-size: 16px; object-fit: cover; }
+  .mem-ava .avatar { width: 40px; height: 40px; font-size: calc(16px * var(--fs)); object-fit: cover; }
   .mem-ava .ava-x {
     position: absolute; top: -4px; right: -5px; width: 16px; height: 16px;
     border-radius: 50%; background: var(--red); color: #fff; border: 2px solid var(--card);
-    font-size: 12px; line-height: 12px; text-align: center; cursor: pointer; font-weight: 700;
+    font-size: calc(12px * var(--fs)); line-height: 12px; text-align: center; cursor: pointer; font-weight: 700;
   }
-  .mem-link { font-size: 12px; font-weight: 600; color: #7c5cbf; background: rgba(124,92,191,.12); padding: 1px 6px; border-radius: 12px; white-space: nowrap; }
+  .mem-link { font-size: calc(12px * var(--fs)); font-weight: 600; color: #7c5cbf; background: rgba(124,92,191,.12); padding: 1px 6px; border-radius: 12px; white-space: nowrap; }
   /* 学员管理管理页 */
-  .pool-empty { padding: 14px; text-align: center; font-size: 13px; color: var(--text-light); }
+  .pool-empty { padding: 14px; text-align: center; font-size: calc(13px * var(--fs)); color: var(--text-light); }
   .pool-row {
     display: flex; align-items: center; gap: 10px; padding: 9px 10px; cursor: pointer;
     border-radius: 12px; border: 1px solid var(--soft-border);
     background: rgba(247,241,232,0.5); margin-bottom: 6px; transition: background .12s; min-height: 66px;
   }
   .pool-row:hover { background: var(--orange-light); }
-  .pool-row .avatar { width: 38px; height: 38px; font-size: 13px; flex-shrink: 0; object-fit: cover; }
+  .pool-row .avatar { width: 38px; height: 38px; font-size: calc(13px * var(--fs)); flex-shrink: 0; object-fit: cover; }
   .pool-main { flex: 1; min-width: 0; }
   .pool-name-line { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-  .pool-name { font-weight: 500; font-size: 13px; color: var(--wood-dark); }
-  .pool-sub { font-size: 12px; color: var(--text-light); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .pool-groups { font-size: 12px; color: #7c5cbf; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .pool-hours { font-size: 12px; font-weight: 700; color: var(--orange-deep); flex-shrink: 0; font-variant-numeric: tabular-nums; }
-  .pool-sch-row { display: flex; align-items: center; gap: 8px; font-size: 12px; padding: 6px 0; border-bottom: 1px dashed var(--soft-border); }
+  .pool-name { font-weight: 500; font-size: calc(13px * var(--fs)); color: var(--wood-dark); }
+  .pool-sub { font-size: calc(12px * var(--fs)); color: var(--text-light); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pool-groups { font-size: calc(12px * var(--fs)); color: #7c5cbf; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pool-hours { font-size: calc(12px * var(--fs)); font-weight: 700; color: var(--orange-deep); flex-shrink: 0; font-variant-numeric: tabular-nums; }
+  .pool-sch-row { display: flex; align-items: center; gap: 8px; font-size: calc(12px * var(--fs)); padding: 6px 0; border-bottom: 1px dashed var(--soft-border); }
   .pool-sch-row:last-child { border-bottom: none; }
   .pool-sch-day { color: var(--text-light); flex: none; width: 66px; font-variant-numeric: tabular-nums; }
   .pool-sch-time { font-weight: 700; color: var(--wood-dark); flex: none; }
   .pool-sch-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .pool-sch-tag { font-size: 12px; font-weight: 700; background: var(--orange-light); color: var(--orange-deep); border-radius: 4px; padding: 0 5px; flex: none; }
-  .pool-cross-badge { font-size: 12px; font-weight: 700; color: #7c5cbf; background: #efe9fb; border-radius: 4px; padding: 0 4px; line-height: 1.6; }
-  .pool-bday { font-size: 12px; color: #c2588a; flex-shrink: 0; }
+  .pool-sch-tag { font-size: calc(12px * var(--fs)); font-weight: 700; background: var(--orange-light); color: var(--orange-deep); border-radius: 4px; padding: 0 5px; flex: none; }
+  .pool-cross-badge { font-size: calc(12px * var(--fs)); font-weight: 700; color: #7c5cbf; background: #efe9fb; border-radius: 4px; padding: 0 4px; line-height: 1.6; }
+  .pool-bday { font-size: calc(12px * var(--fs)); color: #c2588a; flex-shrink: 0; }
   .pool-form { display: flex; flex-direction: column; gap: 2px; }
-  .rc-row .avatar { width: 38px; height: 38px; font-size: 13px; flex-shrink: 0; object-fit: cover; }
-  .rc-name { display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--wood-dark); font-size: 13px; flex: 1; min-width: 0; }
-  .ds-member-row .avatar { width: 38px; height: 38px; font-size: 13px; flex-shrink: 0; object-fit: cover; }
+  .rc-row .avatar { width: 38px; height: 38px; font-size: calc(13px * var(--fs)); flex-shrink: 0; object-fit: cover; }
+  .rc-name { display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--wood-dark); font-size: calc(13px * var(--fs)); flex: 1; min-width: 0; }
+  .ds-member-row .avatar { width: 38px; height: 38px; font-size: calc(13px * var(--fs)); flex-shrink: 0; object-fit: cover; }
   .rc-sec {
-    font-size: 12px; font-weight: 600; color: var(--text-light);
+    font-size: calc(12px * var(--fs)); font-weight: 600; color: var(--text-light);
     margin: 10px 0 6px; padding-bottom: 4px; border-bottom: 1px solid var(--soft-border);
   }
   .rc-sec:first-child { margin-top: 0; }
@@ -1467,12 +1468,12 @@
     border: 1px solid var(--soft-border); border-radius: 12px; padding: 10px 13px; margin-bottom: 8px; min-height: 64px;
   }
   .rc-row-lv { background: rgba(243,236,226,0.5); }
-  .rc-hours { font-size: 12px; color: var(--text-light); flex: 1; }
-  .rc-state { font-size: 12px; font-weight: 600; color: var(--green); }
+  .rc-hours { font-size: calc(12px * var(--fs)); color: var(--text-light); flex: 1; }
+  .rc-state { font-size: calc(12px * var(--fs)); font-weight: 600; color: var(--green); }
   .rc-state.st-lv { color: #b08968; }
   .rc-toggle { display: flex; gap: 6px; flex-shrink: 0; }
   .rc-btn {
-    min-height: 32px; padding: 0 14px; border-radius: 12px; font-size: 13px; font-weight: 700;
+    min-height: 32px; padding: 0 14px; border-radius: 12px; font-size: calc(13px * var(--fs)); font-weight: 700;
     border: 1px solid #e3d9c8; background: var(--card); color: var(--text-light);
     cursor: pointer; font-family: inherit;
   }
@@ -1482,22 +1483,22 @@
   /* 课时流水 */
   .hl-list { display: flex; flex-direction: column; gap: 4px; max-height: 240px; overflow-x: hidden; overflow-y: auto; }
   .hl-row {
-    display: flex; align-items: center; gap: 8px; font-size: 12px;
+    display: flex; align-items: center; gap: 8px; font-size: calc(12px * var(--fs));
     padding: 6px 9px; border-radius: 12px; background: rgba(247,241,232,0.45);
     border: 1px solid var(--soft-border);
   }
-  .hl-row .hl-date { color: var(--text-light); flex-shrink: 0; min-width: 42px; font-size: 12px; }
+  .hl-row .hl-date { color: var(--text-light); flex-shrink: 0; min-width: 42px; font-size: calc(12px * var(--fs)); }
   .hl-row .hl-name { font-weight: 500; color: var(--wood-dark); flex-shrink: 0; max-width: 5em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .hl-row .hl-badge { flex-shrink: 0; font-size: 12px; font-weight: 700; border-radius: 12px; padding: 0 5px; line-height: 1.6; }
+  .hl-row .hl-badge { flex-shrink: 0; font-size: calc(12px * var(--fs)); font-weight: 700; border-radius: 12px; padding: 0 5px; line-height: 1.6; }
   .hl-b-consume { background: #f6e3dd; color: #b5482a; }
   .hl-b-charge { background: #dff0e4; color: #2e7d4f; }
   .hl-b-adjust { background: #e8e9f6; color: #4f5bab; }
-  .hl-row .hl-note { color: var(--text-light); font-size: 12px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .hl-row .hl-note { color: var(--text-light); font-size: calc(12px * var(--fs)); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .hl-row .hl-delta { font-weight: 700; flex-shrink: 0; font-variant-numeric: tabular-nums; }
   .hl-d-pos { color: #2e7d4f; }
   .hl-d-neg { color: #b5482a; }
-  .hl-row .hl-after { color: var(--text-light); font-size: 12px; flex-shrink: 0; font-variant-numeric: tabular-nums; }
-  .hl-empty { font-size: 12px; color: var(--text-light); padding: 6px 2px; }
+  .hl-row .hl-after { color: var(--text-light); font-size: calc(12px * var(--fs)); flex-shrink: 0; font-variant-numeric: tabular-nums; }
+  .hl-empty { font-size: calc(12px * var(--fs)); color: var(--text-light); padding: 6px 2px; }
   .log-item {
     background: rgba(247,241,232,0.5);
     border: 1px solid var(--soft-border); border-radius: 12px; padding: 10px 13px;
@@ -1505,24 +1506,24 @@
   }
   .log-top { display: flex; align-items: center; gap: 8px; }
   .log-date {
-    font-size: 12px; font-weight: 700; color: var(--orange-deep);
+    font-size: calc(12px * var(--fs)); font-weight: 700; color: var(--orange-deep);
     background: var(--orange-light); padding: 2px 8px; border-radius: 99px; flex-shrink: 0;
   }
   .log-del {
     margin-left: auto; background: none; border: none; color: var(--text-disabled);
-    font-size: 12px; cursor: pointer; font-family: inherit; padding: 2px 4px;
+    font-size: calc(12px * var(--fs)); cursor: pointer; font-family: inherit; padding: 2px 4px;
   }
   .log-del:hover { color: var(--red); }
-  .log-content { font-size: 13px; color: var(--text); line-height: 1.5; }
-  .log-homework { font-size: 12px; color: var(--wood); background: #f6edde; border-radius: 12px; padding: 4px 8px; }
-  .ds-empty { font-size: 13px; color: var(--text-light); text-align: center; padding: 18px 0 6px; }
+  .log-content { font-size: calc(13px * var(--fs)); color: var(--text); line-height: 1.5; }
+  .log-homework { font-size: calc(12px * var(--fs)); color: var(--wood); background: #f6edde; border-radius: 12px; padding: 4px 8px; }
+  .ds-empty { font-size: calc(13px * var(--fs)); color: var(--text-light); text-align: center; padding: 18px 0 6px; }
   .ds-ops { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
   .ds-ops button { flex: 1; min-width: 90px; }
   /* 课时明细列表 */
   .ds-detail { display: flex; flex-direction: column; gap: 5px; max-height: 260px; overflow-x: hidden; overflow-y: auto; }
   .det-item {
     display: flex; align-items: center; gap: 8px;
-    font-size: 13px; padding: 7px 11px; border-radius: 12px;
+    font-size: calc(13px * var(--fs)); padding: 7px 11px; border-radius: 12px;
     background: var(--soft); border: 1px solid var(--soft-border);
   }
   .det-batch-cb {
@@ -1531,27 +1532,27 @@
   }
   .det-batch-bar {
     display: flex; align-items: center; padding: 8px 4px 10px;
-    font-size: 13px; color: var(--text-light);
+    font-size: calc(13px * var(--fs)); color: var(--text-light);
   }
   .export-opt-group { display: flex; flex-direction: column; gap: 9px; }
-  .export-opt, .export-format { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); cursor: pointer; }
+  .export-opt, .export-format { display: flex; align-items: center; gap: 8px; font-size: calc(13px * var(--fs)); color: var(--text); cursor: pointer; }
   /* 回收站 / 备份列表项 */
   .recycle-item, .backup-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border: 1px solid rgba(224,207,174,.5); border-radius: 12px; margin-bottom: 8px; background: #fffdfb; }
   .recycle-item .ri-main, .backup-item .bi-main { flex: 1; min-width: 0; }
-  .recycle-item .ri-name, .backup-item .bi-name { font-weight: 600; font-size: 13px; }
-  .recycle-item .ri-meta, .backup-item .bi-meta { font-size: 12px; color: var(--text-light); margin-top: 2px; }
+  .recycle-item .ri-name, .backup-item .bi-name { font-weight: 600; font-size: calc(13px * var(--fs)); }
+  .recycle-item .ri-meta, .backup-item .bi-meta { font-size: calc(12px * var(--fs)); color: var(--text-light); margin-top: 2px; }
   .recycle-item .ri-ops, .backup-item .bi-ops { display: flex; gap: 6px; flex-shrink: 0; }
   .export-opt input, .export-format input { width: 16px; height: 16px; accent-color: var(--accent); flex-shrink: 0; cursor: pointer; }
-  .det-date { font-size: 12px; font-weight: 700; color: var(--orange-deep); background: var(--orange-light); padding: 1px 7px; border-radius: 99px; flex-shrink: 0; }
-  .det-time { color: var(--wood); font-size: 12px; flex-shrink: 0; }
-  .det-minus { color: var(--red); font-weight: 700; font-size: 12px; flex-shrink: 0; }
-  .det-note { color: var(--text-light); font-size: 12px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .det-tag { font-size: 12px; font-weight: 700; color: #fff; background: #b08968; padding: 1px 6px; border-radius: 99px; flex-shrink: 0; }
+  .det-date { font-size: calc(12px * var(--fs)); font-weight: 700; color: var(--orange-deep); background: var(--orange-light); padding: 1px 7px; border-radius: 99px; flex-shrink: 0; }
+  .det-time { color: var(--wood); font-size: calc(12px * var(--fs)); flex-shrink: 0; }
+  .det-minus { color: var(--red); font-weight: 700; font-size: calc(12px * var(--fs)); flex-shrink: 0; }
+  .det-note { color: var(--text-light); font-size: calc(12px * var(--fs)); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .det-tag { font-size: calc(12px * var(--fs)); font-weight: 700; color: #fff; background: #b08968; padding: 1px 6px; border-radius: 99px; flex-shrink: 0; }
   .det-tag.charge { background: var(--green); }
   .det-tag.adjust { background: #8c7a66; }
-  .det-del { margin-left: auto; background: none; border: none; color: var(--text-disabled); font-size: 12px; cursor: pointer; font-family: inherit; padding: 2px 4px; flex-shrink: 0; }
+  .det-del { margin-left: auto; background: none; border: none; color: var(--text-disabled); font-size: calc(12px * var(--fs)); cursor: pointer; font-family: inherit; padding: 2px 4px; flex-shrink: 0; }
   .det-del:hover { color: var(--red); }
-  .det-change { font-weight: 700; font-size: 12px; flex-shrink: 0; min-width: 46px; text-align: right; }
+  .det-change { font-weight: 700; font-size: calc(12px * var(--fs)); flex-shrink: 0; min-width: 46px; text-align: right; }
   .det-change.plus { color: var(--green); }
   .det-change.minus { color: var(--red); }
   .det-change.zero { color: var(--text-light); }
@@ -1560,9 +1561,9 @@
   .det-item.det-adjust { background: rgba(245,243,240,.6); border-color: var(--soft-border); }
   .det-month { margin-bottom: 5px; }
   .det-month-head { display: flex; align-items: center; gap: 8px; padding: 7px 11px; background: var(--soft); border: 1px solid var(--soft-border); border-radius: 12px; cursor: pointer; user-select: none; }
-  .det-month-icon { font-size: 12px; color: var(--text-light); width: 14px; text-align: center; }
-  .det-month-title { font-weight: 700; font-size: 13px; color: var(--wood-dark); }
-  .det-month-summary { margin-left: auto; font-size: 12px; color: var(--text-light); white-space: nowrap; }
+  .det-month-icon { font-size: calc(12px * var(--fs)); color: var(--text-light); width: 14px; text-align: center; }
+  .det-month-title { font-weight: 700; font-size: calc(13px * var(--fs)); color: var(--wood-dark); }
+  .det-month-summary { margin-left: auto; font-size: calc(12px * var(--fs)); color: var(--text-light); white-space: nowrap; }
   .det-month-body { display: flex; flex-direction: column; gap: 5px; padding: 5px 0 2px 6px; }
   .det-add { align-self: flex-start; margin-top: 8px; }
   /* 小组成员各自的明细块 */
@@ -1571,29 +1572,29 @@
     background: var(--soft); padding: 9px 10px; margin-bottom: 8px;
   }
   .det-mb-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 7px; }
-  .det-mb-name { font-weight: 500; font-size: 13px; color: var(--wood-dark); }
-  .det-mb-hours { font-size: 12px; color: var(--text-light); }
+  .det-mb-name { font-weight: 500; font-size: calc(13px * var(--fs)); color: var(--wood-dark); }
+  .det-mb-hours { font-size: calc(12px * var(--fs)); color: var(--text-light); }
   .det-mb-add {
     margin-left: auto; border: 1px dashed var(--wood-light); background: transparent;
-    padding: 3px 9px; border-radius: 12px; font-size: 12px; cursor: pointer; font-family: inherit; color: var(--wood);
+    padding: 3px 9px; border-radius: 12px; font-size: calc(12px * var(--fs)); cursor: pointer; font-family: inherit; color: var(--wood);
   }
 
   /* ===== 设置 ===== */
   .set-group { margin-bottom: 18px; }
-  .set-label { font-size: 13px; font-weight: 700; margin-bottom: 8px; display: block; }
+  .set-label { font-size: calc(13px * var(--fs)); font-weight: 700; margin-bottom: 8px; display: block; }
   .set-input, .set-area {
     width: 100%; min-height: 46px;
     border: 1px solid var(--wood-light); border-radius: 12px;
-    padding: 10px 14px; font-size: 16px; font-family: inherit;
+    padding: 10px 14px; font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */; font-family: inherit;
     background: var(--input-bg); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
     color: var(--text); outline: none;
   }
   .set-area { min-height: 110px; resize: vertical; line-height: 1.6; }
   .set-input:focus, .set-area:focus { border-color: var(--orange); }
-  .set-tip { font-size: 12px; color: var(--text-light); margin-top: 8px; line-height: 1.8; }
-  .set-tip code { background: var(--orange-light); color: var(--orange-deep); padding: 0 5px; border-radius: 12px; font-size: 12px; }
+  .set-tip { font-size: calc(12px * var(--fs)); color: var(--text-light); margin-top: 8px; line-height: 1.8; }
+  .set-tip code { background: var(--orange-light); color: var(--orange-deep); padding: 0 5px; border-radius: 12px; font-size: calc(12px * var(--fs)); }
   /* 合并后大区内的功能分组小标题 */
-  .set-sub-head { font-size: 13px; font-weight: 700; color: var(--wood-dark); margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid var(--soft-border); display: flex; align-items: center; gap: 7px; }
+  .set-sub-head { font-size: calc(13px * var(--fs)); font-weight: 700; color: var(--wood-dark); margin: 16px 0 8px; padding-top: 12px; border-top: 1px solid var(--soft-border); display: flex; align-items: center; gap: 7px; }
   .set-sub-head::before { content: ""; width: 3px; height: 13px; border-radius: 2px; background: var(--orange); flex-shrink: 0; }
   .acc-inner .set-sub-head:first-child { margin-top: 0; padding-top: 0; border-top: none; }
   /* 大区内功能分组卡片：让「统计与导出 / 数据与备份」里多个功能块边界清晰、一眼可分 */
@@ -1610,15 +1611,15 @@
     display: flex; align-items: center; justify-content: center;
   }
   .set-feat-ico svg { width: 15px; height: 15px; }
-  .set-feat-title { flex: 1; min-width: 0; display: block; font-size: 13px; font-weight: 700; color: var(--wood-dark); line-height: 1.25; }
-  .set-feat-title small { display: block; font-size: 12px; font-weight: 400; color: var(--text-light); margin-top: 2px; line-height: 1.5; }
+  .set-feat-title { flex: 1; min-width: 0; display: block; font-size: calc(13px * var(--fs)); font-weight: 700; color: var(--wood-dark); line-height: 1.25; }
+  .set-feat-title small { display: block; font-size: calc(12px * var(--fs)); font-weight: 400; color: var(--text-light); margin-top: 2px; line-height: 1.5; }
   .btn-line { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
   .btn-ghost {
     min-height: 44px; padding: 0 15px;
     border: 1px solid var(--wood-light); background: var(--input-bg);
     backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
     color: var(--wood); border-radius: 12px;
-    font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+    font-size: calc(13px * var(--fs)); font-weight: 600; cursor: pointer; font-family: inherit;
     display: inline-flex; align-items: center; gap: 5px;
   }
   .btn-ghost:hover { border-color: var(--wood); }
@@ -1637,11 +1638,11 @@
   .theme-card.sel { border-color: var(--orange); box-shadow: 0 0 0 3px var(--orange-light); }
   .theme-swatches { display: flex; gap: 5px; margin-bottom: 7px; }
   .theme-swatches i { width: 22px; height: 22px; border-radius: 50%; border: 1px solid rgba(0,0,0,0.12); display: block; }
-  .theme-name { font-size: 13px; font-weight: 700; }
-  .theme-desc { font-size: 12px; color: var(--text-light); line-height: 1.5; margin-top: 2px; }
+  .theme-name { font-size: calc(13px * var(--fs)); font-weight: 700; }
+  .theme-desc { font-size: calc(12px * var(--fs)); color: var(--text-light); line-height: 1.5; margin-top: 2px; }
   .theme-check {
     position: absolute; top: 7px; right: 9px; width: 18px; height: 18px; border-radius: 50%;
-    background: var(--orange); color: #fff; font-size: 12px; line-height: 18px; text-align: center;
+    background: var(--orange); color: #fff; font-size: calc(12px * var(--fs)); line-height: 18px; text-align: center;
     display: none; font-weight: 700;
   }
   .theme-card.sel .theme-check { display: block; }
@@ -1649,18 +1650,18 @@
     display: flex; align-items: center; gap: 9px;
     padding: 9px 12px; background: var(--soft);
     backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
-    border: 1px solid var(--soft-border); border-radius: 12px; margin-bottom: 7px; font-size: 13px;
+    border: 1px solid var(--soft-border); border-radius: 12px; margin-bottom: 7px; font-size: calc(13px * var(--fs));
   }
   .loc-item .loc-dot { width: 12px; height: 12px; }
   .loc-item .loc-del {
     min-height: 34px; padding: 0 10px;
     border: 1px solid #ecc8c8; background: #fff; color: var(--red);
-    border-radius: 12px; font-size: 12px; cursor: pointer; font-family: inherit;
+    border-radius: 12px; font-size: calc(12px * var(--fs)); cursor: pointer; font-family: inherit;
   }
   .loc-item .loc-edit {
     min-height: 34px; padding: 0 12px;
     border: 1px solid #eccfa8; background: var(--orange-light); color: var(--orange-deep);
-    border-radius: 12px; font-size: 12px; cursor: pointer; font-family: inherit; margin-left: auto;
+    border-radius: 12px; font-size: calc(12px * var(--fs)); cursor: pointer; font-family: inherit; margin-left: auto;
   }
   .loc-edit-row { flex-wrap: wrap !important; gap: 8px; }
   .loc-edit-row .loc-edit-name { flex: 1; min-height: 38px; }
@@ -1681,7 +1682,7 @@
   .swatch.on { outline: 2px solid #2a1a10; outline-offset: 2px; }
   .swatch-add {
     background: conic-gradient(#d9534f,#d4a544,#5a9e6f,#3bb3c3,#4a7fb5,#8e6bbf,#c2588f,#d9534f);
-    color: #fff; font-size: 13px; font-weight: 700; line-height: 1;
+    color: #fff; font-size: calc(13px * var(--fs)); font-weight: 700; line-height: 1;
     display: inline-flex; align-items: center; justify-content: center;
     text-shadow: 0 1px 2px rgba(0,0,0,0.35);
   }
@@ -1693,10 +1694,10 @@
   }
   /* 自定义取色器弹窗 */
   .color-picker-modal { max-width: 360px; }
-  .color-picker-modal .modal-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+  .color-picker-modal .modal-title { font-size: calc(15px * var(--fs)); font-weight: 700; margin-bottom: 12px; }
   .cp-preview { width: 100%; height: 56px; border-radius: 12px; margin-bottom: 14px; border: 1px solid rgba(0,0,0,.1); }
   .cp-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-  .cp-row label { width: 56px; flex-shrink: 0; font-size: 13px; font-weight: 600; color: var(--wood-dark); }
+  .cp-row label { width: 56px; flex-shrink: 0; font-size: calc(13px * var(--fs)); font-weight: 600; color: var(--wood-dark); }
   .cp-row input[type=range] { flex: 1; accent-color: var(--orange); height: 28px; }
   .cp-row input[type=text] { flex: 1; text-transform: uppercase; }
   .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px; }
@@ -1720,7 +1721,7 @@
   .bottom-nav button {
     flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
     background: none; border: none; color: var(--text-light);
-    font-size: 12px; font-weight: 600; cursor: pointer; padding: 4px 0; font-family: inherit;
+    font-size: calc(12px * var(--fs)); font-weight: 600; cursor: pointer; padding: 4px 0; font-family: inherit;
   }
   .bottom-nav button.active { color: var(--orange-deep); }
   @media (max-width: 768px) {
@@ -1731,8 +1732,8 @@
     .stu-toolbar { gap: 6px; }
     .search-box { min-width: 0; }
     .stu-toolbar-actions { gap: 6px; }
-    .stu-toolbar-actions .btn-ghost { padding: 0 8px; font-size: 12px; }
-    .stu-toolbar-actions .btn-add { padding: 0 8px; font-size: 12px; }
+    .stu-toolbar-actions .btn-ghost { padding: 0 8px; font-size: calc(12px * var(--fs)); }
+    .stu-toolbar-actions .btn-add { padding: 0 8px; font-size: calc(12px * var(--fs)); }
   }
 
   /* ===== 模态框 ===== */
@@ -1837,7 +1838,7 @@
   /* 5) 空状态美化：虚线卡片 + 友好留白（不再只是一行灰字） */
   .empty-tip {
     display: flex; flex-direction: column; align-items: center; gap: 8px;
-    text-align: center; color: var(--text-light); font-size: 13px;
+    text-align: center; color: var(--text-light); font-size: calc(13px * var(--fs));
     padding: 28px 18px; margin: 6px 0;
     border: 1px dashed var(--orange-border); border-radius: 12px;
     background: var(--orange-light);
@@ -1862,7 +1863,7 @@
   }
   .pool-batch-bar .sbb-btn {
     min-height: 42px; padding: 0 14px; border-radius: 12px;
-    font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+    font-size: calc(13px * var(--fs)); font-weight: 600; cursor: pointer; font-family: inherit;
     border: 1px solid var(--soft-border); background: var(--soft); color: var(--wood);
     white-space: nowrap;
   }
@@ -1870,7 +1871,7 @@
   .pool-batch-bar .sbb-all { color: var(--wood-dark); }
   .pool-batch-bar .sbb-del { background: var(--red); color: #fff; border-color: var(--red); margin-left: auto; }
   .pool-batch-bar .sbb-del:disabled { background: #d9c8c0; border-color: #d9c8c0; opacity: .7; cursor: not-allowed; }
-  .pool-batch-bar .sbb-count { font-size: 13px; color: var(--text); font-weight: 600; flex: 1; text-align: center; }
+  .pool-batch-bar .sbb-count { font-size: calc(13px * var(--fs)); color: var(--text); font-weight: 600; flex: 1; text-align: center; }
 
   /* 7) 键盘可见焦点：无障碍，Tab 导航时有清晰描边 */
   :focus-visible {
@@ -1914,7 +1915,7 @@
     #stuModal .form-item { margin-bottom: 12px; }
     #stuModal .modal-ops { margin-top: 12px; }
   }
-  .modal h3 { font-size: 15px; margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
+  .modal h3 { font-size: calc(15px * var(--fs)); margin-bottom: 14px; display: flex; align-items: center; gap: 7px; }
   /* 轻量卡片弹窗（续费等动态创建） */
   .modal-card {
     background: var(--glass-bg-strong);
@@ -1930,16 +1931,16 @@
   }
   @media (min-width: 600px) { .modal-card { border-radius: 12px; } }
   .modal-card .modal-title {
-    font-size: 15px; font-weight: 700; margin-bottom: 14px;
+    font-size: calc(15px * var(--fs)); font-weight: 700; margin-bottom: 14px;
     display: flex; align-items: center; gap: 7px; justify-content: center;
   }
   .modal-card .modal-ops { margin-top: 0; }
   .form-item { margin-bottom: 16px; }
-  .form-item label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 7px; color: var(--wood-dark); }
+  .form-item label { display: block; font-size: calc(13px * var(--fs)); font-weight: 600; margin-bottom: 7px; color: var(--wood-dark); }
   .form-item input, .form-item select, .form-item textarea {
     width: 100%; min-height: 44px;
     border: 1px solid var(--wood-light); border-radius: 12px;
-    padding: 8px 12px; font-size: 16px; font-family: inherit;
+    padding: 8px 12px; font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */; font-family: inherit;
     background: var(--soft); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
     color: var(--text); outline: none;
   }
@@ -1954,7 +1955,7 @@
     padding: 10px 12px;
     background: var(--soft); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
     color: var(--text);
-    font-size: 16px; font-weight: 600; font-family: inherit;
+    font-size: calc(16px * var(--fs)); font-weight: 600; font-family: inherit;
     display: flex; align-items: center; justify-content: space-between; gap: 8px;
     cursor: pointer; outline: none; text-align: left;
   }
@@ -1982,7 +1983,7 @@
   .stu-picker-search svg { color: var(--text-light); flex: none; }
   .stu-picker-search input {
     flex: 1; min-height: 38px; border: none; background: transparent;
-    font-size: 16px; color: var(--text); outline: none; font-family: inherit;
+    font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */; color: var(--text); outline: none; font-family: inherit;
   }
   .stu-picker-list { overflow-x: hidden; overflow-y: auto; flex: 1; padding: 4px; }
   .stu-picker-item {
@@ -1995,29 +1996,29 @@
   .stu-picker-item.selected { background: var(--orange-light); }
   .stu-picker-item.selected .check { opacity: 1; }
   .stu-picker-main { min-width: 0; flex: 1; }
-  .stu-picker-name { font-size: 15px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .stu-picker-meta { font-size: 12px; color: var(--text-light); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stu-picker-name { font-size: calc(15px * var(--fs)); font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .stu-picker-meta { font-size: calc(12px * var(--fs)); color: var(--text-light); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .stu-picker-tag {
-    flex: none; font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 12px;
+    flex: none; font-size: calc(12px * var(--fs)); font-weight: 700; padding: 2px 7px; border-radius: 12px;
     background: var(--orange-light); color: var(--orange-deep);
   }
   .stu-picker-tag.fixed { background: var(--green-light); color: var(--green); }
   .stu-picker-tag.pool { background: #efe9fb; color: #7c5cbf; }
   .stu-picker-tag.grp { background: #e7f1fb; color: #4a7fb5; }
-  .sched-type-btn { flex: 1; min-height: 42px; font-size: 13px; font-weight: 700; }
+  .sched-type-btn { flex: 1; min-height: 42px; font-size: calc(13px * var(--fs)); font-weight: 700; }
   .sched-type-btn.on { background: var(--orange) !important; color: #fff !important; border-color: var(--orange) !important; }
   .add-sched-members { display: flex; flex-wrap: wrap; gap: 6px; }
-  .add-sched-mem { display: inline-flex; align-items: center; gap: 5px; background: var(--orange-light); color: var(--wood-dark); border-radius: 12px; padding: 4px 9px 4px 10px; font-size: 12px; font-weight: 600; }
+  .add-sched-mem { display: inline-flex; align-items: center; gap: 5px; background: var(--orange-light); color: var(--wood-dark); border-radius: 12px; padding: 4px 9px 4px 10px; font-size: calc(12px * var(--fs)); font-weight: 600; }
   .add-sched-mem .asm-x { cursor: pointer; color: var(--orange-deep); font-weight: 800; padding: 0 2px; }
   .add-sched-pool { margin-top: 8px; border: 1px solid var(--soft-border); border-radius: 12px; max-height: 180px; overflow-x: hidden; overflow-y: auto; }
-  .add-sched-pool-item { display: flex; align-items: center; gap: 8px; padding: 9px 10px; font-size: 13px; border-bottom: 1px dashed var(--soft-border); cursor: pointer; }
+  .add-sched-pool-item { display: flex; align-items: center; gap: 8px; padding: 9px 10px; font-size: calc(13px * var(--fs)); border-bottom: 1px dashed var(--soft-border); cursor: pointer; }
   .add-sched-pool-item:last-child { border-bottom: none; }
   .add-sched-pool-item:hover { background: var(--orange-light); }
 
   /* ===== 课表管理列表 ===== */
   .sched-manage-list { max-height: 52vh; overflow-x: hidden; overflow-y: auto; }
   .sm-group-title {
-    font-size: 12px; font-weight: 700; color: var(--text-light);
+    font-size: calc(12px * var(--fs)); font-weight: 700; color: var(--text-light);
     padding: 8px 2px 4px; letter-spacing: .3px;
   }
   .sm-row {
@@ -2027,16 +2028,16 @@
     background: rgba(247,241,232,0.42);
   }
   .sm-main { flex: 1; min-width: 0; }
-  .sm-name { font-size: 13px; font-weight: 500; color: var(--wood-dark); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .sm-meta { font-size: 12px; color: var(--text-light); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .sm-tag { font-size: 12px; font-weight: 700; border-radius: 4px; padding: 1px 6px; flex: none; }
+  .sm-name { font-size: calc(13px * var(--fs)); font-weight: 500; color: var(--wood-dark); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sm-meta { font-size: calc(12px * var(--fs)); color: var(--text-light); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sm-tag { font-size: calc(12px * var(--fs)); font-weight: 700; border-radius: 4px; padding: 1px 6px; flex: none; }
   .sm-tag.fixed { background: var(--green-light); color: var(--green); }
   .sm-tag.temp { background: var(--orange-light); color: var(--orange-deep); }
-  .sm-done { font-size: 12px; font-weight: 700; color: #3d8b5f; background: #e4f2e9; border-radius: 12px; padding: 1px 6px; flex: none; }
+  .sm-done { font-size: calc(12px * var(--fs)); font-weight: 700; color: #3d8b5f; background: #e4f2e9; border-radius: 12px; padding: 1px 6px; flex: none; }
   .sm-btn {
     flex: none; min-height: 32px; padding: 0 10px; border-radius: 12px;
     border: 1px solid var(--soft-border); background: var(--soft);
-    color: var(--wood); font-size: 12px; font-weight: 600;
+    color: var(--wood); font-size: calc(12px * var(--fs)); font-weight: 600;
     cursor: pointer; font-family: inherit;
   }
   .sm-btn.del { color: var(--red); border-color: #ecc8c8; }
@@ -2050,29 +2051,29 @@
     color: var(--wood); border-radius: 12px; cursor: pointer; font-family: inherit;
     padding: 4px 6px;
   }
-  .lo-btn .lo-label { font-size: 13px; font-weight: 700; }
-  .lo-btn .lo-desc { font-size: 12px; color: var(--text-light); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lo-btn .lo-label { font-size: calc(13px * var(--fs)); font-weight: 700; }
+  .lo-btn .lo-desc { font-size: calc(12px * var(--fs)); color: var(--text-light); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .lo-btn.on { background: var(--orange) !important; color: #fff !important; border-color: var(--orange) !important; }
   .lo-btn.on .lo-desc { color: rgba(255,255,255,.85); }
   /* 紧凑：小屏手机 / 一屏多看 */
-  body.layout-compact { font-size: 13px; }
+  body.layout-compact { font-size: calc(13px * var(--fs)); }
   body.layout-compact .wrap { max-width: 680px; padding: 10px; }
   body.layout-compact header { padding: 14px 16px 12px; }
   body.layout-compact .stu-list { grid-template-columns: 1fr; gap: 8px; }
   body.layout-compact .stu-card { padding: 5px 9px; }
-  body.layout-compact .stu-card .avatar { width: 40px; height: 40px; font-size: 15px; }
+  body.layout-compact .stu-card .avatar { width: 40px; height: 40px; font-size: calc(15px * var(--fs)); }
   body.layout-compact .day-row { padding: 7px 10px; gap: 6px; }
-  body.layout-compact .cls-chip { padding: 2px 6px; font-size: 12px; min-height: 26px; }
+  body.layout-compact .cls-chip { padding: 2px 6px; font-size: calc(12px * var(--fs)); min-height: 26px; }
   body.layout-compact .day-label { width: 42px; }
   body.layout-compact .modal { padding: 16px 14px calc(16px + env(safe-area-inset-bottom)); }
   /* 宽松：平板 / 大屏 */
-  body.layout-roomy { font-size: 16px; }
+  body.layout-roomy { font-size: calc(16px * var(--fs)); }
   body.layout-roomy .wrap { max-width: 1280px; padding: 24px; }
   body.layout-roomy .stu-list { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
   body.layout-roomy .day-row { padding: 12px 16px; }
   body.layout-roomy .day-label { width: 56px; }
   body.layout-roomy .modal { max-width: 560px; }
-  .stu-picker-empty { padding: 20px; text-align: center; color: var(--text-light); font-size: 13px; }
+  .stu-picker-empty { padding: 20px; text-align: center; color: var(--text-light); font-size: calc(13px * var(--fs)); }
   .stu-picker .check { width: 18px; height: 18px; color: var(--orange); opacity: 0; flex: none; }
 
   .form-row { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -2084,7 +2085,7 @@
   .radio-group label {
     flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
     border: 1px solid var(--wood-light); border-radius: 12px;
-    min-height: 44px; cursor: pointer; font-size: 13px; font-weight: 500;
+    min-height: 44px; cursor: pointer; font-size: calc(13px * var(--fs)); font-weight: 500;
     background: var(--soft); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
     margin: 0; color: var(--text);
   }
@@ -2095,17 +2096,17 @@
   /* v147：按钮栏不再吸底——改回随内容流式排布，滚到表单/列表最后才出现（用户明确反馈吸底按钮
      压在内容上"看着很奇怪"，并要求所有弹窗统一）。22 处 .modal-ops 全部由这一条规则覆盖。 */
   .modal-ops { display: flex; gap: 10px; margin-top: 16px; }
-  .modal-ops button { flex: 1; min-height: 46px; border-radius: 12px; border: none; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+  .modal-ops button { flex: 1; min-height: 46px; border-radius: 12px; border: none; font-size: calc(13px * var(--fs)); font-weight: 700; cursor: pointer; font-family: inherit; }
   .m-cancel { background: rgba(247,241,232,0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); color: var(--text-light); }
   .m-ok { background: var(--orange); color: #fff; }
   .m-ok:hover { background: var(--orange-deep); }
   .avatar-edit-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .avatar-edit-row .avatar { width: 60px; height: 60px; font-size: 25px; object-fit: cover; }
-  .avatar-edit-row .btn-ghost { min-height: 40px; padding: 0 12px; font-size: 12px; }
+  .avatar-edit-row .btn-ghost { min-height: 40px; padding: 0 12px; font-size: calc(12px * var(--fs)); }
 
   /* 倒计时徽章（v126：缩小字号/字重，弱化脉冲，整体不抢眼） */
   /* 倒计时徽章（v127：重排版——去掉填充色块与脉冲，改为低调纯文字，整体变小） */
-  .cd-chip { font-size: 9px; font-weight: 400; border-radius: 3px; padding: 0 1px; display: inline-block; line-height: 1.35; white-space: nowrap; opacity: .7; letter-spacing: .1px; }
+  .cd-chip { font-size: calc(9px * var(--fs)); font-weight: 400; border-radius: 3px; padding: 0 1px; display: inline-block; line-height: 1.35; white-space: nowrap; opacity: .7; letter-spacing: .1px; }
   .cd-ok { color: var(--wood-dark); background: transparent; }
   .cd-soon { color: var(--red); background: transparent; }
   .cd-now { color: var(--green); background: transparent; }
@@ -2122,14 +2123,14 @@
     border: 1px solid rgba(255,255,255,0.15);
     color: #fff;
     padding: 11px 20px; border-radius: 99px;
-    font-size: 13px; opacity: 0; pointer-events: none;
+    font-size: calc(13px * var(--fs)); opacity: 0; pointer-events: none;
     transition: all .25s; z-index: 200; max-width: 86vw; text-align: center;
   }
   /* v113：toast 内动作按钮（撤销）——悬浮在文字右侧，不撑开布局 */
   .toast .toast-act {
     position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
     background: rgba(255,255,255,.16); border: none; color: #ffd9a8;
-    font-size: 13px; font-weight: 600; font-family: inherit;
+    font-size: calc(13px * var(--fs)); font-weight: 600; font-family: inherit;
     padding: 4px 12px; border-radius: 99px; cursor: pointer; flex-shrink: 0;
   }
   .toast .toast-act:active { background: rgba(255,255,255,.3); }
@@ -2143,20 +2144,20 @@
     background: rgba(253,246,231,0.55);
     backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
     border: 1px solid rgba(238,219,175,0.6);
-    border-radius: 12px; padding: 9px 13px; font-size: 13px;
+    border-radius: 12px; padding: 9px 13px; font-size: calc(13px * var(--fs));
     color: #8a6d2f; margin-bottom: 12px;
   }
   .sample-banner button {
     margin-left: auto; min-height: 34px; padding: 0 12px;
     border: 1px solid var(--orange-border); background: var(--soft); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
     color: #8a6d2f;
-    border-radius: 12px; font-size: 12px; font-weight: 600;
+    border-radius: 12px; font-size: calc(12px * var(--fs)); font-weight: 600;
     cursor: pointer; font-family: inherit; flex-shrink: 0;
   }
   /* 头像裁剪 */
   .crop-area { position: relative; text-align: center; }
   .crop-area canvas { margin: 0 auto; border: 1px solid var(--glass-border); }
-  .crop-guide { font-size: 12px; color: var(--text-light); margin-top: 6px; }
+  .crop-guide { font-size: calc(12px * var(--fs)); color: var(--text-light); margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -2202,7 +2203,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v154</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v155</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -2547,7 +2548,7 @@
   <div class="modal" style="max-width:520px">
     <h3 style="display:flex;align-items:center;gap:8px">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9c6644" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-      回收站 <span style="font-size:12px;color:var(--text-light);font-weight:400">（保留 7 天）</span>
+      回收站 <span style="font-size:calc(12px * var(--fs));color:var(--text-light);font-weight:400">（保留 7 天）</span>
     </h3>
     <div id="recycleList" style="max-height:60vh;overflow-x:hidden;overflow-y:auto;margin-top:6px"></div>
     <div class="modal-ops">
@@ -2626,7 +2627,7 @@
       </div>
     </div>
     <div class="form-item">
-      <label class="export-opt" style="font-size:14px;font-weight:600"><input type="checkbox" id="stuInRoster" checked> 在学员管理中显示该学生</label>
+      <label class="export-opt" style="font-size:calc(14px * var(--fs));font-weight:600"><input type="checkbox" id="stuInRoster" checked> 在学员管理中显示该学生</label>
       <div class="set-tip" style="margin-top:4px">勾选后，学生卡片显示在「学员管理」页<b>默认上课地点</b>对应的琴行分组下；试课、临时学员可取消勾选（不影响排课上课与课时统计）。</div>
     </div>
     <div class="form-item">
@@ -2731,7 +2732,7 @@
     <div class="form-item" id="addSchedGroupWrap" style="display:none">
       <label id="addSchedGroupLabel">小组成员</label>
       <div id="addSchedMembers" class="add-sched-members"></div>
-      <button type="button" class="btn-ghost" style="width:100%;min-height:40px;margin-top:8px;font-size: 12px" onclick="toggleAddSchedPool()">＋ 添加成员（从学员池选择）</button>
+      <button type="button" class="btn-ghost" style="width:100%;min-height:40px;margin-top:8px;font-size: calc(12px * var(--fs))" onclick="toggleAddSchedPool()">＋ 添加成员（从学员池选择）</button>
       <div id="addSchedPool" class="add-sched-pool" style="display:none">
         <div class="stu-picker-search" style="margin-bottom:6px">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -2782,7 +2783,7 @@
   <div class="modal" style="max-width:520px">
     <h3>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e0762e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="12" y1="14" x2="12" y2="18"/><line x1="10" y1="16" x2="14" y2="16"/></svg>
-      课表管理 <span id="schedManageCount" style="font-weight:400;font-size:12px;color:var(--text-light)"></span>
+      课表管理 <span id="schedManageCount" style="font-weight:400;font-size:calc(12px * var(--fs));color:var(--text-light)"></span>
     </h3>
     <div class="set-tip" style="margin:0 0 10px">统一添加、修改、删除课表。临时课按某一天排，固定课每周自动重复。小组课点<b>编辑</b>还能直接增删小组成员。</div>
     <button class="btn-add" style="width:100%;justify-content:center;min-height:44px;margin-bottom:10px" onclick="addSchedFromManage=true;closeModal('schedManageModal');openAddScheduleModal()">
@@ -2876,7 +2877,7 @@
         <input type="text" id="extraNameInput" placeholder="如：小红" maxlength="12" onkeydown="onExtraNameKey(event)">
         <button type="button" class="btn-ghost" style="flex-shrink:0;min-height:40px;padding:0 14px" onclick="addExtraName()">添加</button>
       </div>
-      <button type="button" class="btn-ghost" style="width:100%;min-height:36px;margin-top:8px;font-size:12px" onclick="toggleExtraPool()">从学员管理选择（有档案的会扣课时）</button>
+      <button type="button" class="btn-ghost" style="width:100%;min-height:36px;margin-top:8px;font-size:calc(12px * var(--fs))" onclick="toggleExtraPool()">从学员管理选择（有档案的会扣课时）</button>
       <div id="extraPool" class="add-sched-pool" style="display:none;margin-top:8px">
         <div class="stu-picker-search" style="margin-bottom:6px">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="20" y1="20" x2="16.5" y2="16.5"/></svg>
@@ -2903,7 +2904,7 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d64545" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       <span id="confirmTitle">确认操作</span>
     </h3>
-    <p id="confirmMsg" style="font-size:14px;color:var(--text-light);margin-bottom:4px;word-break:break-word"></p>
+    <p id="confirmMsg" style="font-size:calc(14px * var(--fs));color:var(--text-light);margin-bottom:4px;word-break:break-word"></p>
     <div class="modal-ops">
       <button class="m-cancel" onclick="closeModal('confirmModal')">取消</button>
       <button class="m-ok" id="confirmOkBtn" style="background:var(--red)">确认</button>
@@ -2990,7 +2991,7 @@
     </h3>
     <input type="hidden" id="rcType"><input type="hidden" id="rcFlexId">
     <input type="hidden" id="rcStudentId"><input type="hidden" id="rcTime"><input type="hidden" id="rcDate">
-    <p style="font-size: 12px;color:var(--text-light);margin-bottom:10px"><b>固定成员</b>点一下切换：<b style="color:var(--green)">出勤</b>扣1节课时，<b style="color:#b08968">请假</b>不扣课时。<b>本次临时参与者</b>不在编制内、默认出勤，学员管理里有档案的同样扣1节。</p>
+    <p style="font-size: calc(12px * var(--fs));color:var(--text-light);margin-bottom:10px"><b>固定成员</b>点一下切换：<b style="color:var(--green)">出勤</b>扣1节课时，<b style="color:#b08968">请假</b>不扣课时。<b>本次临时参与者</b>不在编制内、默认出勤，学员管理里有档案的同样扣1节。</p>
     <div id="rollcallList"></div>
     <div class="modal-ops">
       <button class="m-cancel" onclick="closeModal('rollcallModal')">取消</button>
@@ -3007,7 +3008,7 @@
       <span id="memberLeaveTitle">组内请假登记</span>
     </h3>
     <input type="hidden" id="mlStudentId"><input type="hidden" id="mlDate">
-    <p style="font-size: 12px;color:var(--text-light);margin-bottom:10px">点姓名切换当天请假状态，标记后立即保存（不扣课时）</p>
+    <p style="font-size: calc(12px * var(--fs));color:var(--text-light);margin-bottom:10px">点姓名切换当天请假状态，标记后立即保存（不扣课时）</p>
     <div id="memberLeaveList"></div>
     <div class="modal-ops">
       <button class="m-ok" style="background:var(--wood)" onclick="closeModal('memberLeaveModal')">完成</button>
@@ -3020,7 +3021,7 @@
   <div class="modal" style="max-width:460px">
     <h3>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e0762e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      学员管理 <span id="poolCount" style="font-weight:400;font-size:12px;color:var(--text-light)"></span>
+      学员管理 <span id="poolCount" style="font-weight:400;font-size:calc(12px * var(--fs));color:var(--text-light)"></span>
     </h3>
     <div id="poolTopBar">
       <div style="display:flex;gap:8px;margin-bottom:10px">
@@ -3033,7 +3034,7 @@
           批量删除
         </button>
       </div>
-      <input type="text" id="poolSearch" placeholder="搜索姓名 / 电话" oninput="renderPoolList()" style="width:100%;min-height:40px;padding:8px 12px;border:1px solid #ddd0bd;border-radius:12px;font-size: 16px;font-family:inherit;margin-bottom:8px"><!-- v112: 13px→16px 防 iOS 聚焦缩放 -->
+      <input type="text" id="poolSearch" placeholder="搜索姓名 / 电话" oninput="renderPoolList()" style="width:100%;min-height:40px;padding:8px 12px;border:1px solid #ddd0bd;border-radius:12px;font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */;font-family:inherit;margin-bottom:8px"><!-- v112: 13px→16px 防 iOS 聚焦缩放 -->
     </div>
     <div class="set-tip" style="margin:0 0 8px">每位学员一份档案，跨小组共享课时与身份。点学员可编辑资料 🎂</div>
     <div id="poolList" style="max-height:46vh;overflow-x:hidden;overflow-y:auto"></div>
@@ -3055,8 +3056,8 @@
     <div class="brand-av-line">
       <div class="brand-av-preview" id="brandAvPreview"></div>
       <div class="brand-av-btns">
-        <button class="btn-ghost" style="min-height:38px;font-size: 13px" onclick="document.getElementById('brandAvatarFile').click()">上传头像</button>
-        <button class="btn-ghost" id="brandAvRemove" style="min-height:38px;font-size: 13px" onclick="removeBrandAvatar()">移除头像</button>
+        <button class="btn-ghost" style="min-height:38px;font-size: calc(13px * var(--fs))" onclick="document.getElementById('brandAvatarFile').click()">上传头像</button>
+        <button class="btn-ghost" id="brandAvRemove" style="min-height:38px;font-size: calc(13px * var(--fs))" onclick="removeBrandAvatar()">移除头像</button>
       </div>
     </div>
     <input type="file" id="brandAvatarFile" accept="image/*" style="display:none" onchange="onBrandAvatarPick(event)">
@@ -3075,7 +3076,7 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#b08968" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
       <span>课表图片已生成</span>
     </h3>
-    <p id="imgExportTip" style="font-size: 12px;color:var(--text-light);margin-bottom:10px">长按下方图片，选择「存储图像」即可保存到手机</p>
+    <p id="imgExportTip" style="font-size: calc(12px * var(--fs));color:var(--text-light);margin-bottom:10px">长按下方图片，选择「存储图像」即可保存到手机</p>
     <img id="imgExportPreview" alt="课表图片" style="width:100%;display:block;border-radius:12px;border:1px solid #e8ddd0;box-shadow:var(--shadow);-webkit-touch-callout:default;touch-action:manipulation">
     <div class="modal-ops">
       <button class="m-ok" style="background:var(--wood)" onclick="saveExportImage()">下载图片</button>
@@ -3096,9 +3097,9 @@
       <div class="crop-guide">拖动移动 · 双指或滚轮缩放</div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;margin:10px 0">
-      <button class="btn-ghost" style="min-height:38px;padding:0 12px;font-size: 12px" onclick="cropZoom(-0.1)">−</button>
+      <button class="btn-ghost" style="min-height:38px;padding:0 12px;font-size: calc(12px * var(--fs))" onclick="cropZoom(-0.1)">−</button>
       <input type="range" id="cropZoom" min="50" max="300" step="5" value="100" style="flex:1;accent-color:var(--orange)" oninput="cropZoomBySlider(this.value)">
-      <button class="btn-ghost" style="min-height:38px;padding:0 12px;font-size: 12px" onclick="cropZoom(0.1)">＋</button>
+      <button class="btn-ghost" style="min-height:38px;padding:0 12px;font-size: calc(12px * var(--fs))" onclick="cropZoom(0.1)">＋</button>
     </div>
     <div class="modal-ops">
       <button class="m-cancel" onclick="closeModal('cropModal')">取消</button>
@@ -3112,8 +3113,8 @@
   <div class="modal">
     <div class="avatar-zoom-box" id="avatarZoomBox"></div>
     <div class="avatar-zoom-actions" id="avatarZoomActions" style="display:none;margin-top:14px;text-align:center">
-      <button type="button" class="btn-copy btn-wood" style="min-height:36px;padding:0 16px;font-size: 13px" onclick="changeZoomAvatar()">修改头像</button>
-      <button type="button" class="btn-ghost" id="avatarZoomRemoveBtn" style="min-height:36px;padding:0 14px;font-size: 13px;margin-left:8px" onclick="removeZoomAvatar()">移除头像</button>
+      <button type="button" class="btn-copy btn-wood" style="min-height:36px;padding:0 16px;font-size: calc(13px * var(--fs))" onclick="changeZoomAvatar()">修改头像</button>
+      <button type="button" class="btn-ghost" id="avatarZoomRemoveBtn" style="min-height:36px;padding:0 14px;font-size: calc(13px * var(--fs));margin-left:8px" onclick="removeZoomAvatar()">移除头像</button>
     </div>
     <input type="file" id="avatarZoomFile" accept="image/*" style="display:none" onchange="onZoomAvatarPick(event)">
   </div>
@@ -3127,7 +3128,7 @@
     <div class="cp-row"><label>色相</label><input type="range" id="cpHue" min="0" max="360" value="210" oninput="updateCpFromSliders()"></div>
     <div class="cp-row"><label>饱和</label><input type="range" id="cpSat" min="0" max="100" value="60" oninput="updateCpFromSliders()"></div>
     <div class="cp-row"><label>明度</label><input type="range" id="cpVal" min="0" max="100" value="70" oninput="updateCpFromSliders()"></div>
-    <div class="cp-row"><label>十六进制</label><input type="text" id="cpHex" class="set-input" style="min-height:38px;font-size: 16px" maxlength="7" oninput="updateCpFromHex()"></div><!-- v112: 13px→16px 防 iOS 聚焦缩放 -->
+    <div class="cp-row"><label>十六进制</label><input type="text" id="cpHex" class="set-input" style="min-height:38px;font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */" maxlength="7" oninput="updateCpFromHex()"></div><!-- v112: 13px→16px 防 iOS 聚焦缩放 -->
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeColorPicker()">取消</button>
       <button class="btn-add" onclick="confirmColorPicker()">确定</button>
@@ -3139,7 +3140,7 @@
 <div class="modal-mask" id="customExportModal" onclick="if(event.target===this)closeModal('customExportModal')">
   <div class="modal" style="max-width:420px">
     <div class="modal-title">自定义导出</div>
-    <div style="font-size: 13px;color:var(--text-light);margin-bottom:10px">选择要导出的内容，生成可下载文件。</div>
+    <div style="font-size: calc(13px * var(--fs));color:var(--text-light);margin-bottom:10px">选择要导出的内容，生成可下载文件。</div>
     <div class="export-opt-group" style="margin:10px 0 14px">
       <label class="export-opt"><input type="checkbox" id="cex-students" checked onchange="updateCustomExportUI()"> 学员与成员信息（含剩余课时）</label>
       <label class="export-opt"><input type="checkbox" id="cex-hours" checked onchange="updateCustomExportUI()"> 课时流水（扣课 / 续费 / 调整）</label>
@@ -3149,7 +3150,7 @@
       <label class="export-opt"><input type="checkbox" id="cex-settings" onchange="updateCustomExportUI()"> 设置与提醒模板</label>
     </div>
     <div style="margin-bottom:12px">
-      <div class="set-label" style="font-size: 13px;margin-bottom:6px">导出格式</div>
+      <div class="set-label" style="font-size: calc(13px * var(--fs));margin-bottom:6px">导出格式</div>
       <div class="btn-line" style="gap:8px;justify-content:flex-start">
         <label class="export-format"><input type="radio" name="cex-format" value="json"> JSON</label>
         <label class="export-format"><input type="radio" name="cex-format" value="csv"> CSV（表格）</label>
@@ -3157,8 +3158,8 @@
       </div>
     </div>
     <div id="cex-studentFilterBox" style="margin-bottom:12px;padding:10px;border:1px dashed var(--soft-border);border-radius:12px;background:var(--soft)">
-      <div class="set-label" style="font-size: 13px;margin-bottom:6px">指定学员（默认全部）</div>
-      <select id="cex-studentFilter" class="set-input" style="min-height:40px;font-size:16px"><option value="">全部学员</option></select><!-- v112: 14px→16px 防 iOS 聚焦缩放 -->
+      <div class="set-label" style="font-size: calc(13px * var(--fs));margin-bottom:6px">指定学员（默认全部）</div>
+      <select id="cex-studentFilter" class="set-input" style="min-height:40px;font-size:16px;/* v155: 固定 16px 不随档缩放 */"><option value="">全部学员</option></select><!-- v112: 14px→16px 防 iOS 聚焦缩放 -->
     </div>
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeModal('customExportModal')">取消</button>
@@ -3259,7 +3260,7 @@ var GLASS_OPTS = [
   { key: 'standard', label: '标准', value: 'blur(6px) saturate(150%)', desc: '均衡（默认）' },
   { key: 'strong', label: '液态', value: 'blur(14px) saturate(185%)', desc: '流动感最强' }
 ];
-/* v154: 字体大小——zoom 作用于整页坐标系，fixed 弹窗/键盘适配同比例缩放不受影响 */
+/* v154: 字体大小四档；v155: 由整页 zoom 改为 --fs 变量只缩放字号（修页面变形） */
 var FONT_OPTS = [
   { key: 'small', label: '小', zoom: 0.9, desc: '一屏更多内容' },
   { key: 'standard', label: '标准', zoom: 1, desc: '默认' },
@@ -3274,7 +3275,11 @@ function applyGlass() {
 function applyFontZoom() {
   var key = state.settings.font || 'standard';
   var o = FONT_OPTS.filter(function (x) { return x.key === key; })[0] || FONT_OPTS[1];
-  document.body.style.zoom = (o.zoom === 1) ? '' : String(o.zoom);
+  /* v155: 不再用 body.style.zoom——整页缩放会把 fixed 遮罩/弹窗/sticky 栏一起缩放导致页面变形，
+     还让键盘适配（visualViewport 像素 vs 缩放后 CSS 像素）算错。
+     改为只缩放「字号」：CSS 里所有 font-size 写成 calc(Npx * var(--fs))，布局盒子尺寸不变。 */
+  if (document.body.style.zoom) document.body.style.zoom = ''; /* 清掉 ≤v154 的整页 zoom 遗留 */
+  document.documentElement.style.setProperty('--fs', String(o.zoom));
 }
 function renderGlassOpts() {
   var box = document.getElementById('glassOpts');
@@ -4810,7 +4815,7 @@ function openExtraAttendees(type, id, studentId, time, dateStr) {
   if (info) {
     var stu = getStudent(studentId);
     info.innerHTML = '<div><b>' + escapeHtml(stu ? stu.name : '(未命名)') + '</b>' +
-      '<div style="color:var(--text-light);font-size:12px;margin-top:4px">' +
+      '<div style="color:var(--text-light);font-size:calc(12px * var(--fs));margin-top:4px">' +
       escapeHtml(fmtDateCN(dateStr)) + ' ' + escapeHtml(time) + '</div></div>';
   }
   var inp = document.getElementById('extraNameInput');
@@ -4839,7 +4844,7 @@ function renderExtraList() {
           '<span class="asm-link" onclick="toggleExtraLink(' + i + ')" title="切换这节课是否扣他课时">' + (p ? '改不扣' : '关联') + '</span>' +
           '<span class="asm-x" onclick="removeExtraName(' + i + ')" title="移除">×</span></span>';
       }).join('')
-    : '<span style="color:var(--text-light);font-size:12px">还没有添加。填名字点「添加」——学员管理里有同名档案会自动关联并扣课时。</span>';
+    : '<span style="color:var(--text-light);font-size:calc(12px * var(--fs))">还没有添加。填名字点「添加」——学员管理里有同名档案会自动关联并扣课时。</span>';
 }
 /* 同名判定：工作区里已有同名（不论是否关联档案）就不许再加 */
 function extraHasName(name) {
@@ -4907,7 +4912,7 @@ function renderExtraPool() {
     var hTxt = (e.hours == null || e.hours === '') ? '未记课时' : '剩' + e.hours + '节';
     return '<div class="stu-picker-row' + (already ? ' picked' : '') + '" onclick="pickExtraFromPool(\'' + e.key + '\')">' +
       avatarHtml(e.obj) +
-      '<div class="stu-picker-name">' + escapeHtml(e.name) + (already ? ' <span style="color:var(--green);font-size:11px">已添加</span>' : '') + '</div>' +
+      '<div class="stu-picker-name">' + escapeHtml(e.name) + (already ? ' <span style="color:var(--green);font-size:calc(11px * var(--fs))">已添加</span>' : '') + '</div>' +
       '<div class="stu-picker-sub">' + escapeHtml(e.contact || '') + ' · ' + hTxt + '</div>' +
       '</div>';
   }).join('');
@@ -5442,7 +5447,7 @@ function renderTopArea() {
   document.getElementById('todayCnt').textContent = todayActiveCnt ? '共 ' + todayActiveCnt + ' 节' : '';
   var tHtml = '';
   if (!todayClasses.length) {
-    tHtml = '<div class="empty-tip">今天没有排课，休息一下 🎸<br><span style="font-size:12px">（可在课表看板中添加）</span></div>';
+    tHtml = '<div class="empty-tip">今天没有排课，休息一下 🎸<br><span style="font-size:calc(12px * var(--fs))">（可在课表看板中添加）</span></div>';
   } else {
     /* 已完成排到列表底部，未完成/请假的保持原顺序在前 */
     var pending = [], finished = [];
@@ -5583,7 +5588,7 @@ function renderTopArea() {
           if (ml) lvCnt++;
           return '<span class="mem-chip' + (ml ? ' mem-lv' : '') + '" onclick="toggleMemberLeave(\'' + tomorrowStr + '\',\'' + c.studentId + '\',\'' + m.id + '\')">' + escapeHtml(m.name) + (ml ? '·假' : '') + '</span>';
         }).join('');
-        memRow = '<div class="mem-row" style="grid-column:1/-1"><span style="font-size: 12px;color:var(--text-light);flex-shrink:0">成员请假（点击切换）：</span>' + chips + '</div>';
+        memRow = '<div class="mem-row" style="grid-column:1/-1"><span style="font-size: calc(12px * var(--fs));color:var(--text-light);flex-shrink:0">成员请假（点击切换）：</span>' + chips + '</div>';
       }
       /* 本次临时加人（试听/蹭课）：只挂在这一天这一节课上，不建档、不扣课时 */
       var mExList = getExtraAttendees(c, tomorrowStr);
@@ -5605,7 +5610,7 @@ function renderTopArea() {
       mHtml += '<div class="r-item' + (reminded && !leave ? ' done-r' : '') + (leave ? ' leave-r' : '') + '"' + mStyle + '>' +
         '<div class="r-avatar">' + avatarHtml(stu) + '</div>' +
         '<div class="r-info">' +
-          '<div class="r-name">' + escapeHtml(c.name) + ' ' + (c.type === 'fixed' ? '<span style="font-size: 12px;color:var(--wood);font-weight:600">固定</span>' : '<span style="font-size: 12px;color:var(--orange-deep);font-weight:600">约课</span>') + (grp ? memChip : (stu && !leave ? ' ' + hoursBadge(stu) : '')) + (leave ? ' <span class="badge-leave">已请假</span>' : '') + mExChip + mExBtn + '</div>' +
+          '<div class="r-name">' + escapeHtml(c.name) + ' ' + (c.type === 'fixed' ? '<span style="font-size: calc(12px * var(--fs));color:var(--wood);font-weight:600">固定</span>' : '<span style="font-size: calc(12px * var(--fs));color:var(--orange-deep);font-weight:600">约课</span>') + (grp ? memChip : (stu && !leave ? ' ' + hoursBadge(stu) : '')) + (leave ? ' <span class="badge-leave">已请假</span>' : '') + mExChip + mExBtn + '</div>' +
           '<div class="r-meta">明天 ' + weekdayOf(tomorrowStr) + ' <span class="r-time">' + c.time + '</span>' + locHtml(c.locationId) + (c.reschedIn ? ' <span class="rs-note">↪ 原' + fmtDateCN(c.reschedIn.fromDate) + ' ' + c.reschedIn.fromTime + '</span>' : '') + (leave ? '' : reminded ? '已提醒' : (grp && lvCnt === membersOf(stu).length ? '全员请假' : '待提醒')) + '</div>' +
         '</div>' +
         '<div class="r-actions">' + right + '</div>' +
@@ -6422,7 +6427,7 @@ function renderHoursStats() {
     '</div>' +
     '<div class="set-tip" style="margin:0 0 6px">' + rangeTxt + (loc ? ' · ' + escapeHtml(loc.name) : ' · 全部机构') + '（小组课按组内成员出勤计）</div>' +
     (locDistTxt ? '<div class="set-tip" style="margin:0 0 8px">📍 地点分布：' + locDistTxt + '</div>' : '') +
-    '<div class="set-tip" style="margin:0 0 6px;color:#b08968;font-size: 12px">💡 充值/消耗来自课时流水账，从启用流水功能后开始累计</div>';
+    '<div class="set-tip" style="margin:0 0 6px;color:#b08968;font-size: calc(12px * var(--fs))">💡 充值/消耗来自课时流水账，从启用流水功能后开始累计</div>';
   if (!st.rows.length) {
     html += '<div class="stat-empty">该时间段内还没有完成或请假的课程记录</div>';
   } else {
@@ -6992,7 +6997,7 @@ function renderMemberEditor(list, boxId, onChange, emptyTip) {
         return '<span class="add-sched-mem">' + escapeHtml(m.name || '?') + (linked ? ' 🔗' : '') +
           '<span class="asm-x" onclick="removeEditorMember(' + i + ')" title="移除">×</span></span>';
       }).join('') + '</div>'
-    : '<div style="color:var(--text-light);font-size:12px">' +
+    : '<div style="color:var(--text-light);font-size:calc(12px * var(--fs))">' +
       (emptyTip || '还没有成员。点「添加成员」挑人即可组成小组课。') + '</div>';
   box.innerHTML =
     chips +
@@ -7001,7 +7006,7 @@ function renderMemberEditor(list, boxId, onChange, emptyTip) {
     '</div>' +
     '<div id="' + ids.pool + '" style="display:' + (editorMemberPoolOpen[editorMemberBoxId] ? '' : 'none') + '">' +
       '<input type="text" id="' + ids.search + '" placeholder="搜索姓名 / 电话" oninput="renderEditorMemberPool()" ' +
-        'style="width:100%;min-height:40px;padding:8px 12px;border:1px solid #ddd0bd;border-radius:12px;font-size:16px;font-family:inherit;margin:8px 0 0">' +
+        'style="width:100%;min-height:40px;padding:8px 12px;border:1px solid #ddd0bd;border-radius:12px;font-size:calc(16px * var(--fs));font-family:inherit;margin:8px 0 0">' +
       '<div id="' + ids.list + '" class="add-sched-pool"></div>' +
     '</div>';
   if (editorMemberPoolOpen[editorMemberBoxId]) renderEditorMemberPool();
@@ -7038,15 +7043,15 @@ function renderEditorMemberPool() {
     return true;
   });
   if (!entries.length) {
-    p.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-light);font-size:12px">' +
+    p.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-light);font-size:calc(12px * var(--fs))">' +
       (kw ? '没找到匹配的学员' : '学员池里没有可添加的成员了') + '</div>';
     return;
   }
   p.innerHTML = entries.map(function (e) {
     var h = e.hours == null ? '未设课时' : ('剩 ' + e.hours + ' 节');
     var tag = e.kind === 'student'
-      ? '<span style="color:var(--orange-deep);font-size:12px;flex-shrink:0">单人课</span>'
-      : '<span style="color:var(--text-light);font-size:12px;flex-shrink:0">' + escapeHtml(h) + '</span>';
+      ? '<span style="color:var(--orange-deep);font-size:calc(12px * var(--fs));flex-shrink:0">单人课</span>'
+      : '<span style="color:var(--text-light);font-size:calc(12px * var(--fs));flex-shrink:0">' + escapeHtml(h) + '</span>';
     return '<div class="add-sched-pool-item" onclick="addEditorMember(\'' + e.key + '\')">' +
       '<span style="flex:1;min-width:0">' + escapeHtml(e.name || '(未命名)') + '</span>' + tag + '</div>';
   }).join('');
@@ -7533,8 +7538,8 @@ function openPoolEditor(key) {
     '<div class="pool-form">' +
     '<div class="form-item"><label>头像</label><div class="avatar-edit-row">' +
     '<span id="peAvatarPreview"></span>' +
-    '<button type="button" class="btn-ghost" style="min-height:40px;padding:0 12px;font-size: 12px" onclick="document.getElementById(\'peAvatarFile\').click()">上传头像</button>' +
-    '<button type="button" class="btn-ghost danger" style="min-height:40px;padding:0 12px;font-size: 12px" onclick="clearPoolAvatar()">移除</button>' +
+    '<button type="button" class="btn-ghost" style="min-height:40px;padding:0 12px;font-size: calc(12px * var(--fs))" onclick="document.getElementById(\'peAvatarFile\').click()">上传头像</button>' +
+    '<button type="button" class="btn-ghost danger" style="min-height:40px;padding:0 12px;font-size: calc(12px * var(--fs))" onclick="clearPoolAvatar()">移除</button>' +
     '<input type="file" id="peAvatarFile" accept="image/*" style="display:none" onchange="onPoolAvatarPick(event)">' +
     '</div></div>' +
     '<div class="form-item"><label>姓名</label><input type="text" id="peName" maxlength="20" value="' + escapeHtml(e.name) + '" oninput="renderPoolAvatarPreview()"></div>' +
@@ -7545,9 +7550,9 @@ function openPoolEditor(key) {
     '<div class="form-item"><label>课时操作</label>' +
       '<div class="ds-h-btns" style="gap:6px;flex-wrap:wrap">' +
       '<button class="h-btn" style="min-width:96px" onclick="rechargePoolEntry(\'' + key + '\')">＋ 续费</button>' +
-      '<button class="btn-copy" style="min-height:34px;padding:0 10px;font-size:12px" onclick="poolManualDone(\'' + key + '\')">补记上课</button>' +
-      '<button class="btn-copy" style="min-height:34px;padding:0 10px;font-size:12px" onclick="poolHoursDetail(\'' + key + '\')">课时明细</button>' +
-      '<button class="btn-copy" style="min-height:34px;padding:0 10px;font-size:12px" onclick="poolHoursDetailImage(\'' + key + '\')">明细图片</button>' +
+      '<button class="btn-copy" style="min-height:34px;padding:0 10px;font-size:calc(12px * var(--fs))" onclick="poolManualDone(\'' + key + '\')">补记上课</button>' +
+      '<button class="btn-copy" style="min-height:34px;padding:0 10px;font-size:calc(12px * var(--fs))" onclick="poolHoursDetail(\'' + key + '\')">课时明细</button>' +
+      '<button class="btn-copy" style="min-height:34px;padding:0 10px;font-size:calc(12px * var(--fs))" onclick="poolHoursDetailImage(\'' + key + '\')">明细图片</button>' +
       '</div></div>' +
     '<div class="set-tip">' + grpTip + '</div>' +
     '<div class="form-item"><label>课表（未来 7 天 · 只读，增删请到课表管理）</label>' + poolUpcomingHtml(e) + '</div>' +
@@ -8011,7 +8016,7 @@ function renderStudentDetail() {
     : '<div class="ds-renew-tip muted">暂无续费记录</div>';
   var hoursHtml = hoursVal === null
     ? '<div class="ds-h-num muted">未设置</div>'
-    : '<div class="ds-h-num' + (low ? ' red' : '') + '">' + hoursVal + '<span style="font-size: 13px;color:var(--text-light);margin-left:2px">节</span></div>';
+    : '<div class="ds-h-num' + (low ? ' red' : '') + '">' + hoursVal + '<span style="font-size: calc(13px * var(--fs));color:var(--text-light);margin-left:2px">节</span></div>';
   var renewBtn = (low && hoursVal !== null)
     ? '<button class="btn-copy btn-red" onclick="copyRenewOne(\'' + s.id + '\')">复制续费提醒</button>'
     : '';
@@ -8037,16 +8042,16 @@ function renderStudentDetail() {
           '<div class="ds-member-name">' + escapeHtml(m.name) + (m.contact ? '<span class="ds-member-contact">' + escapeHtml(m.contact) + '</span>' : '') + crossTip + '</div>' +
           '<div class="ds-member-sub">' +
             (h === null
-              ? '<span class="ds-h-num muted" style="font-size: 13px">未设置</span>'
-              : '<span class="ds-h-num' + (mLow ? ' red' : '') + '" style="font-size: 13px">' + h + '<span style="font-size: 12px;color:var(--text-light)">节</span></span>') +
+              ? '<span class="ds-h-num muted" style="font-size: calc(13px * var(--fs))">未设置</span>'
+              : '<span class="ds-h-num' + (mLow ? ' red' : '') + '" style="font-size: calc(13px * var(--fs))">' + h + '<span style="font-size: calc(12px * var(--fs));color:var(--text-light)">节</span></span>') +
             '<span class="ds-member-lv">请假' + memberLeaveCount(s.id, m.id) + '次</span>' +
           '</div>' +
         '</div>' +
         '<div class="ds-member-actions">' +
-          '<button class="h-btn" style="min-width:72px;min-height:34px;font-size: 13px" onclick="rechargeMemberHours(\'' + s.id + '\',\'' + m.id + '\')">＋ 续费</button>' +
-          '<button class="btn-copy" style="min-height:34px;padding:0 9px;font-size:12px" onclick="copyHoursDetail(\'' + s.id + '\',\'' + m.id + '\')">明细</button>' +
-          '<button class="btn-copy" style="min-height:34px;padding:0 9px;font-size:12px" onclick="copyHoursDetailImage(\'' + s.id + '\',\'' + m.id + '\')">图片</button>' +
-          (mLow && h !== null ? '<button class="btn-copy btn-red" style="min-height:34px;padding:0 10px;font-size:12px" onclick="copyRenewMember(\'' + s.id + '\',\'' + m.id + '\')">续费提醒</button>' : '') +
+          '<button class="h-btn" style="min-width:72px;min-height:34px;font-size: calc(13px * var(--fs))" onclick="rechargeMemberHours(\'' + s.id + '\',\'' + m.id + '\')">＋ 续费</button>' +
+          '<button class="btn-copy" style="min-height:34px;padding:0 9px;font-size:calc(12px * var(--fs))" onclick="copyHoursDetail(\'' + s.id + '\',\'' + m.id + '\')">明细</button>' +
+          '<button class="btn-copy" style="min-height:34px;padding:0 9px;font-size:calc(12px * var(--fs))" onclick="copyHoursDetailImage(\'' + s.id + '\',\'' + m.id + '\')">图片</button>' +
+          (mLow && h !== null ? '<button class="btn-copy btn-red" style="min-height:34px;padding:0 10px;font-size:calc(12px * var(--fs))" onclick="copyRenewMember(\'' + s.id + '\',\'' + m.id + '\')">续费提醒</button>' : '') +
         '</div>' +
         renewTipM +
         '</div>';
@@ -8123,8 +8128,8 @@ function renderStudentDetail() {
   }
   var detailCopyBtn = ms.length
     ? '' /* 小组成员各有自己的明细按钮 */
-    : '<button class="btn-copy" style="margin-left:auto;min-height:30px;padding:0 10px;font-size:12px" onclick="copyHoursDetail(\'' + s.id + '\')">复制明细</button>';
-  var batchBtn = '<button class="btn-copy" style="margin-left:6px;min-height:30px;padding:0 10px;font-size:12px" onclick="toggleDetailBatch()">' + (detailBatchMode ? '完成' : '批量') + '</button>';
+    : '<button class="btn-copy" style="margin-left:auto;min-height:30px;padding:0 10px;font-size:calc(12px * var(--fs))" onclick="copyHoursDetail(\'' + s.id + '\')">复制明细</button>';
+  var batchBtn = '<button class="btn-copy" style="margin-left:6px;min-height:30px;padding:0 10px;font-size:calc(12px * var(--fs))" onclick="toggleDetailBatch()">' + (detailBatchMode ? '完成' : '批量') + '</button>';
   if (detailBatchMode) {
     detailBatchBar = '<div class="det-batch-bar">' +
       '<span id="batchSelCount">已选 0 条</span>' +
@@ -8149,7 +8154,7 @@ function renderStudentDetail() {
     '<div class="ds-detail">' + detailBatchBar + detailHtml + '</div>' +
     detailAddHtml +
     '<div class="ds-sec-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9c6644" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>上课记录' +
-    '<button class="btn-copy" style="margin-left:auto;min-height:32px;padding:0 12px;font-size:12px" onclick="openLessonModal(\'' + s.id + '\')">+ 记一次课</button></div>' +
+    '<button class="btn-copy" style="margin-left:auto;min-height:32px;padding:0 12px;font-size:calc(12px * var(--fs))" onclick="openLessonModal(\'' + s.id + '\')">+ 记一次课</button></div>' +
     '<div class="ds-log">' + logHtml + '</div>' +
     '<div class="ds-ops">' +
     '<button class="op-btn" onclick="closeModal(\'detailModal\');openAddScheduleModal(\'' + s.id + '\')">添加课表</button>' +
@@ -8211,7 +8216,7 @@ function showRechargeModal(title, defaultN, onOk) {
     '<div style="display:flex;align-items:center;justify-content:center;gap:6px">' +
     '<input type="number" id="rechargeInput" min="1" inputmode="numeric" value="' + defaultVal + '" ' +
     'style="width:110px;text-align:center;font-size:28px;font-weight:800;height:54px;border:2px solid var(--wood);border-radius:12px;padding:0 8px;background:var(--bg-card);color:var(--text-main);outline:none">' +
-    '<span style="font-size:16px;color:var(--text-light)">节</span>' +
+    '<span style="font-size:calc(16px * var(--fs));color:var(--text-light)">节</span>' +
     '</div>' +
     '<div class="set-tip" style="margin-top:10px">填写本次续费节数，默认 10 节</div>' +
     '</div>' +
@@ -8552,15 +8557,15 @@ function showHoursTextModal(range) {
     '<div class="modal-card" style="max-width:94vw;width:440px">' +
       '<div class="modal-title" id="hoursTextTitle">复制课时明细（文本）</div>' +
       '<div style="padding:10px 16px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
-        '<label style="font-size:12px;color:var(--text-light)">起始</label>' +
-        '<input id="hoursTextFrom" type="date" value="' + (range.from || '') + '" style="font-family:inherit;font-size: 16px;padding:4px 6px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card)">' +
-        '<label style="font-size:12px;color:var(--text-light)">结束</label>' +
-        '<input id="hoursTextTo" type="date" value="' + (range.to || '') + '" style="font-family:inherit;font-size: 16px;padding:4px 6px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card)">' +
-        '<button class="btn-ghost" style="font-size:12px;padding:4px 10px" onclick="__hoursTextApply()">应用</button>' +
-        '<button class="btn-ghost" style="font-size:12px;padding:4px 10px" onclick="__hoursTextAll()">全部</button>' +
+        '<label style="font-size:calc(12px * var(--fs));color:var(--text-light)">起始</label>' +
+        '<input id="hoursTextFrom" type="date" value="' + (range.from || '') + '" style="font-family:inherit;font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */;padding:4px 6px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card)">' +
+        '<label style="font-size:calc(12px * var(--fs));color:var(--text-light)">结束</label>' +
+        '<input id="hoursTextTo" type="date" value="' + (range.to || '') + '" style="font-family:inherit;font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */;padding:4px 6px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card)">' +
+        '<button class="btn-ghost" style="font-size:calc(12px * var(--fs));padding:4px 10px" onclick="__hoursTextApply()">应用</button>' +
+        '<button class="btn-ghost" style="font-size:calc(12px * var(--fs));padding:4px 10px" onclick="__hoursTextAll()">全部</button>' +
       '</div>' +
       '<div id="hoursTextBody" style="padding:12px 16px">' +
-        '<textarea id="hoursTextPreview" readonly style="width:100%;height:240px;box-sizing:border-box;font-family:inherit;font-size: 16px;line-height:1.6;padding:10px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card);color:var(--text);resize:vertical"></textarea>' +
+        '<textarea id="hoursTextPreview" readonly style="width:100%;height:240px;box-sizing:border-box;font-family:inherit;font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */;line-height:1.6;padding:10px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card);color:var(--text);resize:vertical"></textarea>' +
       '</div>' +
       '<div class="modal-ops">' +
         '<button class="m-cancel" onclick="closeModal(\'hoursTextModal\')">关闭</button>' +
@@ -8814,12 +8819,12 @@ function showHoursImageModal(range) {
     '<div class="modal-card" style="max-width:94vw;width:430px">' +
       '<div class="modal-title" id="hoursImgTitle">课时明细图片</div>' +
       '<div style="padding:10px 16px 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap">' +
-        '<label style="font-size:12px;color:var(--text-light)">起始</label>' +
-        '<input id="hoursImgFrom" type="date" value="' + (range.from || '') + '" style="font-family:inherit;font-size: 16px;padding:4px 6px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card)">' +
-        '<label style="font-size:12px;color:var(--text-light)">结束</label>' +
-        '<input id="hoursImgTo" type="date" value="' + (range.to || '') + '" style="font-family:inherit;font-size: 16px;padding:4px 6px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card)">' +
-        '<button class="btn-ghost" style="font-size:12px;padding:4px 10px" onclick="__hoursImgApply()">应用</button>' +
-        '<button class="btn-ghost" style="font-size:12px;padding:4px 10px" onclick="__hoursImgAll()">全部</button>' +
+        '<label style="font-size:calc(12px * var(--fs));color:var(--text-light)">起始</label>' +
+        '<input id="hoursImgFrom" type="date" value="' + (range.from || '') + '" style="font-family:inherit;font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */;padding:4px 6px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card)">' +
+        '<label style="font-size:calc(12px * var(--fs));color:var(--text-light)">结束</label>' +
+        '<input id="hoursImgTo" type="date" value="' + (range.to || '') + '" style="font-family:inherit;font-size: 16px; /* v155: 输入控件字号固定 16px，不随字体档缩放——<16px 会触发 iOS 聚焦自动放大，放大又会让 placeholder/日期值被裁 */;padding:4px 6px;border:1px solid var(--soft-border);border-radius:12px;background:var(--bg-card)">' +
+        '<button class="btn-ghost" style="font-size:calc(12px * var(--fs));padding:4px 10px" onclick="__hoursImgApply()">应用</button>' +
+        '<button class="btn-ghost" style="font-size:calc(12px * var(--fs));padding:4px 10px" onclick="__hoursImgAll()">全部</button>' +
       '</div>' +
       '<div id="hoursImgBody" style="padding:12px 16px;text-align:center"></div>' +
       '<div class="modal-ops">' +
@@ -9666,7 +9671,7 @@ function updateAddSchedGroup() {
           return '<span class="add-sched-mem">' + escapeHtml(m.name || '?') +
             '<span class="asm-x" onclick="removeAddSchedMember(' + i + ')" title="移除">×</span></span>';
         }).join('')
-      : '<span style="color:var(--text-light);font-size: 12px">还没添加成员，点下面按钮挑人（单人课学员选中后会自动并入学员管理）</span>';
+      : '<span style="color:var(--text-light);font-size: calc(12px * var(--fs))">还没添加成员，点下面按钮挑人（单人课学员选中后会自动并入学员管理）</span>';
   }
   renderAddSchedPool();
 }
@@ -9698,14 +9703,14 @@ function renderAddSchedPool() {
     return true;
   });
   if (!entries.length) {
-    p.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-light);font-size: 12px">' + (kw ? '没找到匹配的学员' : '学员池里没有可添加的成员了') + '</div>';
+    p.innerHTML = '<div style="padding:12px;text-align:center;color:var(--text-light);font-size: calc(12px * var(--fs))">' + (kw ? '没找到匹配的学员' : '学员池里没有可添加的成员了') + '</div>';
     return;
   }
   p.innerHTML = entries.map(function (e) {
     var h = e.hours == null ? '未设课时' : ('剩 ' + e.hours + ' 节');
     var tag = e.kind === 'student'
-      ? '<span style="color:var(--orange-deep);font-size: 12px;flex-shrink:0">单人课</span>'
-      : '<span style="color:var(--text-light);font-size: 12px;flex-shrink:0">' + escapeHtml(h) + '</span>';
+      ? '<span style="color:var(--orange-deep);font-size: calc(12px * var(--fs));flex-shrink:0">单人课</span>'
+      : '<span style="color:var(--text-light);font-size: calc(12px * var(--fs));flex-shrink:0">' + escapeHtml(h) + '</span>';
     return '<div class="add-sched-pool-item" onclick="addAddSchedMember(\'' + e.key + '\')">' +
       '<span style="flex:1;min-width:0">' + escapeHtml(e.name || '(未命名)') + '</span>' + tag + '</div>';
   }).join('');
@@ -9793,13 +9798,13 @@ function updateAddSchedInfo() {
   if (!box) return;
   if (addSchedNewGroup) {
     box.innerHTML = '<div><b>新建小组课</b>' +
-      '<div style="color:var(--text-light);font-size:12px;margin-top:4px">从学员管理挑成员，组好后按下面的日期时间排课</div></div>' +
+      '<div style="color:var(--text-light);font-size:calc(12px * var(--fs));margin-top:4px">从学员管理挑成员，组好后按下面的日期时间排课</div></div>' +
       '<div class="set-tip" style="margin:0">小组课按成员各自扣课时，课时在学员管理里统一管理。成员改动在点「添加到课表」时才写入，取消不留痕。</div>';
     return;
   }
   var c = addSchedSel();
   if (!c) {
-    box.innerHTML = '<span style="color:var(--text-light);font-size: 12px">从上面选择学员。学员管理里的人选中后会自动建立单独课档案并导入，不影响他原有的小组课。</span>';
+    box.innerHTML = '<span style="color:var(--text-light);font-size: calc(12px * var(--fs))">从上面选择学员。学员管理里的人选中后会自动建立单独课档案并导入，不影响他原有的小组课。</span>';
     return;
   }
   var hrs = c.hours == null ? '未设置' : (c.hours + ' 节');
@@ -9815,7 +9820,7 @@ function updateAddSchedInfo() {
   /* 注意：外层 .rs-info 是 flex column，这里用 div 分块，不要用 <br>（会变成多余 flex 项导致间距异常） */
   box.innerHTML =
     '<div><b>' + escapeHtml(c.name) + '</b>' + tagTxt +
-      '<div style="color:var(--text-light);font-size:12px;margin-top:4px">剩余课时 <b style="color:#c9601a">' + escapeHtml(hrs) + '</b>' +
+      '<div style="color:var(--text-light);font-size:calc(12px * var(--fs));margin-top:4px">剩余课时 <b style="color:#c9601a">' + escapeHtml(hrs) + '</b>' +
       (c.contact ? '　' + escapeHtml(c.contact) : '') +
       (locName ? '　📍默认地点 ' + escapeHtml(locName) : '　📍未设置默认地点') + '</div></div>' +
     '<div class="set-tip" style="margin:0">添加或删除排课都不会改动剩余课时，课时会一直保留在学员档案里。' +
@@ -10141,7 +10146,7 @@ function openSchedEdit(key) {
   var box = document.getElementById('seStuInfo');
   if (box) {
     box.innerHTML = '<div><b>' + escapeHtml(e.name) + '</b>' + (e.group ? '（小组课）' : '') +
-      '<div style="color:var(--text-light);font-size:12px;margin-top:4px">' +
+      '<div style="color:var(--text-light);font-size:calc(12px * var(--fs));margin-top:4px">' +
       (e.kind === 'fixed' ? '固定课 · 每周' + escapeHtml(WEEKDAYS[e.day]) : '临时课 · ' + escapeHtml(fmtDateCN(e.date))) +
       '</div></div>';
   }
@@ -11198,7 +11203,7 @@ function showConfirmTriple(title, msg, subLabel, onSub, mainLabel, onMain) {
   document.getElementById('confirmMsg').textContent = msg;
   var ops = document.querySelector('#confirmModal .modal-ops');
   ops.innerHTML = '<button class="m-cancel" onclick="closeModal(\'confirmModal\')">取消</button>' +
-    '<button class="btn-ghost" id="confirmSubBtn" style="min-height:38px;padding:0 12px;font-size: 13px">' + escapeHtml(subLabel) + '</button>' +
+    '<button class="btn-ghost" id="confirmSubBtn" style="min-height:38px;padding:0 12px;font-size: calc(13px * var(--fs))">' + escapeHtml(subLabel) + '</button>' +
     '<button class="m-ok" id="confirmOkBtn" style="background:var(--red)">' + escapeHtml(mainLabel) + '</button>';
   document.getElementById('confirmSubBtn').onclick = function () { closeModal('confirmModal'); onSub(); };
   document.getElementById('confirmOkBtn').onclick = function () { closeModal('confirmModal'); onMain(); };
@@ -11256,8 +11261,8 @@ function showErrorDetail(msg) {
     }
     var html = '<div class="modal-card" style="max-width:94vw;width:440px">' +
       '<div class="modal-title">出错了（已自动记录）</div>' +
-      '<div style="padding:10px 16px 4px;font-size:12px;color:var(--text-light)">把下面的错误信息发给我，我就能精确定位修复：</div>' +
-      '<pre style="margin:8px 16px;padding:10px;max-height:42vh;overflow:auto;background:#f6efe5;border-radius:12px;font-size: 12px;line-height:1.5;white-space:pre-wrap;word-break:break-all;color:#7a3b2a">' + escapeHtml((typeof msg === 'string' ? msg : JSON.stringify(msg)).slice(0, 1200)) + '</pre>' +
+      '<div style="padding:10px 16px 4px;font-size:calc(12px * var(--fs));color:var(--text-light)">把下面的错误信息发给我，我就能精确定位修复：</div>' +
+      '<pre style="margin:8px 16px;padding:10px;max-height:42vh;overflow:auto;background:#f6efe5;border-radius:12px;font-size: calc(12px * var(--fs));line-height:1.5;white-space:pre-wrap;word-break:break-all;color:#7a3b2a">' + escapeHtml((typeof msg === 'string' ? msg : JSON.stringify(msg)).slice(0, 1200)) + '</pre>' +
       '<div class="modal-ops">' +
         '<button class="m-cancel" onclick="closeModal(\'' + mid + '\')">关闭</button>' +
         '<button class="m-ok" onclick="copyErrorDetail()">复制错误</button>' +
