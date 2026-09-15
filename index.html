@@ -2199,7 +2199,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v151</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v152</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -2617,12 +2617,16 @@
       </div>
     </div>
     <div class="form-item">
+      <label class="export-opt" style="font-size:14px;font-weight:600"><input type="checkbox" id="stuInRoster" checked> 在学员管理中显示该学生</label>
+      <div class="set-tip" style="margin-top:4px">勾选后，学生卡片显示在「学员管理」页<b>默认上课地点</b>对应的琴行分组下；试课、临时学员可取消勾选（不影响排课上课与课时统计）。</div>
+    </div>
+    <div class="form-item">
       <label>课时关联（选填）</label>
       <input type="text" id="stuHourGroup" list="hourGroupList" placeholder="如：chenqiantao" maxlength="20">
       <datalist id="hourGroupList"></datalist>
       <div class="set-tip" style="margin-top:4px">同一个学员拆成多条记录（如一周两节）时，填相同标识即可<b>共用同一份课时</b>，上完任意一节都从总课时里扣</div>
     </div>
-    <div class="form-item">
+    <div class="form-item" id="stuMemberSection">
       <label>小组成员</label>
       <div id="memberEditor"></div>
       <div class="set-tip" style="margin-top:4px">添加成员后即成为<b>小组课</b>，课时按成员各自计算；同一学员参加多个小组时课时自动共享。改动在点「保存」后才写入。</div>
@@ -5689,6 +5693,7 @@ function studentEffectiveLocation(s) {
 function renderStudents() {
   var kw = (document.getElementById('searchInput').value || '').trim().toLowerCase();
   var list = state.students.filter(function (s) {
+    if (s.hideInRoster) return false; /* v152: 添加学生时勾掉"在学员管理中显示"的（试课/临时）不在此页出现 */
     if (!kw) return true;
     return (s.name || '').toLowerCase().indexOf(kw) >= 0 || (s.note || '').toLowerCase().indexOf(kw) >= 0 || (s.contact || '').toLowerCase().indexOf(kw) >= 0;
   });
@@ -5696,7 +5701,7 @@ function renderStudents() {
   if (!state.students.length) {
     html = '<div class="empty-tip" style="grid-column:1/-1">还没有学生，打开「学员管理」即可添加学员<br><button class="btn-ghost" style="margin-top:10px" onclick="loadSampleData();renderAll()">先载入示例数据看看效果</button></div>';
   } else if (!list.length) {
-    html = '<div class="empty-tip" style="grid-column:1/-1">没有找到匹配的学生</div>';
+    html = '<div class="empty-tip" style="grid-column:1/-1">' + (kw ? '没有找到匹配的学生' : '当前没有显示中的学员（添加/编辑学生时勾选「在学员管理中显示」即可加入）') + '</div>';
   } else {
     /* 分组：非搜索时显示全部地点（含暂无学员的新地点），搜索时只显示命中的组；未设置地点排最后 */
     var groups = [], gmap = {};
@@ -7683,6 +7688,8 @@ function openStudentModal(id) {
     renderMemberEditor(membersOf(s).map(function (m) { return { id: m.id, personId: m.personId, name: m.name, contact: m.contact || '', hours: m.hours, avatar: m.avatar || '' }; }),
       'memberEditor', updateGroupFields,
       '当前为<b>单人课</b>。点「添加成员」挑人即可升级为小组课（课时按成员各自计算）。');
+    document.getElementById('stuMemberSection').style.display = ''; /* 编辑态保留成员管理 */
+    document.getElementById('stuInRoster').checked = !s.hideInRoster;
   } else {
     document.getElementById('stuModalTitle').textContent = '添加学生';
     document.getElementById('stuName').value = '';
@@ -7695,6 +7702,9 @@ function openStudentModal(id) {
     renderMemberEditor([], 'memberEditor', updateGroupFields,
       '当前为<b>单人课</b>。点「添加成员」挑人即可升级为小组课（课时按成员各自计算）。');
     renderSlotEditor([]);
+    /* v151: 添加学生不需要"添加成员升级小组课"入口（小组课走 课表管理→添加课表→新建小组课），隐藏成员区块 */
+    document.getElementById('stuMemberSection').style.display = 'none';
+    document.getElementById('stuInRoster').checked = true;
   }
   document.getElementById('stuLocation').innerHTML = locOptionsHtml(selLoc, true, '不设置');
   renderHourGroupOptions();
@@ -7732,6 +7742,8 @@ function saveStudent() {
     data.fixedSlots = [];
   }
   data.hourGroupId = document.getElementById('stuHourGroup').value.trim();
+  /* v152: "在学员管理中显示"开关——取消勾选的学生不出现在学员管理列表（仍参与排课/课时统计） */
+  data.hideInRoster = !document.getElementById('stuInRoster').checked;
   /* 小组成员从编辑器写回：点「保存」才生效，取消不留痕。
      新增的单人课学员在 collectEditorMembers 里迁到学员管理建档，课时/头像一并并入。 */
   data.members = collectEditorMembers();
@@ -7765,11 +7777,13 @@ function saveStudent() {
       if (s) {
         Object.keys(data).forEach(function (k) { s[k] = data[k]; });
         s.isSample = false;
+        if (!data.hideInRoster) delete s.hideInRoster; /* 显示时不残留隐藏标志 */
         syncSoloPersonHours(s);
       }
       showToast('已保存 ' + name + ' 的信息');
     } else {
       data.id = uid(); data.createdAt = Date.now();
+      if (!data.hideInRoster) delete data.hideInRoster;
       state.students.push(data);
       syncSoloPersonHours(data);
       showToast('已添加学生 ' + name);
