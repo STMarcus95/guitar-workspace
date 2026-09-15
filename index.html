@@ -2052,7 +2052,7 @@
     padding: 4px 6px;
   }
   .lo-btn .lo-label { font-size: calc(13px * var(--fs)); font-weight: 700; }
-  .lo-btn .lo-desc { font-size: calc(12px * var(--fs)); color: var(--text-light); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lo-btn .lo-desc { font-size: calc(12px * var(--fs)); color: var(--text-light); max-width: 100%; line-height: 1.35; overflow-wrap: anywhere; }
   .lo-btn.on { background: var(--orange) !important; color: #fff !important; border-color: var(--orange) !important; }
   .lo-btn.on .lo-desc { color: rgba(255,255,255,.85); }
   /* 紧凑：小屏手机 / 一屏多看 */
@@ -2203,7 +2203,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v155</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v156</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -2347,7 +2347,7 @@
       <div class="set-tip">卡片与弹窗的毛玻璃流动感。「关闭」最清晰也最省电，老旧手机推荐；「液态」朦胧流动感最强。</div>
       <div class="set-sub-head">字体大小</div>
       <div class="layout-opts" id="fontOpts"></div>
-      <div class="set-tip">整页文字与按钮一起缩放，选「大 / 特大」看得更清楚，不影响任何数据。</div>
+      <div class="set-tip">只调整文字与按钮的字号，页面布局不变形；选「大 / 特大」看得更清楚，不影响任何数据。</div>
       </div></div>
     </section>
 
@@ -3255,12 +3255,12 @@ var LAYOUT_OPTS = [
 ];
 /* v154: 玻璃液化效果（毛玻璃强度）——off 关掉最省电最清晰；standard 与历史默认一致 */
 var GLASS_OPTS = [
-  { key: 'off', label: '关闭', value: 'none', desc: '最清晰 · 最省电' },
+  { key: 'off', label: '关闭', value: 'none', desc: '最省电 · 最清晰' },
   { key: 'soft', label: '轻柔', value: 'blur(3px) saturate(130%)', desc: '轻微朦胧' },
-  { key: 'standard', label: '标准', value: 'blur(6px) saturate(150%)', desc: '均衡（默认）' },
+  { key: 'standard', label: '标准', value: 'blur(6px) saturate(150%)', desc: '均衡 · 默认' },
   { key: 'strong', label: '液态', value: 'blur(14px) saturate(185%)', desc: '流动感最强' }
 ];
-/* v154: 字体大小四档；v155: 由整页 zoom 改为 --fs 变量只缩放字号（修页面变形） */
+/* v154: 字体大小四档；v155: 由整页 zoom 改为 --fs 变量只缩放字号（修页面变形）；v156: 说明文案与档位描述截断修正 */
 var FONT_OPTS = [
   { key: 'small', label: '小', zoom: 0.9, desc: '一屏更多内容' },
   { key: 'standard', label: '标准', zoom: 1, desc: '默认' },
@@ -7006,7 +7006,7 @@ function renderMemberEditor(list, boxId, onChange, emptyTip) {
     '</div>' +
     '<div id="' + ids.pool + '" style="display:' + (editorMemberPoolOpen[editorMemberBoxId] ? '' : 'none') + '">' +
       '<input type="text" id="' + ids.search + '" placeholder="搜索姓名 / 电话" oninput="renderEditorMemberPool()" ' +
-        'style="width:100%;min-height:40px;padding:8px 12px;border:1px solid #ddd0bd;border-radius:12px;font-size:calc(16px * var(--fs));font-family:inherit;margin:8px 0 0">' +
+        'style="width:100%;min-height:40px;padding:8px 12px;border:1px solid #ddd0bd;border-radius:12px;font-size:16px;font-family:inherit;margin:8px 0 0">' + /* v155: 输入控件固定 16px */
       '<div id="' + ids.list + '" class="add-sched-pool"></div>' +
     '</div>';
   if (editorMemberPoolOpen[editorMemberBoxId]) renderEditorMemberPool();
