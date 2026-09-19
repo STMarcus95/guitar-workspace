@@ -1079,7 +1079,8 @@
     .day-header { padding: 0 3px; }
   }
   /* 周课表课次卡：扁长单行布局（v97，v98 再拉长：更扁、留白收窄、间距收紧）
-     一行 = [时间][固/约][名字][已请假][地点色点][调课徽标]靠左 + [操作按钮]靠右
+     一行 = [时间][固/约][名字][已请假][地点色点]靠左 + [操作按钮]靠右
+     v165：调课提示不再是主行徽标，改为卡内第二行小字（chip-rs-line）
      放不下时操作按钮整组换行、仍靠右；单人课与小组课结构一致，小组不显示人数徽标 */
   /* v102 流畅性：胶囊数量多（整周几十个），不做逐条背景模糊（移动端重绘大头）；
      v105 玻璃感回归：0.5 半通透底色 + 白色描边/内侧高光模拟玻璃边缘（GPU 廉价，无 blur）
@@ -1145,10 +1146,16 @@
     content: ""; position: absolute; left: 50%; top: 50%;
     transform: translate(-50%, -50%); width: 36px; height: 36px;
   }
-  /* 调课状态徽标（"已调至 9月2 19:30" 等）放进 chip-actions 末尾 */
-  .rs-badge { font-size: calc(13px * var(--fs)); font-weight: 600; padding: 0 4px; border-radius: 4px; white-space: nowrap; }
-  .rs-b-out { color: var(--text-light); background: rgba(170,150,128,.16); }
-  .rs-b-in { color: #a06a1c; background: rgba(224,118,46,.15); }
+  /* v165：调课提示不再做主行徽标（「从 9月20日 12:00 调来」太长，会把操作按钮挤得
+     换行错位），改为独立第二行小字：字号降到 11px 档、去底色块、↪ 箭头引导，
+     缩进 45px 对齐名字起点（chip-time 40px + 列间距 5px） */
+  .chip-rs-line {
+    flex-basis: 100%; min-width: 0;
+    display: inline-flex; align-items: center; gap: 3px;
+    font-size: calc(11px * var(--fs)); font-weight: 500; color: #a06a1c;
+    padding-left: 45px; margin-top: 1px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
   .cls-chip.rs-out-c { opacity: .6; }
   .cls-chip.rs-out-c .chip-mark { background: #b3a696; }
   .cls-chip.rs-out-c .chip-name { text-decoration: line-through; }
@@ -2275,7 +2282,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v164</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v165</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -5794,17 +5801,19 @@ function renderSchedule() {
       if (loc) {
         locStyle = ' style="border-left:3px solid ' + loc.color + ';background:' + hexToRgba(loc.color, leave ? 0.10 : 0.16) + '"';
       }
-      var rsBadge = '';
+      /* v165：调课提示改为独立第二行小字（chip-rs-line），不再挤在主行把操作按钮顶乱 */
+      var rsLine = '';
       if (rsOut) {
-        rsBadge = '<span class="rs-badge rs-b-out">已调至 ' + fmtDateCN(rsOut.toDate) + ' ' + rsOut.toTime + '</span>';
+        rsLine = '<span class="chip-rs-line">↪ 已调至 ' + fmtDateCN(rsOut.toDate) + ' ' + rsOut.toTime + '</span>';
       } else if (rsIn) {
-        rsBadge = (rsIn.fromDate === dStr)
-          ? '<span class="rs-badge rs-b-in">原时间 ' + rsIn.fromTime + '</span>'
-          : '<span class="rs-badge rs-b-in">从 ' + fmtDateCN(rsIn.fromDate) + ' ' + rsIn.fromTime + ' 调来</span>';
+        rsLine = (rsIn.fromDate === dStr)
+          ? '<span class="chip-rs-line">↪ 由 ' + rsIn.fromTime + ' 调来</span>'
+          : '<span class="chip-rs-line">↪ 从 ' + fmtDateCN(rsIn.fromDate) + ' ' + rsIn.fromTime + ' 调来</span>';
       }
       chips += '<div class="cls-chip ' + (c.type === 'fixed' ? 'fixed-c' : 'flex-c') + (cancelled ? ' cancelled-c' : '') + (done ? ' done-c' : '') + (leave ? ' leave-c' : '') + (rsOut ? ' rs-out-c' : '') + (rsIn ? ' rs-in-c' : '') + '"' + locStyle + '>' +
-        /* v97 扁长单行布局：
-           [时间][固/约][人名/课程][已请假][地点色点][调课徽标] 靠左，操作按钮组靠右；
+        /* v97 扁长单行布局 + v165 调课提示独立第二行：
+           [时间][固/约][人名/课程][已请假][地点色点] 靠左，操作按钮组靠右；
+           调课提示（↪ 从…调来 / ↪ 已调至…）独占第二行小字（chip-rs-line）
            放不下时按钮整组换行仍靠右（小组课按钮多时出现第二行）
            （小组不显示人数徽标、不区分胶囊底色；请假/调课/成员假等操作按钮原样保留） */
         '<span class="chip-time">' + c.time + '</span>' +
@@ -5812,10 +5821,9 @@ function renderSchedule() {
         '<span class="chip-name">' + escapeHtml(c.name) + '</span>' +
         (leave ? ' <span class="chip-leave">已请假</span>' : '') +
         (loc ? '<span class="loc-tag"><span class="loc-dot" style="background:' + loc.color + '"></span></span>' : '') +
-        rsBadge +
         '<span class="chip-actions">' + (rsOut ? '' : leaveBtn + memBtn + signBtn) + rsBtn +
         (c.type === 'flexible' ? '<span class="chip-act-del" onclick="delFlexClass(\'' + c.id + '\')" title="删除本次排课"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>' : '') +
-        '</span></div>';
+        '</span>' + rsLine + '</div>';
     });
     var isTomorrow = dStr === tomorrowStr;
     var dayExpanded = isScheduleDayExpanded(dStr, isToday, isTomorrow);
