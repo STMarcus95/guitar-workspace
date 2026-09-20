@@ -1172,6 +1172,9 @@
   #retroList .r-actions { margin-left: auto; display: flex; align-items: center; }
   .retro-r { background: rgba(255,247,235,.85); border-color: rgba(240,193,120,.55); border-left: 3px solid var(--orange-deep); }
   .retro-r .r-date { font-weight: 700; color: var(--orange-deep); font-variant-numeric: tabular-nums; }
+  /* v168：补签条目「忽略」按钮——低调灰，区别于木质「补签到」主按钮 */
+  .btn-ignore { border: 1px solid #ddd0bd; background: var(--card); color: var(--text-light); border-radius: 12px; font-size: calc(12px * var(--fs)); font-weight: 600; padding: 3px 9px; min-height: 26px; cursor: pointer; white-space: nowrap; }
+  .btn-ignore:active { background: #f0e9dd; }
   .rs-info { display: flex; flex-direction: column; gap: 6px; padding: 10px; background: rgba(243,236,225,.5); border-radius: 12px; }
   .rs-stu-row { display: flex; align-items: center; gap: 10px; }
   .rs-stu-name { font-weight: 500; font-size: calc(13px * var(--fs)); }
@@ -2290,7 +2293,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v167</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v168</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -3506,7 +3509,7 @@ function defaultState() {
     extraAttendees: {},
     reschedules: [],
     locations: JSON.parse(JSON.stringify(REAL_SCHEDULE.locations)),
-    settings: { teacherName: '', reminderTemplate: DEFAULT_TEMPLATE, renewTemplate: DEFAULT_RENEW_TEMPLATE, expandedLocs: [], theme: 'classic', brandName: '', brandAvatar: '', todayCollapsed: false, tomorrowCollapsed: false, weekCollapsed: false, retroCollapsed: false, backupHintDismissedAt: 0, backupHintDismissedCount: 0, lowHoursCollapsed: false, glass: 'standard', font: 'standard' }
+    settings: { teacherName: '', reminderTemplate: DEFAULT_TEMPLATE, renewTemplate: DEFAULT_RENEW_TEMPLATE, expandedLocs: [], theme: 'classic', brandName: '', brandAvatar: '', todayCollapsed: false, tomorrowCollapsed: false, weekCollapsed: false, retroCollapsed: false, dismissedRetro: [], backupHintDismissedAt: 0, backupHintDismissedCount: 0, lowHoursCollapsed: false, glass: 'standard', font: 'standard' }
   };
 }
 var state = defaultState();
@@ -3775,6 +3778,7 @@ function loadData(raw) {
         state.settings.tomorrowCollapsed = false;
         state.settings.weekCollapsed = false;
         state.settings.retroCollapsed = false;
+        state.settings.dismissedRetro = [];
         if (typeof state.settings.backupHintDismissedAt !== 'number') state.settings.backupHintDismissedAt = 0;
         if (typeof state.settings.backupHintDismissedCount !== 'number') state.settings.backupHintDismissedCount = 0;
         if (typeof state.settings.lowHoursCollapsed !== 'boolean') state.settings.lowHoursCollapsed = false;
@@ -5766,13 +5770,17 @@ function renderRetro() {
     var d = new Date(now.getTime() - i * 86400000);
     var dStr = fmtDate(d);
     var classes = getClassesOfDate(d);
+    var dismissed = state.settings.dismissedRetro || [];
     classes.forEach(function (c) {
       if (c.reschedOut) return;                       /* 当天被调走的，不在这里补 */
+      if (c.reschedIn) return;                        /* v168：调课（调来的）课在周课表按新时间签到，不进补签提示 */
       if (isOnLeave(dStr, c)) return;                 /* 请假的不是漏签 */
       var done = (c.type === 'flexible' && c.status === 'done') ||
                  (c.type === 'fixed' && isFixedDone(dStr, c.studentId, c.time));
       if (done) return;
-      list.push({ c: c, dStr: dStr, d: d });
+      var key = c.studentId + '|' + c.type + '|' + (c.id || '') + '|' + c.time + '|' + dStr;
+      if (dismissed.indexOf(key) !== -1) return;      /* v168：用户手动忽略的提示不再显示 */
+      list.push({ c: c, dStr: dStr, d: d, key: key });
     });
   }
   var cnt = list.length;
@@ -5790,7 +5798,8 @@ function renderRetro() {
     var stu = getStudent(c.studentId);
     var grp = isGroup(stu);
     var memChip = (grp && !isOnLeave(dStr, c)) ? ' <span class="grp-chip">' + membersOf(stu).length + '人组</span>' : '';
-    var opBtn = '<button class="btn-copy btn-wood" onclick="retroFinish(\'' + c.type + '\',\'' + (c.id || '') + '\',\'' + c.studentId + '\',\'' + c.time + '\',\'' + dStr + '\',' + (grp ? 'true' : 'false') + ')">补签到</button>';
+    var opBtn = '<button class="btn-copy btn-wood" onclick="retroFinish(\'' + c.type + '\',\'' + (c.id || '') + '\',\'' + c.studentId + '\',\'' + c.time + '\',\'' + dStr + '\',' + (grp ? 'true' : 'false') + ')">补签到</button>' +
+      '<button class="btn-ignore" onclick="dismissRetro(\'' + it.key + '\')" title="不再提示这节课">忽略</button>';
     html += '<div class="r-item retro-r">' +
       '<div class="r-avatar">' + avatarHtml(stu) + '</div>' +
       '<div class="r-info">' +
@@ -5807,6 +5816,15 @@ function renderRetro() {
 function retroFinish(type, id, stu, time, dStr, grp) {
   if (grp) { openRollcall(type, id, stu, time, dStr); return; }
   finishClass(type, id, stu, time, dStr);
+}
+/* v168：手动忽略某条补签提示（如已调课/已另处处理的课）。key 含具体日期，
+   该日期滚出 7 天窗口后自然不再出现；忽略状态持久化在 settings.dismissedRetro */
+function dismissRetro(key) {
+  if (!state.settings.dismissedRetro) state.settings.dismissedRetro = [];
+  if (state.settings.dismissedRetro.indexOf(key) === -1) state.settings.dismissedRetro.push(key);
+  saveData();
+  renderRetro();
+  showToast('已忽略该补签提示');
 }
 
 /* 当前周（周一起） */
@@ -11260,6 +11278,7 @@ function importData(ev) {
         state.settings.tomorrowCollapsed = false;
         state.settings.weekCollapsed = false;
         state.settings.retroCollapsed = false;
+        state.settings.dismissedRetro = [];
         if (typeof state.settings.backupHintDismissedAt !== 'number') state.settings.backupHintDismissedAt = 0;
         if (typeof state.settings.backupHintDismissedCount !== 'number') state.settings.backupHintDismissedCount = 0;
         if (typeof state.settings.lowHoursCollapsed !== 'boolean') state.settings.lowHoursCollapsed = false;
