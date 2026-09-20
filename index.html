@@ -1167,6 +1167,11 @@
   .rs-note { font-size: calc(12px * var(--fs)); color: #a06a1c; display: inline-flex; align-items: center; gap: 3px; flex-shrink: 0; }
   .r-item.rs-out-r { opacity: .62; background: rgba(200,190,178,.16); border-left: 3px solid #cbb9a6; }
   .r-item.rs-out-r .badge-rs-out { font-size: calc(12px * var(--fs)); font-weight: 600; color: var(--text-light); }
+  /* v167: retro panel item styles -- warm amber tone signals "needs make-up", distinct from done/leave/resched */
+  #retroList .r-item .r-avatar .avatar { width: 34px; height: 34px; font-size: calc(13px * var(--fs)); border-radius: 8px; flex-shrink: 0; object-fit: cover; object-position: center 30%; }
+  #retroList .r-actions { margin-left: auto; display: flex; align-items: center; }
+  .retro-r { background: rgba(255,247,235,.85); border-color: rgba(240,193,120,.55); border-left: 3px solid var(--orange-deep); }
+  .retro-r .r-date { font-weight: 700; color: var(--orange-deep); font-variant-numeric: tabular-nums; }
   .rs-info { display: flex; flex-direction: column; gap: 6px; padding: 10px; background: rgba(243,236,225,.5); border-radius: 12px; }
   .rs-stu-row { display: flex; align-items: center; gap: 10px; }
   .rs-stu-name { font-weight: 500; font-size: calc(13px * var(--fs)); }
@@ -2285,7 +2290,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v166</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v167</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -2341,6 +2346,18 @@
         <div class="panel-body" id="todayPanelBody">
           <div id="todayList"></div>
           <button class="btn-copy-all" id="finishAllBtn" onclick="finishAllToday()" style="display:none">一键全部签到</button>
+        </div>
+      </section>
+
+      <section class="panel panel-fold" id="retroPanel">
+        <div class="panel-title togglable" onclick="togglePanelCollapse('retro')">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#b08968" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+          补签到
+          <span class="cnt" id="retroCnt"></span>
+          <svg class="panel-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="panel-body" id="retroPanelBody">
+          <div id="retroList"></div>
         </div>
       </section>
 
@@ -3489,7 +3506,7 @@ function defaultState() {
     extraAttendees: {},
     reschedules: [],
     locations: JSON.parse(JSON.stringify(REAL_SCHEDULE.locations)),
-    settings: { teacherName: '', reminderTemplate: DEFAULT_TEMPLATE, renewTemplate: DEFAULT_RENEW_TEMPLATE, expandedLocs: [], theme: 'classic', brandName: '', brandAvatar: '', todayCollapsed: false, tomorrowCollapsed: false, weekCollapsed: false, backupHintDismissedAt: 0, backupHintDismissedCount: 0, lowHoursCollapsed: false, glass: 'standard', font: 'standard' }
+    settings: { teacherName: '', reminderTemplate: DEFAULT_TEMPLATE, renewTemplate: DEFAULT_RENEW_TEMPLATE, expandedLocs: [], theme: 'classic', brandName: '', brandAvatar: '', todayCollapsed: false, tomorrowCollapsed: false, weekCollapsed: false, retroCollapsed: false, backupHintDismissedAt: 0, backupHintDismissedCount: 0, lowHoursCollapsed: false, glass: 'standard', font: 'standard' }
   };
 }
 var state = defaultState();
@@ -3757,6 +3774,7 @@ function loadData(raw) {
         state.settings.todayCollapsed = false;
         state.settings.tomorrowCollapsed = false;
         state.settings.weekCollapsed = false;
+        state.settings.retroCollapsed = false;
         if (typeof state.settings.backupHintDismissedAt !== 'number') state.settings.backupHintDismissedAt = 0;
         if (typeof state.settings.backupHintDismissedCount !== 'number') state.settings.backupHintDismissedCount = 0;
         if (typeof state.settings.lowHoursCollapsed !== 'boolean') state.settings.lowHoursCollapsed = false;
@@ -5728,10 +5746,67 @@ function renderTopArea() {
   var bdayChip = document.getElementById('bdayChip');
   if (bdayChip) bdayChip.innerHTML = bdayHtml ? '🎂 ' + bdayHtml.replace(/<[^>]+>/g, '') : '';
 
+  /* 补签到（过去 N 天遗漏的课）—— 今天的未签在今日面板已能签到，这里只收过去遗漏 */
+  renderRetro();
   /* 顶部品牌与面板折叠状态 */
   applyBrand();
   applyPanelCollapse();
   applyWeekCollapse();
+}
+
+/* ===== 补签到：收齐最近 RETRO_DAYS 天（不含今天）已排课却漏签的课 =====
+   今天内的漏签仍在「今天上课」面板即可签到，这里只补过去的，
+   避免重复入口。finishClass / openRollcall 本身支持传入历史 dateStr，
+   会落到正确那天的流水（v113 已支持 retrosign），所以这里只需把正确日期传进去。 */
+var RETRO_DAYS = 7;
+function renderRetro() {
+  var now = new Date();
+  var list = [];
+  for (var i = 1; i <= RETRO_DAYS; i++) {
+    var d = new Date(now.getTime() - i * 86400000);
+    var dStr = fmtDate(d);
+    var classes = getClassesOfDate(d);
+    classes.forEach(function (c) {
+      if (c.reschedOut) return;                       /* 当天被调走的，不在这里补 */
+      if (isOnLeave(dStr, c)) return;                 /* 请假的不是漏签 */
+      var done = (c.type === 'flexible' && c.status === 'done') ||
+                 (c.type === 'fixed' && isFixedDone(dStr, c.studentId, c.time));
+      if (done) return;
+      list.push({ c: c, dStr: dStr, d: d });
+    });
+  }
+  var cnt = list.length;
+  var cntEl = document.getElementById('retroCnt');
+  if (cntEl) cntEl.textContent = cnt ? ('漏 ' + cnt + ' 节') : '';
+  var box = document.getElementById('retroList');
+  if (!box) return;
+  if (!cnt) {
+    box.innerHTML = '<div class="empty-tip">最近 ' + RETRO_DAYS + ' 天都签到啦 🎉</div>';
+    return;
+  }
+  var html = '';
+  list.forEach(function (it) {
+    var c = it.c, dStr = it.dStr, d = it.d;
+    var stu = getStudent(c.studentId);
+    var grp = isGroup(stu);
+    var memChip = (grp && !isOnLeave(dStr, c)) ? ' <span class="grp-chip">' + membersOf(stu).length + '人组</span>' : '';
+    var opBtn = '<button class="btn-copy btn-wood" onclick="retroFinish(\'' + c.type + '\',\'' + (c.id || '') + '\',\'' + c.studentId + '\',\'' + c.time + '\',\'' + dStr + '\',' + (grp ? 'true' : 'false') + ')">补签到</button>';
+    html += '<div class="r-item retro-r">' +
+      '<div class="r-avatar">' + avatarHtml(stu) + '</div>' +
+      '<div class="r-info">' +
+        '<div class="r-name">' + escapeHtml(c.name) + memChip + '</div>' +
+        '<div class="r-meta"><span class="r-date">' + fmtDateCN(dStr) + ' ' + WEEKDAYS[d.getDay()] + '</span> <span class="r-time">' + c.time + '</span>' + locHtml(c.locationId) + '</div>' +
+      '</div>' +
+      '<div class="r-actions">' + opBtn + '</div>' +
+    '</div>';
+  });
+  box.innerHTML = html;
+}
+/* 补签入口：单人/灵活课直接 finishClass（带历史日期，自身含扣课+流水+撤销 toast）；
+   小组课走 openRollcall 弹点名（同样传历史日期，落正确的那天） */
+function retroFinish(type, id, stu, time, dStr, grp) {
+  if (grp) { openRollcall(type, id, stu, time, dStr); return; }
+  finishClass(type, id, stu, time, dStr);
 }
 
 /* 当前周（周一起） */
@@ -7267,6 +7342,7 @@ function saveBrand() {
 /* ===== 今天上课 / 明日提醒 面板折叠 ===== */
 function togglePanelCollapse(which) {
   if (which === 'today') state.settings.todayCollapsed = !state.settings.todayCollapsed;
+  else if (which === 'retro') state.settings.retroCollapsed = !state.settings.retroCollapsed;
   else state.settings.tomorrowCollapsed = !state.settings.tomorrowCollapsed;
   saveData(); applyPanelCollapse();
 }
@@ -7281,8 +7357,10 @@ function applyWeekCollapse() {
 function applyPanelCollapse() {
   var tp = document.getElementById('todayPanel');
   var mp = document.getElementById('tomorrowPanel');
+  var rp = document.getElementById('retroPanel');
   if (tp) tp.classList.toggle('panel-col', !!state.settings.todayCollapsed);
   if (mp) mp.classList.toggle('panel-col', !!state.settings.tomorrowCollapsed);
+  if (rp) rp.classList.toggle('panel-col', !!state.settings.retroCollapsed);
 }
 
 /* ===== 周课表日期分组折叠 ===== */
@@ -11181,6 +11259,7 @@ function importData(ev) {
         state.settings.todayCollapsed = false;
         state.settings.tomorrowCollapsed = false;
         state.settings.weekCollapsed = false;
+        state.settings.retroCollapsed = false;
         if (typeof state.settings.backupHintDismissedAt !== 'number') state.settings.backupHintDismissedAt = 0;
         if (typeof state.settings.backupHintDismissedCount !== 'number') state.settings.backupHintDismissedCount = 0;
         if (typeof state.settings.lowHoursCollapsed !== 'boolean') state.settings.lowHoursCollapsed = false;
