@@ -2317,7 +2317,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v173</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v174</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -3813,6 +3813,8 @@ function loadData(raw) {
         state.students.forEach(function (s) { if (typeof s.locationId === 'undefined') s.locationId = ''; });
         /* 迁移：旧数据没有 persons，将小组成员内联数据转为学员管理记录 */
         migratePersons();
+        /* v174：只剩 1 个成员的小组降级为个人课（删过组员的旧小组不再显示「1人组」） */
+        (state.students || []).forEach(collapseOneMemberGroup);
         /* 清理超过 90 天的旧日期数据，减轻 localStorage 体积 */
         cleanupExpiredData();
         /* 回收站：清理超过 7 天的项目 + 对齐本地自动备份日期 */
@@ -5185,6 +5187,19 @@ function membersOf(stu) {
   });
 }
 function isGroup(stu) { return membersOf(stu).length > 0; }
+/* v174：小组删到只剩 1 个成员，就不再是小组课——原地降级为个人课：
+   成员收编为单人档案（stu.personId 指向该成员的 person，课时取 person 余额）。
+   load/import 时对存量数据跑一遍，保存学员/课表时对新数据跑一遍；幂等。 */
+function collapseOneMemberGroup(stu) {
+  if (!stu || !Array.isArray(stu.members) || stu.members.length !== 1) return false;
+  var pid = stu.members[0].personId;
+  var p = pid ? getPerson(pid) : null;
+  if (!p) return false; /* 成员档案已被删的残局不动 */
+  stu.personId = pid;
+  stu.members = [];
+  if (stu.hoursRemaining == null || stu.hoursRemaining === '') stu.hoursRemaining = p.hoursRemaining;
+  return true;
+}
 function getMember(stu, memberId) {
   var ms = membersOf(stu);
   for (var i = 0; i < ms.length; i++) if (ms[i].id === memberId) return ms[i];
@@ -7317,7 +7332,7 @@ function addEditorMember(key) {
 /* 小组课：有成员时把「学生姓名」改为「小组课名称」并隐藏整组剩余课时（按成员计） */
 function updateGroupFields() {
   var n = editorMembers.length;
-  var isGroup = n >= 1;
+  var isGroup = n >= 2; /* v174：1 个成员按个人课处理（保存时自动降级） */
   var lbl = document.getElementById('stuNameLabel');
   var inp = document.getElementById('stuName');
   var hr = document.getElementById('stuHoursRow');
@@ -8164,6 +8179,7 @@ function saveStudent() {
         Object.keys(data).forEach(function (k) { s[k] = data[k]; });
         s.isSample = false;
         if (!data.hideInRoster) delete s.hideInRoster; /* 显示时不残留隐藏标志 */
+        collapseOneMemberGroup(s); /* v174：成员删到只剩 1 人，保存即降级为个人课 */
         syncSoloPersonHours(s);
       }
       showToast('已保存 ' + name + ' 的信息');
@@ -8171,6 +8187,7 @@ function saveStudent() {
       data.id = uid(); data.createdAt = Date.now();
       if (!data.hideInRoster) delete data.hideInRoster;
       state.students.push(data);
+      collapseOneMemberGroup(data); /* v174：新建时只挑了 1 位成员 → 直接按个人课建档 */
       syncSoloPersonHours(data);
       showToast('已添加学生 ' + name);
     }
@@ -10275,6 +10292,7 @@ function saveAddSchedule() {
       members: addSchedMembers.slice(), createdAt: Date.now()
     };
     state.students.push(stu);
+    collapseOneMemberGroup(stu); /* v174：只挑 1 位成员 → 按个人课建档 */
   } else if (c.kind === 'pool') {
     stu = ensurePersonStudent(getPerson(c.id));
     if (!stu) { showToast('从学员管理导入失败，请重试'); return; }
@@ -10289,6 +10307,7 @@ function saveAddSchedule() {
     addSchedMembers = updatedMembers;
     stu.members = addSchedMembers.slice();
     if (stu.members.length) stu.hoursRemaining = null;
+    collapseOneMemberGroup(stu); /* v174：成员删到只剩 1 人 → 个人课，课时回到 person 账本 */
   }
   var locEl = document.getElementById('addSchedLocation');
   var locId = (locEl ? locEl.value : '') || (stu.locationId || '');
@@ -11336,6 +11355,8 @@ function importData(ev) {
         if (typeof state.settings.lowHoursCollapsed !== 'boolean') state.settings.lowHoursCollapsed = false;
         if (!state.settings.theme || !(THEMES.some(function (x) { return x.id === state.settings.theme; }))) state.settings.theme = 'classic';
         migratePersons();
+        /* v174：只剩 1 个成员的小组降级为个人课 */
+        (state.students || []).forEach(collapseOneMemberGroup);
         /* 版本兼容：补齐所有缺失字段，避免旧版 JSON 缺字段 */
         var defs = defaultState();
         ['students','persons','flexibleClasses','lessonLog','manualDone','hoursLog','reschedules'].forEach(function (k) {
