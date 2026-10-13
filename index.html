@@ -2337,7 +2337,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v176</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v177</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -6584,6 +6584,21 @@ function renderSettings() {
 }
 
 /* ================= 自定义课时统计 ================= */
+/* v177：按 personId 找到「当前名下的单人课」——用于扣课流水带 personId 但已不在任何小组里的情况。
+   优先用流水自身的 studentId（最直接），找不到再按 personId 反查名下单人课。 */
+function getSoloStudentByPid(pid, sid) {
+  if (sid) {
+    var s = getStudent(sid);
+    if (s && !isGroup(s)) return s;
+  }
+  if (!pid) return null;
+  var found = null;
+  state.students.forEach(function (s) {
+    if (found) return;
+    if (!isGroup(s) && s.personId === pid) found = s;
+  });
+  return found;
+}
 function statDefaultRange() {
   var now = new Date();
   return {
@@ -6650,7 +6665,18 @@ function buildStats(startStr, endStr, locId) {
     }
     /* 小组成员扣课：按 personId 找到当前所在小组，累加到成员名下 */
     var lst = getMemberPidList()[h.personId];
-    if (!lst) return;
+    if (!lst) {
+      /* v177：单人课的扣课流水同样带 personId（v146 起流水必带 personId），
+         不能只按「小组成员」找人——找不到小组时必须回退到该 person 名下的单人课，
+         否则这类课在自定义统计里会凭空消失（单人课 / v174 由小组降级来的课） */
+      var solo = getSoloStudentByPid(h.personId, h.studentId);
+      if (!solo) return;
+      if (locId && (solo.locationId || '') !== locId) return;
+      var sr = rows[solo.id];
+      if (!sr) return;
+      sr.done++;
+      return;
+    }
     lst.forEach(function (it) {
       if (locId && it.locId !== locId) return;
       var r = rows[it.sid];
@@ -6679,9 +6705,11 @@ function buildStats(startStr, endStr, locId) {
       /* 防止「已无成员的旧组」被当作单人课：若 stu 本就是组类型（有 members 字段）则跳过 */
       if (r.stu && Array.isArray(r.stu.members)) return;
       if (locId && (r.stu.locationId || '') !== locId) return;
-      /* 去重：若 hoursLog 已有这条的扣课记录则不再加 */
+      /* 去重：若 hoursLog 已有这条的扣课记录则不再加
+         （v177：不再要求 !h.personId——带 personId 的单人课扣课现在主路径已能计入，
+           否则同一节课会被 fixedDone 兜底重复加一次） */
       var hasLog = state.hoursLog.some(function (h) {
-        return h.type === 'consume' && (h.delta || 0) < 0 && h.date === dStr && h.studentId === sid && !h.personId;
+        return h.type === 'consume' && (h.delta || 0) < 0 && h.date === dStr && h.studentId === sid;
       });
       if (!hasLog) r.done++;
     });
