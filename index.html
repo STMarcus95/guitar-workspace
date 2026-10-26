@@ -111,6 +111,7 @@
     --deco-3: rgba(61,139,95,0.16);
     --deco-4: rgba(156,102,68,0.15);
     --header-grad: linear-gradient(135deg, rgba(42,26,16,0.88) 0%, rgba(61,40,23,0.88) 60%, rgba(30,18,8,0.88) 100%);
+    --status-tint: #2a1a10;  /* v179：状态栏/灵动岛实色 */
     --header-glow: rgba(232,192,116,.16);
     --header-border: rgba(232,192,116,.3);
     --gold-text: linear-gradient(135deg, #e8c074, #d4a544);
@@ -154,6 +155,7 @@
     --deco-3: rgba(111,191,146,0.1);
     --deco-4: rgba(212,165,68,0.1);
     --header-grad: linear-gradient(135deg, rgba(20,14,9,0.96) 0%, rgba(34,24,14,0.96) 60%, rgba(12,8,5,0.96) 100%);
+    --status-tint: #140e09;  /* v179：状态栏/灵动岛实色 */
     --header-glow: rgba(232,192,116,.18);
     --header-border: rgba(232,192,116,.32);
     --gold-text: linear-gradient(135deg, #f0d08a, #d4a544);
@@ -209,6 +211,7 @@
     --deco-3: rgba(61,139,95,0.12);
     --deco-4: rgba(92,138,168,0.12);
     --header-grad: linear-gradient(135deg, rgba(24,48,64,0.9) 0%, rgba(40,72,92,0.9) 60%, rgba(16,36,50,0.9) 100%);
+    --status-tint: #183040;  /* v179：状态栏/灵动岛实色 */
     --header-glow: rgba(120,190,225,.18);
     --header-border: rgba(140,200,230,.3);
     --gold-text: linear-gradient(135deg, #bfe0f2, #7fb8d8);
@@ -250,6 +253,7 @@
     --deco-3: rgba(61,139,95,0.13);
     --deco-4: rgba(86,116,72,0.12);
     --header-grad: linear-gradient(135deg, rgba(20,42,28,0.92) 0%, rgba(34,62,42,0.92) 60%, rgba(12,30,18,0.92) 100%);
+    --status-tint: #142a1c;  /* v179：状态栏/灵动岛实色 */
     --header-glow: rgba(140,200,150,.18);
     --header-border: rgba(140,200,150,.3);
     --gold-text: linear-gradient(135deg, #bfe0c6, #7fb88e);
@@ -291,6 +295,7 @@
     --deco-3: rgba(61,139,95,0.11);
     --deco-4: rgba(163,82,63,0.14);
     --header-grad: linear-gradient(135deg, rgba(58,26,18,0.92) 0%, rgba(84,38,26,0.92) 60%, rgba(40,16,10,0.92) 100%);
+    --status-tint: #3a1a12;  /* v179：状态栏/灵动岛实色 */
     --header-glow: rgba(226,170,140,.18);
     --header-border: rgba(226,170,140,.32);
     --gold-text: linear-gradient(135deg, #f0c9b0, #d49370);
@@ -332,6 +337,7 @@
     --deco-3: rgba(61,139,95,0.11);
     --deco-4: rgba(91,124,153,0.12);
     --header-grad: linear-gradient(135deg, rgba(40,52,64,0.92) 0%, rgba(60,78,95,0.92) 60%, rgba(30,40,50,0.92) 100%);
+    --status-tint: #283440;  /* v179：状态栏/灵动岛实色 */
     --header-glow: rgba(150,180,205,.18);
     --header-border: rgba(150,180,205,.3);
     --gold-text: linear-gradient(135deg, #cfe0ee, #9bbcd4);
@@ -373,6 +379,7 @@
     --deco-3: rgba(61,139,95,0.11);
     --deco-4: rgba(220,193,130,0.13);
     --header-grad: linear-gradient(135deg, rgba(58,46,28,0.92) 0%, rgba(84,66,36,0.92) 60%, rgba(40,30,16,0.92) 100%);
+    --status-tint: #3a2e1c;  /* v179：状态栏/灵动岛实色 */
     --header-glow: rgba(220,180,110,.18);
     --header-border: rgba(220,180,110,.32);
     --gold-text: linear-gradient(135deg, #f0d79a, #d4a017);
@@ -414,6 +421,7 @@
     --deco-3: rgba(61,139,95,0.11);
     --deco-4: rgba(206,177,146,0.14);
     --header-grad: linear-gradient(135deg, rgba(56,42,28,0.92) 0%, rgba(82,60,38,0.92) 60%, rgba(38,28,16,0.92) 100%);
+    --status-tint: #382a10;  /* v179：状态栏/灵动岛实色 */
     --header-glow: rgba(216,180,138,.18);
     --header-border: rgba(216,180,138,.32);
     --gold-text: linear-gradient(135deg, #ecd2a8, #c69a64);
@@ -455,8 +463,17 @@
       radial-gradient(circle at 20% 85%, var(--deco-4) 0%, transparent 35%);
     opacity: .85;   /* v105：装饰色块由 .7 部分回调，配合半透明小元素恢复液态玻璃氛围 */
   }
+  /* v179：灵动岛/状态栏填充层，高度＝顶部安全区，铺品牌深色（见 body 内的 .safe-area-top） */
+  .safe-area-top {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: env(safe-area-inset-top); z-index: 400;
+    background: var(--status-tint, #2a1a10);
+    pointer-events: none;
+  }
   /* v90：标准/自动档整体放宽 1200→1440px，宽屏更充实；紧凑/宽松档不受影响 */
   .wrap { max-width: 1440px; margin: 0 auto; padding: 16px; min-width: 0; }
+  /* v179：顶部让出灵动岛/状态栏高度，否则 header 会被压在药丸屏下面 */
+  .wrap { padding-top: calc(16px + env(safe-area-inset-top)); }
   /* ===== 防横向晃动：所有主要容器不得超出视口宽度 ===== */
   .wrap, .view, header, .panel, .stu-list, .week-list, .day-row,
   .modal, .modal-card, .detail-sheet, .acc-body, .acc-inner {
@@ -474,7 +491,7 @@
   }
   @media (min-width: 769px) {
     body { padding-bottom: 32px; font-size: calc(13px * var(--fs)); }
-    .wrap { padding: 20px; }
+    .wrap { padding: 20px; padding-top: calc(20px + env(safe-area-inset-top)); }
   }
 
   /* ===== Header ===== */
@@ -2108,6 +2125,10 @@
     font-size: 16px; color: var(--text); outline: none; font-family: inherit;
   }
   .stu-picker-list { overflow-x: hidden; overflow-y: auto; flex: 1; padding: 4px; }
+  /* v179：多选面板底部——已选人数 + 完成按钮 */
+  .stu-picker-foot { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-top: 1px solid rgba(224,207,174,0.6); flex: none; }
+  .stu-picker-foot .spf-count { flex: 1; min-width: 0; font-size: calc(12px * var(--fs)); color: var(--text-light); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .stu-picker-foot .spf-done { flex: none; min-height: 36px; padding: 0 14px; font-size: calc(12px * var(--fs)); }
   .stu-picker-item {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
     padding: 12px 10px; border-radius: 12px; cursor: pointer;
@@ -2295,6 +2316,9 @@
 </style>
 </head>
 <body>
+<!-- v179：iOS 灵动岛/状态栏填充层。PWA 用 viewport-fit=cover + black-translucent，
+     网页背景会一直透到状态栏，原先那里是浅色页面底色，看起来像顶着一层白条。 -->
+<div class="safe-area-top" aria-hidden="true"></div>
 <div class="wrap">
 
   <!-- ===== Header ===== -->
@@ -2337,7 +2361,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v178</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v179</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -2882,6 +2906,10 @@
             <input type="text" id="addSchedSearch" placeholder="搜索学员 / 学员管理…" oninput="renderAddSchedList()" onclick="event.stopPropagation()" onkeydown="onAddSchedSearchKey(event)">
           </div>
           <div class="stu-picker-list" id="addSchedList"></div>
+          <div class="stu-picker-foot" id="addSchedPickerFoot">
+            <span class="spf-count" id="addSchedSelCount">可多选 · 未选择</span>
+            <button type="button" class="btn-ghost spf-done" onclick="closeAddSchedPicker()">完成</button>
+          </div>
         </div>
       </div>
     </div>
@@ -10044,10 +10072,8 @@ function delFlexClass(id) {
 /* ===== 添加课表（统一入口） =====
    支持：现有学员（含小组课）、以及从学员管理导入学员；课程类型＝临时课（单次）/ 固定课（每周）。
    原则：排课与删除排课都【不改动剩余课时】，课时只在 完成/撤销/续费/调整 时变化。 */
-var addSchedSelKey = '';
+var addSchedSelKeys = [];      /* v179：选中的学员 key 列表（多选＝同一时段各排一节独立课） */
 var addSchedType = 'temp'; /* 'temp' | 'fixed' */
-var ADD_SCHED_NEW_GROUP = '__new_group__';
-var addSchedNewGroup = false;   /* 是否处于「新建小组课」模式 */
 var addSchedMembers = [];       /* 工作区成员名单（{id, personId, name, contact, hours, avatar}），保存时才写入 */
 var addSchedFromManage = false; /* 是否从「课表管理」进入添加（保存后回到管理列表） */
 function hoursTextOf(s) {
@@ -10078,13 +10104,16 @@ function addSchedCandidates() {
   list.sort(function (a, b) { return String(a.name).localeCompare(String(b.name), 'zh'); });
   return list;
 }
-function addSchedSel() {
-  if (!addSchedSelKey) return null;
+function addSchedSelList() {
   var all = addSchedCandidates();
-  for (var i = 0; i < all.length; i++) if (all[i].key === addSchedSelKey) return all[i];
-  return null;
+  var out = [];
+  addSchedSelKeys.forEach(function (k) {
+    for (var i = 0; i < all.length; i++) if (all[i].key === k) { out.push(all[i]); break; }
+  });
+  return out;
 }
-function addSchedMeta(c) {
+/* 单选兼容：返回第一个选中项 */
+function addSchedSel() { return addSchedSelList()[0] || null; }function addSchedMeta(c) {
   var parts = [];
   parts.push(c.hours == null ? '未设课时' : ('剩 ' + c.hours + ' 节'));
   if (c.fromPool) parts.push('选中后自动建档导入');
@@ -10105,14 +10134,13 @@ function renderAddSchedList() {
            (c.contact || '').toLowerCase().indexOf(text) >= 0;
   });
   if (!items.length) { list.innerHTML = '<div class="stu-picker-empty">未找到匹配的学员</div>'; return; }
-  /* v161：彻底移除「新建小组课」入口——排课只选现有学员/学员管理个人，不再建组。
-     addSchedNewGroup 相应恒为 false（下面 picker 不再渲染该项，selectAddSched 也无从置 true）。 */
-  var newGrpHtml = '';
-  list.innerHTML = newGrpHtml + items.map(function (c) {
+  /* v179：多选模式——点一项即勾选/取消，面板不自动关闭；选完点底部「完成」。
+     多位学员＝同一时段各排一节独立课（各自签到、各自扣自己的课时），不会合成小组课。 */
+  list.innerHTML = items.map(function (c) {
     var tag = c.fromPool
       ? '<span class="stu-picker-tag pool">学员管理</span>'
       : (c.group ? '<span class="stu-picker-tag grp">小组' + c.memberCnt + '人</span>' : '<span class="stu-picker-tag">单人课</span>');
-    return '<div class="stu-picker-item' + (c.key === addSchedSelKey ? ' selected' : '') + '" data-key="' + c.key + '" onclick="selectAddSched(\'' + c.key + '\')">' +
+    return '<div class="stu-picker-item' + (addSchedSelKeys.indexOf(c.key) >= 0 ? ' selected' : '') + '" data-key="' + c.key + '" onclick="toggleAddSchedSel(\'' + c.key + '\')">' +
       '<div class="stu-picker-main">' +
         '<div class="stu-picker-name">' + escapeHtml(c.name) + '</div>' +
         '<div class="stu-picker-meta">' + escapeHtml(addSchedMeta(c)) + '</div>' +
@@ -10128,6 +10156,7 @@ function openAddSchedPicker() {
   var s = document.getElementById('addSchedSearch');
   if (s) s.value = '';
   renderAddSchedList();
+  updateAddSchedFoot();
   setTimeout(function () { if (s) s.focus(); }, 0);
 }
 function closeAddSchedPicker() {
@@ -10141,42 +10170,47 @@ function toggleAddSchedPicker(e) {
   if (picker.classList.contains('open')) closeAddSchedPicker();
   else openAddSchedPicker();
 }
-function selectAddSched(key) {
-  addSchedSelKey = key;
-  addSchedNewGroup = false; /* v161：小组课入口已移除，此开关恒 false（防御性，避免任何分支误建组） */
-  if (addSchedNewGroup) {
-    addSchedMembers = [];
-  } else {
+/* v179：多选学员（点一项即勾选/取消，面板不自动关闭） */
+function toggleAddSchedSel(key) {
+  var idx = addSchedSelKeys.indexOf(key);
+  if (idx >= 0) addSchedSelKeys.splice(idx, 1);
+  else addSchedSelKeys.push(key);
+  /* 成员工作区只服务于「恰好勾中一个已存在的小组」：把它现有的成员带进来供增删 */
+  addSchedMembers = [];
+  if (addSchedSelKeys.length === 1) {
     var c = addSchedSel();
     if (c && c.group) {
-      /* 已有小组：把成员复制进工作区，可继续增删，保存时才写回（取消则不留痕） */
       addSchedMembers = (membersOf(getStudent(c.id)) || []).map(function (m) {
         return {
           id: m.id, personId: m.personId || '', name: m.name || '',
           contact: m.contact || '', hours: (m.hours == null ? null : m.hours), avatar: m.avatar || ''
         };
       });
-    } else {
-      addSchedMembers = [];
     }
   }
   updateAddSchedTrigger();
   updateAddSchedInfo();
   updateAddSchedGroup();
-  closeAddSchedPicker();
+  renderAddSchedList();
+  updateAddSchedFoot();
 }
-/* ===== 添加课表：小组成员（新建 / 编辑）===== */
+function updateAddSchedFoot() {
+  var el = document.getElementById('addSchedSelCount');
+  if (!el) return;
+  var n = addSchedSelKeys.length;
+  el.textContent = n ? ('已选 ' + n + ' 人' + (n > 1 ? '（各排一节）' : '')) : '可多选 · 未选择';
+}/* ===== 添加课表：小组成员（新建 / 编辑）===== */
 function updateAddSchedGroup() {
   var wrap = document.getElementById('addSchedGroupWrap');
   var nameWrap = document.getElementById('addSchedGroupNameWrap');
   var c = addSchedSel();
-  var show = addSchedNewGroup || !!(c && c.group);
+  var show = !!(addSchedSelKeys.length === 1 && c && c.group);
   if (!wrap) return;
   wrap.style.display = show ? '' : 'none';
-  if (nameWrap) nameWrap.style.display = addSchedNewGroup ? '' : 'none';
+  if (nameWrap) nameWrap.style.display = 'none'; /* v179：不再在此新建小组，组名输入框恒隐藏 */
   if (!show) return;
   var lbl = document.getElementById('addSchedGroupLabel');
-  if (lbl) lbl.textContent = addSchedNewGroup ? '小组成员 *（从学员管理挑人）' : ('小组成员（' + addSchedMembers.length + ' 人）');
+  if (lbl) lbl.textContent = '小组成员（' + addSchedMembers.length + ' 人）';
   var box = document.getElementById('addSchedMembers');
   if (box) {
     box.innerHTML = addSchedMembers.length
@@ -10288,20 +10322,20 @@ function onAddSchedSearchKey(e) {
   if (e.key === 'Escape') { closeAddSchedPicker(); return; }
   if (e.key === 'Enter') {
     var first = document.querySelector('#addSchedList .stu-picker-item');
-    if (first && first.dataset) selectAddSched(first.dataset.key);
+    if (first && first.dataset) toggleAddSchedSel(first.dataset.key);
   }
 }
 function updateAddSchedTrigger() {
   var textEl = document.getElementById('addSchedText');
   if (!textEl) return;
-  if (addSchedNewGroup) {
-    textEl.textContent = '新建小组课';
-    textEl.classList.remove('placeholder');
-    return;
+  var listT = addSchedSelList();
+  if (!listT.length) { textEl.textContent = '请选择学员（可多选）'; textEl.classList.add('placeholder'); return; }
+  if (listT.length === 1) {
+    var c0 = listT[0];
+    textEl.textContent = c0.name + (c0.group ? '（小组 ' + c0.memberCnt + ' 人）' : (c0.fromPool ? '（从学员管理导入）' : ''));
+  } else {
+    textEl.textContent = '已选 ' + listT.length + ' 人：' + listT.map(function (x) { return x.name; }).join('、');
   }
-  var c = addSchedSel();
-  if (!c) { textEl.textContent = '请选择学员'; textEl.classList.add('placeholder'); return; }
-  textEl.textContent = c.name + (c.group ? '（小组 ' + c.memberCnt + ' 人）' : (c.fromPool ? '（从学员管理导入）' : ''));
   textEl.classList.remove('placeholder');
 }
 function updateAddSchedInfo() {
@@ -10309,18 +10343,18 @@ function updateAddSchedInfo() {
   var loc = document.getElementById('addSchedLocation');
   if (loc) loc.innerHTML = locOptionsHtml('', true, '用学员默认地点');
   if (!box) return;
-  if (addSchedNewGroup) {
-    box.innerHTML = '<div><b>新建小组课</b>' +
-      '<div style="color:var(--text-light);font-size:calc(12px * var(--fs));margin-top:4px">从学员管理挑成员，组好后按下面的日期时间排课</div></div>' +
-      '<div class="set-tip" style="margin:0">小组课按成员各自扣课时，课时在学员管理里统一管理。成员改动在点「添加到课表」时才写入，取消不留痕。</div>';
+  var listM = addSchedSelList();
+  if (!listM.length) {
+    box.innerHTML = '<span style="color:var(--text-light);font-size: calc(12px * var(--fs))">可以点选多位学员：会为他们各自排一节相同时段的课（各自签到、各自扣自己的课时）。学员管理里的人选中后会自动建立单独课档案。</span>';
     return;
   }
-  var c = addSchedSel();
-  if (!c) {
-    box.innerHTML = '<span style="color:var(--text-light);font-size: calc(12px * var(--fs))">从上面选择学员。学员管理里的人选中后会自动建立单独课档案并导入，不影响他原有的小组课。</span>';
+  if (listM.length > 1) {
+    box.innerHTML = '<div><b>' + escapeHtml(listM.map(function (x) { return x.name; }).join('、')) + '</b>（' + listM.length + ' 人，各排一节）' +
+      '<div style="color:var(--text-light);font-size:calc(12px * var(--fs));margin-top:4px">同一时段排 ' + listM.length + ' 节独立课，各自签到、各自扣自己的课时</div></div>' +
+      '<div class="set-tip" style="margin:0">排课不动课时，课时一直留在各自档案里。上课地点在下方统一选择。</div>';
     return;
   }
-  var hrs = c.hours == null ? '未设置' : (c.hours + ' 节');
+  var c = listM[0];  var hrs = c.hours == null ? '未设置' : (c.hours + ' 节');
   var tagTxt = c.group ? '（小组课 ' + c.memberCnt + ' 人）' : (c.fromPool ? '（学员管理 · 将自动建档导入）' : '（单人课）');
   var locName = '';
   if (c.kind === 'student') {
@@ -10398,13 +10432,12 @@ function refreshAddSchedTip() {
   }
 }
 function openAddScheduleModal(studentId) {
-  addSchedSelKey = '';
-  addSchedNewGroup = false;
+  addSchedSelKeys = [];
   addSchedMembers = [];
   if (studentId) {
     var s0 = getStudent(studentId);
     if (s0) {
-      addSchedSelKey = 's:' + studentId;
+      addSchedSelKeys = ['s:' + studentId];
       /* 小组课：把成员载入工作区，可直接增删 */
       if (isGroup(s0)) {
         addSchedMembers = (membersOf(s0) || []).map(function (m) {
@@ -10456,62 +10489,60 @@ function materializeAddSchedMembers() {
   }
   return out;
 }
+/* v179：多选学员保存——为每位选中的学员在同一时段各排一节独立课
+   （各自签到、各自扣自己的课时；不合成小组课，也不新建小组） */
 function saveAddSchedule() {
-  var newGroup = addSchedNewGroup;
-  var c = addSchedSel();
-  if (!newGroup && !c) { showToast('请先选择学员'); return; }
+  var list = addSchedSelList();
+  if (!list.length) { showToast('请先选择学员'); return; }
   var dEl = document.getElementById('addSchedDate'), tEl = document.getElementById('addSchedTime');
   var date = dEl ? dEl.value : '', time = tEl ? tEl.value : '';
   if (!date || !time) { showToast('请填写完整（日期 / 时间）'); return; }
-  var stu;
-  if (newGroup) {
-    /* 新建小组课：小组名称 + 至少 1 位成员（成员从学员管理挑，课时沿用池里的） */
-    var gEl = document.getElementById('addSchedGroupName');
-    var gName = ((gEl && gEl.value) || '').trim();
-    if (!gName) { showToast('请填写小组课名称'); return; }
-    if (!addSchedMembers.length) { showToast('请从学员管理至少添加 1 位成员'); return; }
-    var materialized = materializeAddSchedMembers();
-    if (!materialized) { showToast('成员资料已失效，请重新选择'); return; }
-    addSchedMembers = materialized;
-    stu = {
-      id: uid(), name: gName, contact: '', note: '', mode: 'flex',
-      hoursRemaining: null, locationId: '', avatar: '',
-      members: addSchedMembers.slice(), createdAt: Date.now()
-    };
-    state.students.push(stu);
-    collapseOneMemberGroup(stu); /* v174：只挑 1 位成员 → 按个人课建档 */
-  } else if (c.kind === 'pool') {
-    stu = ensurePersonStudent(getPerson(c.id));
-    if (!stu) { showToast('从学员管理导入失败，请重试'); return; }
-  } else {
-    stu = getStudent(c.id);
-  }
-  if (!stu) { showToast('学员不存在'); return; }
-  /* 已有小组：把编辑后的成员名单写回（小组按成员计课时，整组课时为空） */
-  if (!newGroup && c && c.group) {
-    var updatedMembers = materializeAddSchedMembers();
-    if (!updatedMembers) { showToast('成员资料已失效，请重新选择'); return; }
-    addSchedMembers = updatedMembers;
-    stu.members = addSchedMembers.slice();
-    if (stu.members.length) stu.hoursRemaining = null;
-    collapseOneMemberGroup(stu); /* v174：成员删到只剩 1 人 → 个人课，课时回到 person 账本 */
-  }
   var locEl = document.getElementById('addSchedLocation');
-  var locId = (locEl ? locEl.value : '') || (stu.locationId || '');
+  var locId = (locEl ? locEl.value : '') || '';
   var nEl = document.getElementById('addSchedNote');
   var note = ((nEl && nEl.value) || '').trim();
   var wd = new Date(String(date).replace(/-/g, '/')).getDay();
-  /* 新建的小组课：生成组合头像，和「添加学员」里建组的效果保持一致 */
-  if (newGroup && addSchedMembers.length > 1) {
-    composeGroupAvatar(stu, 128, function (dataUrl) {
-      if (dataUrl) stu.avatar = dataUrl;
-      doAddScheduleSave(stu, date, time, locId, note, wd);
-    });
+  /* 先把选中的 key 解析成真实学员档案（学员管理里的人在此时才建档导入） */
+  var stus = [];
+  list.forEach(function (c) {
+    var stu = null;
+    if (c.kind === 'pool') stu = ensurePersonStudent(getPerson(c.id));
+    else stu = getStudent(c.id);
+    if (stu) stus.push(stu);
+  });
+  if (!stus.length) { showToast('所选学员已失效，请重新选择'); return; }
+  /* 勾中已存在的小组且成员被改动过（含删人后自动降级）→ 写回 */
+  if (list.length === 1 && list[0].group) {
+    var updatedMembers = materializeAddSchedMembers();
+    if (!updatedMembers) { showToast('成员资料已失效，请重新选择'); return; }
+    addSchedMembers = updatedMembers;
+    stus[0].members = addSchedMembers.slice();
+    if (stus[0].members.length) stus[0].hoursRemaining = null;
+    collapseOneMemberGroup(stus[0]); /* v174/v179：只剩 1 人 → 个人课 */
+  }
+  /* 单选：完全走原来的单条路径（保留原有提示与「剩余课时保留」文案） */
+  if (stus.length === 1) {
+    doAddScheduleSave(stus[0], date, time, locId, note, wd);
     return;
   }
-  doAddScheduleSave(stu, date, time, locId, note, wd);
-}
-/* 排课保存后的收尾：刷新页面；若是从「课表管理」进来的，保存完回到管理列表 */
+  /* 多选：同一时段给每位学员各排一节，silent=true 不落库不提示，最后统一一次 */
+  var done = 0, skipped = [];
+  stus.forEach(function (stu) {
+    var ok = doAddScheduleSave(stu, date, time, locId, note, wd, true);
+    if (ok) done++;
+    else skipped.push(stu.name || '?');
+  });
+  saveData();
+  closeModal('addScheduleModal');
+  afterAddScheduleSaved();
+  var when = (addSchedType === 'fixed') ? ('每周' + WEEKDAYS[wd] + ' ' + time) : (fmtDateCN(date) + ' ' + time);
+  if (!done) {
+    showToast('这几位在 ' + when + ' 都有课了，未重复添加');
+    return;
+  }
+  showToast('已加入课表：' + done + ' 位学员各排一节 · ' + when +
+    (skipped.length ? '（跳过 ' + skipped.length + ' 位：该时段已有课）' : ''));
+}/* 排课保存后的收尾：刷新页面；若是从「课表管理」进来的，保存完回到管理列表 */
 function afterAddScheduleSaved() {
   renderAll();
   if (!addSchedFromManage) return;
@@ -10521,7 +10552,10 @@ function afterAddScheduleSaved() {
   if (mm) mm.classList.add('show');
 }
 /* 真正落库并排课：固定课（每周）/ 临时课（单次），都不改动课时 */
-function doAddScheduleSave(stu, date, time, locId, note, wd) {
+/* 真正落库并排课：固定课（每周）/ 临时课（单次），都不改动课时
+   v179：新增 silent 参数——多选批量排课时为 true，只写内存不落库、不弹提示、不关弹窗，
+   由 saveAddSchedule 在最后统一 saveData + 关弹窗 + 提示；返回 false 表示该学员该时段冲突、已跳过 */
+function doAddScheduleSave(stu, date, time, locId, note, wd, silent) {
   var hrs = hoursTextOf(stu);
   if (addSchedType === 'fixed') {
     /* 固定课：只写排课字段，课时原样保留 */
@@ -10530,7 +10564,8 @@ function doAddScheduleSave(stu, date, time, locId, note, wd) {
       slots.push({ day: stu.fixedDay, time: stu.fixedTime });
     }
     if (slots.some(function (sl) { return sl.day === wd && sl.time === time; })) {
-      showToast('「' + stu.name + '」每周' + WEEKDAYS[wd] + ' ' + time + ' 已经有固定课了'); return;
+      if (!silent) showToast('「' + stu.name + '」每周' + WEEKDAYS[wd] + ' ' + time + ' 已经有固定课了');
+      return false;
     }
     var hoursSnapshot = stu.hoursRemaining;
     /* 固定课记住「首次上课日期」作为生效起始日：当天及以后、且星期匹配才显示；
@@ -10541,27 +10576,35 @@ function doAddScheduleSave(stu, date, time, locId, note, wd) {
     if (locId) stu.locationId = locId;
     if (note && !stu.note) stu.note = note;
     stu.hoursRemaining = hoursSnapshot;
+    if (silent) return true;
     saveData(); closeModal('addScheduleModal'); afterAddScheduleSaved();
     showToast('已加入课表：' + stu.name + ' 每周' + WEEKDAYS[wd] + ' ' + time + ' 固定课（剩余 ' + hrs + ' 保留）');
-    return;
+    return true;
   }
   /* 临时课：单次排课，同样不碰课时 */
   var clashFlex = state.flexibleClasses.some(function (x) {
     return x.studentId === stu.id && x.date === date && x.time === time;
   });
-  if (clashFlex) { showToast('「' + stu.name + '」在 ' + date + ' ' + time + ' 已有排课，请换时间或先删除'); return; }
+  if (clashFlex) {
+    if (!silent) showToast('「' + stu.name + '」在 ' + date + ' ' + time + ' 已有排课，请换时间或先删除');
+    return false;
+  }
   if (!isGroup(stu)) {
     var clashFixed = fixedSlotsOf(stu).some(function (sl) { return sl.day === wd && sl.time === time; });
-    if (clashFixed) { showToast('「' + stu.name + '」每周该时段已有固定课，请换一个时间'); return; }
+    if (clashFixed) {
+      if (!silent) showToast('「' + stu.name + '」每周该时段已有固定课，请换一个时间');
+      return false;
+    }
   }
   state.flexibleClasses.push({
     id: uid(), studentId: stu.id, date: date, time: time,
     note: note, locationId: locId, status: 'upcoming', createdAt: Date.now()
   });
+  if (silent) return true;
   saveData(); closeModal('addScheduleModal'); afterAddScheduleSaved();
   showToast('已加入课表：' + stu.name + ' ' + fmtDateCN(date) + ' ' + time + '（剩余 ' + hrs + ' 保留）');
-}
-/* ===== 课表管理：统一增 / 删 / 改 ===== */
+  return true;
+}/* ===== 课表管理：统一增 / 删 / 改 ===== */
 /* 汇总所有课表条目：临时课（flexibleClasses）+ 固定课（各学员的 fixedSlots） */
 function scheduleEntries() {
   var out = [];
@@ -10670,7 +10713,9 @@ function openSchedEdit(key) {
   var mw = document.getElementById('seMemberWrap');
   var memStu = e.studentId ? getStudent(e.studentId) : null;
   if (mw) {
-    mw.style.display = 'none'; /* v161：隐藏成员管理，编辑课表不再提供"加人升级小组课" */
+    /* v179：小组课恢复成员管理——已存在的组可以在这里删掉不想继续上的学员（删到只剩 1 人自动降级为个人课）。
+       单人课仍然不给「加人升级小组」，保持 v161 起的规则：不再新建小组。 */
+    mw.style.display = e.group ? '' : 'none';
     var mlbl = document.getElementById('seMemberLabel');
     if (mlbl) mlbl.textContent = e.group ? '小组成员' : '小组成员（加人后升级为小组课）';
     var selfName = memStu ? (memStu.name || '当前学员') : '当前学员';
@@ -10799,7 +10844,8 @@ function saveSchedEdit() {
     }
     memStu.members = newMembers;
     if (newMembers.length) memStu.hoursRemaining = null; /* 小组按成员计课时 */
-    if (newMembers.length > 1) {
+    collapseOneMemberGroup(memStu); /* v179：成员删到只剩 1 人 → 自动降级为个人课 */
+    if (membersOf(memStu).length > 1) {
       /* 成员变了，组合头像要重出；生成是异步的，等它回来再落库 */
       composeGroupAvatar(memStu, 128, function (dataUrl) {
         if (dataUrl) memStu.avatar = dataUrl;
@@ -11590,7 +11636,7 @@ function resetAllRuntimeState() {
     _rsCtx = null;
     cpState.inputId = ''; cpState.swatchContainer = '';
     cropState.img = null; cropState.callback = null;
-    addSchedSelKey = ''; addSchedNewGroup = false; addSchedMembers = []; addSchedFromManage = false;
+    addSchedSelKeys = []; addSchedMembers = []; addSchedFromManage = false;
     alertedSet = {};
     saveFailGuardShown = 0; lastSaveBytes = 0;
     /* 释放导出用的临时 objectURL，避免残留可下载链接 */
