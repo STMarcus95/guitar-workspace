@@ -2129,6 +2129,19 @@
   .stu-picker-foot { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-top: 1px solid rgba(224,207,174,0.6); flex: none; }
   .stu-picker-foot .spf-count { flex: 1; min-width: 0; font-size: calc(12px * var(--fs)); color: var(--text-light); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .stu-picker-foot .spf-done { flex: none; min-height: 36px; padding: 0 14px; font-size: calc(12px * var(--fs)); }
+  .stu-picker-foot .spf-clear { flex: none; min-height: 36px; padding: 0 12px; font-size: calc(12px * var(--fs)); color: var(--text-light); }
+  /* v180：候选分类筛选 */
+  .spf-filter { display: flex; gap: 6px; padding: 8px 10px 4px; flex: none; flex-wrap: wrap; }
+  .sp-fb {
+    min-height: 30px; padding: 0 10px; border-radius: 99px;
+    border: 1px solid rgba(224,207,174,0.7); background: rgba(255,255,255,0.5);
+    color: var(--text-light); font-size: calc(12px * var(--fs)); font-family: inherit; cursor: pointer;
+  }
+  .sp-fb.on { background: var(--orange-deep); border-color: var(--orange-deep); color: #fff; }
+  .add-sched-mem .asm-tag {
+    margin-left: 4px; font-size: calc(11px * var(--fs)); color: var(--orange-deep);
+    background: rgba(224,118,46,0.12); border-radius: 4px; padding: 0 4px;
+  }
   .stu-picker-item {
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
     padding: 12px 10px; border-radius: 12px; cursor: pointer;
@@ -2361,7 +2374,7 @@
           <div class="h-name-row">
             <h1 id="brandName">Marcus</h1>
             <svg class="brand-edit" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f0d08a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
-            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v179</span>
+            <span class="brand-ver" id="appVersion" title="当前版本（确认拿到最新版）">v180</span>
           </div>
           <div class="h-date" id="todayLabel"></div>
         </div>
@@ -2905,15 +2918,23 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             <input type="text" id="addSchedSearch" placeholder="搜索学员 / 学员管理…" oninput="renderAddSchedList()" onclick="event.stopPropagation()" onkeydown="onAddSchedSearchKey(event)">
           </div>
+          <div class="spf-filter" id="addSchedFilter">
+            <button type="button" class="sp-fb on" data-f="all" onclick="setAddSchedFilter('all')">全部</button>
+            <button type="button" class="sp-fb" data-f="group" onclick="setAddSchedFilter('group')">小组课</button>
+            <button type="button" class="sp-fb" data-f="solo" onclick="setAddSchedFilter('solo')">单人课</button>
+            <button type="button" class="sp-fb" data-f="pool" onclick="setAddSchedFilter('pool')">学员管理</button>
+          </div>
           <div class="stu-picker-list" id="addSchedList"></div>
           <div class="stu-picker-foot" id="addSchedPickerFoot">
             <span class="spf-count" id="addSchedSelCount">可多选 · 未选择</span>
+            <button type="button" class="btn-ghost spf-clear" onclick="clearAddSchedSel()">清空</button>
             <button type="button" class="btn-ghost spf-done" onclick="closeAddSchedPicker()">完成</button>
           </div>
         </div>
       </div>
     </div>
     <div id="addSchedStuInfo" class="rs-info" style="margin-bottom:14px"></div>
+    <div id="addSchedSelChips" class="add-sched-members" style="display:none;margin:-6px 0 12px"></div>
     <div class="form-item" id="addSchedGroupNameWrap" style="display:none">
       <label>小组课名称 *</label>
       <input type="text" id="addSchedGroupName" maxlength="20" placeholder="如：可茹小组 / 周二小课">
@@ -2957,6 +2978,10 @@
       <select id="addSchedLocation"></select>
     </div>
     <div class="form-item">
+      <label>课程名称（选填）</label>
+      <input type="text" id="addSchedCourseName" placeholder="如：周二小组课 / 民谣进阶" maxlength="20">
+    </div>
+    <div class="form-item">
       <label>备注</label>
       <input type="text" id="addSchedNote" placeholder="选填" maxlength="50">
     </div>
@@ -2994,6 +3019,7 @@
       编辑课表
     </h3>
     <div class="form-item"><label>学员</label><div id="seStuInfo" class="rs-info"></div></div>
+    <div class="form-item"><label>课程名称（选填）</label><input type="text" id="seCourseName" placeholder="如：周二小组课 / 民谣进阶" maxlength="20"></div>
     <div class="form-item" id="seMemberWrap" style="display:none">
       <label id="seMemberLabel">小组成员</label>
       <div id="seMemberEditor"></div>
@@ -5014,7 +5040,7 @@ function getClassesOfDate(dateObj) {
       if (sl.day === wd && (sl.startDate == null || dateStr >= sl.startDate)) {
         var rsOut = getReschedOut(dateStr, s.id, sl.time);
         if (rsOut && rsOut.toDate === dateStr) return; /* 同天调时间：原 slot 由下方调来记录代替，不重复出现 */
-        list.push({ type: 'fixed', studentId: s.id, name: s.name, time: sl.time, note: s.note || '', locationId: s.locationId || '', reschedOut: rsOut });
+        list.push({ type: 'fixed', studentId: s.id, name: (sl.courseName ? (sl.courseName + ' · ' + s.name) : s.name), courseName: sl.courseName || '', time: sl.time, note: s.note || '', locationId: s.locationId || '', reschedOut: rsOut });
       }
     });
   });
@@ -5030,7 +5056,7 @@ function getClassesOfDate(dateObj) {
   state.flexibleClasses.forEach(function (c) {
     if (c.date === dateStr && c.status !== 'cancelled') {
       var stu = getStudent(c.studentId);
-      if (stu) list.push({ type: 'flexible', id: c.id, studentId: c.studentId, name: stu.name, time: c.time, note: c.note || '', status: c.status, locationId: c.locationId || stu.locationId || '' });
+      if (stu) list.push({ type: 'flexible', id: c.id, studentId: c.studentId, name: (c.courseName ? (c.courseName + ' · ' + stu.name) : stu.name), courseName: c.courseName || '', time: c.time, note: c.note || '', status: c.status, locationId: c.locationId || stu.locationId || '' });
     }
   });
   list.sort(function (a, b) { return a.time < b.time ? -1 : 1; });
@@ -10073,6 +10099,7 @@ function delFlexClass(id) {
    支持：现有学员（含小组课）、以及从学员管理导入学员；课程类型＝临时课（单次）/ 固定课（每周）。
    原则：排课与删除排课都【不改动剩余课时】，课时只在 完成/撤销/续费/调整 时变化。 */
 var addSchedSelKeys = [];      /* v179：选中的学员 key 列表（多选＝同一时段各排一节独立课） */
+var addSchedFilter = 'all';    /* v180：候选筛选 all|group|solo|pool */
 var addSchedType = 'temp'; /* 'temp' | 'fixed' */
 var addSchedMembers = [];       /* 工作区成员名单（{id, personId, name, contact, hours, avatar}），保存时才写入 */
 var addSchedFromManage = false; /* 是否从「课表管理」进入添加（保存后回到管理列表） */
@@ -10129,10 +10156,21 @@ function renderAddSchedList() {
   var kwEl = document.getElementById('addSchedSearch');
   var text = ((kwEl && kwEl.value) || '').trim().toLowerCase();
   var items = addSchedCandidates().filter(function (c) {
+    /* v180：分类筛选——要排已存在的小组课直接切「小组课」，不用在几十个人里翻 */
+    if (addSchedFilter === 'group' && !c.group) return false;
+    if (addSchedFilter === 'solo' && (c.group || c.fromPool)) return false;
+    if (addSchedFilter === 'pool' && !c.fromPool) return false;
     if (!text) return true;
     return (c.name || '').toLowerCase().indexOf(text) >= 0 ||
            (c.contact || '').toLowerCase().indexOf(text) >= 0;
   });
+  /* v180：全部视图下小组课置顶，找组不用翻 */
+  if (addSchedFilter === 'all') {
+    items.sort(function (a, b) {
+      if (!!a.group !== !!b.group) return a.group ? -1 : 1;
+      return String(a.name).localeCompare(String(b.name), 'zh');
+    });
+  }
   if (!items.length) { list.innerHTML = '<div class="stu-picker-empty">未找到匹配的学员</div>'; return; }
   /* v179：多选模式——点一项即勾选/取消，面板不自动关闭；选完点底部「完成」。
      多位学员＝同一时段各排一节独立课（各自签到、各自扣自己的课时），不会合成小组课。 */
@@ -10155,6 +10193,7 @@ function openAddSchedPicker() {
   picker.classList.add('open');
   var s = document.getElementById('addSchedSearch');
   if (s) s.value = '';
+  setAddSchedFilter(addSchedFilter || 'all');
   renderAddSchedList();
   updateAddSchedFoot();
   setTimeout(function () { if (s) s.focus(); }, 0);
@@ -10193,12 +10232,58 @@ function toggleAddSchedSel(key) {
   updateAddSchedGroup();
   renderAddSchedList();
   updateAddSchedFoot();
+  renderAddSchedChips();
 }
 function updateAddSchedFoot() {
   var el = document.getElementById('addSchedSelCount');
   if (!el) return;
   var n = addSchedSelKeys.length;
   el.textContent = n ? ('已选 ' + n + ' 人' + (n > 1 ? '（各排一节）' : '')) : '可多选 · 未选择';
+}
+/* v180：候选分类筛选 */
+function setAddSchedFilter(f) {
+  addSchedFilter = f || 'all';
+  var box = document.getElementById('addSchedFilter');
+  if (box) {
+    box.querySelectorAll('.sp-fb').forEach(function (b) {
+      b.classList.toggle('on', b.getAttribute('data-f') === addSchedFilter);
+    });
+  }
+  renderAddSchedList();
+}
+/* v180：已选学员以 chip 形式常驻，点 × 直接移除，不用重新打开选择面板 */
+function renderAddSchedChips() {
+  var box = document.getElementById('addSchedSelChips');
+  if (!box) return;
+  var list = addSchedSelList();
+  if (!list.length) { box.innerHTML = ''; box.style.display = 'none'; return; }
+  box.style.display = '';
+  box.innerHTML = list.map(function (c) {
+    return '<span class="add-sched-mem">' + escapeHtml(c.name || '?') +
+      (c.group ? '<span class="asm-tag">小组</span>' : '') +
+      '<span class="asm-x" onclick="removeAddSchedSelKey(\'' + c.key + '\')" title="移除">×</span></span>';
+  }).join('');
+}
+function removeAddSchedSelKey(key) {
+  var i = addSchedSelKeys.indexOf(key);
+  if (i >= 0) addSchedSelKeys.splice(i, 1);
+  addSchedMembers = [];
+  updateAddSchedTrigger();
+  updateAddSchedInfo();
+  updateAddSchedGroup();
+  updateAddSchedFoot();
+  renderAddSchedChips();
+  if (document.getElementById('addSchedPicker').classList.contains('open')) renderAddSchedList();
+}
+function clearAddSchedSel() {
+  addSchedSelKeys = [];
+  addSchedMembers = [];
+  updateAddSchedTrigger();
+  updateAddSchedInfo();
+  updateAddSchedGroup();
+  updateAddSchedFoot();
+  renderAddSchedChips();
+  renderAddSchedList();
 }/* ===== 添加课表：小组成员（新建 / 编辑）===== */
 function updateAddSchedGroup() {
   var wrap = document.getElementById('addSchedGroupWrap');
@@ -10434,6 +10519,9 @@ function refreshAddSchedTip() {
 function openAddScheduleModal(studentId) {
   addSchedSelKeys = [];
   addSchedMembers = [];
+  addSchedFilter = 'all';
+  var cnReset = document.getElementById('addSchedCourseName');
+  if (cnReset) cnReset.value = '';
   if (studentId) {
     var s0 = getStudent(studentId);
     if (s0) {
@@ -10501,6 +10589,8 @@ function saveAddSchedule() {
   var locId = (locEl ? locEl.value : '') || '';
   var nEl = document.getElementById('addSchedNote');
   var note = ((nEl && nEl.value) || '').trim();
+  var cnEl = document.getElementById('addSchedCourseName');
+  var courseName = ((cnEl && cnEl.value) || '').trim();
   var wd = new Date(String(date).replace(/-/g, '/')).getDay();
   /* 先把选中的 key 解析成真实学员档案（学员管理里的人在此时才建档导入） */
   var stus = [];
@@ -10522,13 +10612,13 @@ function saveAddSchedule() {
   }
   /* 单选：完全走原来的单条路径（保留原有提示与「剩余课时保留」文案） */
   if (stus.length === 1) {
-    doAddScheduleSave(stus[0], date, time, locId, note, wd);
+    doAddScheduleSave(stus[0], date, time, locId, note, wd, false, courseName);
     return;
   }
   /* 多选：同一时段给每位学员各排一节，silent=true 不落库不提示，最后统一一次 */
   var done = 0, skipped = [];
   stus.forEach(function (stu) {
-    var ok = doAddScheduleSave(stu, date, time, locId, note, wd, true);
+    var ok = doAddScheduleSave(stu, date, time, locId, note, wd, true, courseName);
     if (ok) done++;
     else skipped.push(stu.name || '?');
   });
@@ -10555,7 +10645,7 @@ function afterAddScheduleSaved() {
 /* 真正落库并排课：固定课（每周）/ 临时课（单次），都不改动课时
    v179：新增 silent 参数——多选批量排课时为 true，只写内存不落库、不弹提示、不关弹窗，
    由 saveAddSchedule 在最后统一 saveData + 关弹窗 + 提示；返回 false 表示该学员该时段冲突、已跳过 */
-function doAddScheduleSave(stu, date, time, locId, note, wd, silent) {
+function doAddScheduleSave(stu, date, time, locId, note, wd, silent, courseName) {
   var hrs = hoursTextOf(stu);
   if (addSchedType === 'fixed') {
     /* 固定课：只写排课字段，课时原样保留 */
@@ -10570,7 +10660,7 @@ function doAddScheduleSave(stu, date, time, locId, note, wd, silent) {
     var hoursSnapshot = stu.hoursRemaining;
     /* 固定课记住「首次上课日期」作为生效起始日：当天及以后、且星期匹配才显示；
        若用户填的是今天/过去日期，则立即生效（startDate<=今天），符合直觉 */
-    slots.push({ day: wd, time: time, startDate: date });
+    slots.push({ day: wd, time: time, startDate: date, courseName: courseName || '' });
     stu.fixedSlots = slots;
     stu.mode = 'fixed';
     if (locId) stu.locationId = locId;
@@ -10598,7 +10688,7 @@ function doAddScheduleSave(stu, date, time, locId, note, wd, silent) {
   }
   state.flexibleClasses.push({
     id: uid(), studentId: stu.id, date: date, time: time,
-    note: note, locationId: locId, status: 'upcoming', createdAt: Date.now()
+    note: note, locationId: locId, status: 'upcoming', courseName: courseName || '', createdAt: Date.now()
   });
   if (silent) return true;
   saveData(); closeModal('addScheduleModal'); afterAddScheduleSaved();
@@ -10612,7 +10702,7 @@ function scheduleEntries() {
     fixedSlotsOf(s).forEach(function (sl) {
       out.push({
         kind: 'fixed', key: 'fx:' + s.id + ':' + sl.day + ':' + sl.time,
-        studentId: s.id, name: s.name || '', day: sl.day, time: sl.time,
+        studentId: s.id, name: (sl.courseName ? (sl.courseName + ' · ' + s.name) : (s.name || '')), courseName: sl.courseName || '', day: sl.day, time: sl.time,
         date: '', locationId: s.locationId || '', note: s.note || '',
         status: '', group: isGroup(s)
       });
@@ -10623,7 +10713,7 @@ function scheduleEntries() {
     var s = getStudent(c.studentId);
     out.push({
       kind: 'temp', key: 'tp:' + c.id, id: c.id,
-      studentId: c.studentId, name: s ? s.name : '(学员已删除)',
+      studentId: c.studentId, name: (c.courseName && s) ? (c.courseName + ' · ' + s.name) : (s ? s.name : '(学员已删除)'), courseName: c.courseName || '',
       day: -1, time: c.time, date: c.date,
       locationId: c.locationId || '', note: c.note || '',
       status: c.status || 'upcoming', group: s ? isGroup(s) : false
@@ -10728,6 +10818,8 @@ function openSchedEdit(key) {
       return { id: m.id, personId: m.personId, name: m.name, contact: m.contact || '', hours: m.hours, avatar: m.avatar || '' };
     }) : [], 'seMemberEditor', null, mTip);
   }
+  var cnSe = document.getElementById('seCourseName');
+  if (cnSe) cnSe.value = (e.courseName || '');
   var dWrap = document.getElementById('seDateWrap');
   var dayWrap = document.getElementById('seDayWrap');
   if (dWrap) dWrap.style.display = (e.kind === 'fixed') ? 'none' : '';
@@ -10776,6 +10868,8 @@ function saveSchedEdit() {
   var locId = locEl ? locEl.value : '';
   var nEl = document.getElementById('seNote');
   var note = ((nEl && nEl.value) || '').trim();
+  var cnEl = document.getElementById('seCourseName');
+  var courseName = cnEl ? (cnEl.value || '').trim() : '';
   if (e.kind === 'fixed') {
     var s = getStudent(e.studentId);
     if (!s) { showToast('学员不存在'); return; }
@@ -10793,7 +10887,7 @@ function saveSchedEdit() {
     var sdVal = sdInput ? (sdInput.value || '') : '';
     slots = slots.map(function (sl) {
       if (sl.day === e.day && sl.time === e.time) {
-        return { day: day, time: time, startDate: sdVal ? sdVal : null };
+        return { day: day, time: time, startDate: sdVal ? sdVal : null, courseName: courseName || '' };
       }
       return sl;
     });
@@ -10819,6 +10913,7 @@ function saveSchedEdit() {
     cls.time = time;
     cls.locationId = locId;
     cls.note = note;
+    cls.courseName = courseName || '';
   }
   var schedEditUpgraded = false; /* 本次保存是否把单人课升级成了小组课 */
   function finalizeSchedEdit() {
